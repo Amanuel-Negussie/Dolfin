@@ -1,35 +1,86 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// app.tsx
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { usePlaidLink } from "react-plaid-link";
 
-function App() {
-  const [count, setCount] = useState(0)
+axios.defaults.baseURL = "http://localhost:8000";
+
+function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
+  const [transactions, setTransactions] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const allTransactions: any[] = [];
+
+        for (const publicToken of publicTokens) {
+          const accessTokenResponse = await axios.post("/exchange_public_token", {
+            public_token: publicToken,
+          });
+          const accessToken = accessTokenResponse.data.accessToken;
+          const transactionsResponse = await axios.post("/transactions/sync", {
+            access_token: accessToken,
+          });
+          allTransactions.push(...transactionsResponse.data.transactions);
+          setTransactions(allTransactions);
+        }
+        
+        console.log(allTransactions);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
+    }
+    fetchData();
+  }, [publicTokens]);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <h2>Transactions</h2>
+      <ul>
+        {transactions.map((transaction: any, index: number) => (
+          <li key={index}>
+            <p>Date: {transaction.date}</p>
+            <p>Amount: {transaction.amount}</p>
+            <p>Name: {transaction.name}</p>
+            <p>Category: {transaction.personal_finance_category.primary}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
-export default App
+function App() {
+  const [linkToken, setLinkToken] = useState("");
+  const [publicTokens, setPublicTokens] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchLinkToken() {
+      try {
+        const response = await axios.post("/create_link_token");
+        setLinkToken(response.data.link_token);
+      } catch (error) {
+        console.error("Error fetching link token:", error);
+      }
+    }
+    fetchLinkToken();
+  }, []);
+
+  const { open, ready } = usePlaidLink({
+    token: linkToken,
+    onSuccess: (public_token: string) => {
+      setPublicTokens((prevTokens) => [...prevTokens, public_token]);
+    },
+  });
+
+  return (
+    <div>
+      <button onClick={() => open()} disabled={!ready}>
+        Connect a bank account
+      </button>
+      {publicTokens.length > 0 && <DisplayTransactions publicTokens={publicTokens} />}
+    </div>
+  );
+}
+
+export default App;
