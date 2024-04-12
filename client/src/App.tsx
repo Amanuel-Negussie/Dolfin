@@ -5,7 +5,7 @@ import { usePlaidLink } from "react-plaid-link";
 
 axios.defaults.baseURL = "http://localhost:8000";
 
-function PlaidAuth({ publicTokens }: { publicTokens: string[] }) {
+function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
   const [transactions, setTransactions] = useState<any[]>([]);
 
   useEffect(() => {
@@ -22,8 +22,9 @@ function PlaidAuth({ publicTokens }: { publicTokens: string[] }) {
             access_token: accessToken,
           });
           allTransactions.push(...transactionsResponse.data.transactions);
+          setTransactions(allTransactions);
         }
-        setTransactions(allTransactions);
+        
         console.log(allTransactions);
       } catch (error) {
         console.error("Error fetching transactions:", error);
@@ -77,7 +78,7 @@ function App() {
       <button onClick={() => open()} disabled={!ready}>
         Connect a bank account
       </button>
-      {publicTokens.length > 0 && <PlaidAuth publicTokens={publicTokens} />}
+      {publicTokens.length > 0 && <DisplayTransactions publicTokens={publicTokens} />}
     </div>
   );
 }
