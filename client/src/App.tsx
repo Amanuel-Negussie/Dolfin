@@ -2,6 +2,15 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { usePlaidLink } from "react-plaid-link";
+import Button from '@mui/material/Button';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+]
 
 axios.defaults.baseURL = "http://localhost:8000";
 
@@ -36,19 +45,39 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
   return (
     <div>
       <h2>Transactions</h2>
-      <ul>
-        {transactions.map((transaction: any, index: number) => (
-          <li key={index}>
-            <p>Date: {transaction.date}</p>
-            <p>Amount: {transaction.amount}</p>
-            <p>Name: {transaction.name}</p>
-            <p>Category: {transaction.personal_finance_category.primary}</p>
-          </li>
-        ))}
-      </ul>
+      <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Date</TableCell>
+            <TableCell align="right">Amount</TableCell>
+            <TableCell align="right">Name</TableCell>
+            <TableCell align="right">Category</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {transactions.map((transaction: any, index: number) => (
+            <TableRow
+              key={index}
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+            >
+              <TableCell component="th" scope="row">
+                {transaction.date}
+              </TableCell>
+              <TableCell align="right">{transaction.amount}</TableCell>
+              <TableCell align="right">{transaction.name}</TableCell>
+              <TableCell align="right">{transaction.personal_finance_category.primary}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
     </div>
   );
 }
+
+
+
 
 function App() {
   const [linkToken, setLinkToken] = useState("");
@@ -72,12 +101,13 @@ function App() {
       setPublicTokens((prevTokens) => [...prevTokens, public_token]);
     },
   });
+  
 
   return (
     <div>
-      <button onClick={() => open()} disabled={!ready}>
+      <Button onClick={() => open()} variant = "contained" disabled={!ready}>
         Connect a bank account
-      </button>
+      </Button>
       {publicTokens.length > 0 && <DisplayTransactions publicTokens={publicTokens} />}
     </div>
   );
