@@ -10,7 +10,8 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-]
+import Box from '@mui/material/Box';
+import { DataGrid, GridToolbar, GridColDef } from '@mui/x-data-grid';
 
 axios.defaults.baseURL = "http://localhost:8000";
 
@@ -42,36 +43,63 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
     fetchData();
   }, [publicTokens]);
 
+  const columns: GridColDef<(typeof rows)[number]>[] = [
+    { field: 'id', headerName: 'ID', width: 90 },
+    {
+      field: 'date',
+      headerName: 'Date',
+      width: 150,
+      valueGetter: (params) => params.row.date || '',
+    },
+    {
+      field: 'amount',
+      headerName: 'Amount',
+      width: 150,
+      valueGetter: (params) => params.row.amount || '',
+    },
+    {
+      field: 'name',
+      headerName: 'Name',
+      width: 150,
+      valueGetter: (params) => params.row.name || '',
+    },
+    {
+      field: 'category',
+      headerName: 'Category',
+      width: 150,
+      valueGetter: (params) => params.row.category || '',
+    },
+  ];
+
+  const rows = transactions.map((transaction: any, index: number) => ({
+    id: index + 1,
+    date: transaction.date,
+    amount: transaction.amount,
+    name: transaction.name,
+    category: transaction.personal_finance_category?.primary || "", 
+  }));
+  ;
+
   return (
     <div>
       <h2>Transactions</h2>
-      <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Date</TableCell>
-            <TableCell align="right">Amount</TableCell>
-            <TableCell align="right">Name</TableCell>
-            <TableCell align="right">Category</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {transactions.map((transaction: any, index: number) => (
-            <TableRow
-              key={index}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-            >
-              <TableCell component="th" scope="row">
-                {transaction.date}
-              </TableCell>
-              <TableCell align="right">{transaction.amount}</TableCell>
-              <TableCell align="right">{transaction.name}</TableCell>
-              <TableCell align="right">{transaction.personal_finance_category.primary}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+      <Box sx={{ height: 800, width: '100%' }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        initialState={{
+          pagination: {
+            paginationModel: {
+              pageSize: 20,
+            },
+          },
+        }}
+        pageSizeOptions={[20]}
+        checkboxSelection
+        disableRowSelectionOnClick
+      />
+    </Box>
+
     </div>
   );
 }
