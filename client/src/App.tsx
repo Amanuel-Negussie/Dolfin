@@ -13,6 +13,7 @@ import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import { DataGrid, GridToolbar, GridColDef } from '@mui/x-data-grid';
 
+// Defining the base url for our database 
 axios.defaults.baseURL = "http://localhost:8000";
 
 function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
@@ -24,6 +25,7 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
         const allTransactions: any[] = [];
 
         for (const publicToken of publicTokens) {
+
           const accessTokenResponse = await axios.post("/exchange_public_token", {
             public_token: publicToken,
           });
@@ -32,8 +34,10 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
             access_token: accessToken,
           });
           allTransactions.push(...transactionsResponse.data.transactions);
-          setTransactions(allTransactions);
+         
         }
+        setTransactions(allTransactions);
+      
         
         console.log(allTransactions);
       } catch (error) {
