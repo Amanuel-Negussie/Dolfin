@@ -76,6 +76,36 @@ app.post("/transactions/sync", async function (request, response) {
   }
 });
 
+// server getting authoriziation information
+app.post("/user/data", async function (request, response) {
+  const accessToken = request.body.access_token;
+  try {
+    const userInfoResponse = await plaidClient.authGet({ // Example endpoint to fetch user information
+      access_token: accessToken,
+    });
+    const userInfo = userInfoResponse.data; // Adjust this according to the Plaid API response
+    response.json(userInfo);
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    response.status(500).send("failed");
+  }
+});
+
+// server getting 
+app.post("/user/identity", async function (request, response) {
+  const accessToken = request.body.access_token;
+  try {
+    const userInfoResponse = await plaidClient.identityGet({ // Example endpoint to fetch user information
+      access_token: accessToken,
+    });
+    const userInfo = userInfoResponse.data; // Adjust this according to the Plaid API response
+    response.json(userInfo);
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    response.status(500).send("failed");
+  }
+});
+
 app.listen(8000, () => {
   console.log("Server has started");
 });

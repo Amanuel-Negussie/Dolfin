@@ -13,6 +13,7 @@ import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import { DataGrid, GridToolbar, GridColDef } from '@mui/x-data-grid';
 
+// Defining the base url for our database 
 axios.defaults.baseURL = "http://localhost:8000";
 
 function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
@@ -24,6 +25,7 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
         const allTransactions: any[] = [];
 
         for (const publicToken of publicTokens) {
+
           const accessTokenResponse = await axios.post("/exchange_public_token", {
             public_token: publicToken,
           });
@@ -32,8 +34,10 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
             access_token: accessToken,
           });
           allTransactions.push(...transactionsResponse.data.transactions);
-          setTransactions(allTransactions);
+         
         }
+        setTransactions(allTransactions);
+      
         
         console.log(allTransactions);
       } catch (error) {
@@ -110,6 +114,8 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
 function App() {
   const [linkToken, setLinkToken] = useState("");
   const [publicTokens, setPublicTokens] = useState<string[]>([]);
+  const [userData, setUserData] = useState<any>(null); // State to store user data
+  const [identityData, setIdentityData] = useState<any>(null); // state to store identity data
 
   useEffect(() => {
     async function fetchLinkToken() {
@@ -129,13 +135,103 @@ function App() {
       setPublicTokens((prevTokens) => [...prevTokens, public_token]);
     },
   });
-  
 
+  /*
+  fetchers - functions that fetch data from backend calls
+
+  */
+
+  const fetchUserData = async (accessToken: string) => {
+    try {
+      const userDataResponse = await axios.post("/user/data", {
+        access_token: accessToken,
+      });
+      setUserData(userDataResponse.data);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+
+  // fetch User Identity
+  const fetchUserIdentity = async (accessToken: string) => {
+    try {
+      const identityDataResponse = await axios.post("/user/identity", {
+        access_token: accessToken,
+      });
+      setIdentityData(identityDataResponse.data);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+
+
+  useEffect(() => {
+    if (publicTokens.length > 0) {
+      const lastPublicToken = publicTokens[publicTokens.length - 1];
+      axios
+        .post("/exchange_public_token", {
+          public_token: lastPublicToken,
+        })
+        .then((response) => {
+          const accessToken = response.data.accessToken;
+          fetchUserData(accessToken); // Call fetchUserData function with access token
+          fetchUserIdentity(accessToken); // Call fetchUserIdentity function with access token
+        })
+        .catch((error) => {
+          console.error("Error exchanging public token:", error);
+        });
+    }
+  }, [publicTokens]);
+
+
+
+  /*
+  LOGGERS - console logging functions
+  
+  */
+
+
+  useEffect(() => {
+    // Log the JSON data to the console when it updates
+    console.log('JSON Data for UserData:', userData);
+  }, [userData]); // This useEffect will run whenever jsonData changes
+
+
+  useEffect(() => {
+    // Log the JSON data to the console when it updates
+    console.log('JSON Data for identityData:', identityData);
+  }, [identityData]); // This useEffect will run whenever jsonData changes
+
+
+
+
+  
   return (
     <div>
       <Button onClick={() => open()} variant = "contained" disabled={!ready}>
         Connect a bank account
       </Button>
+      {userData && identityData && (
+        <Box>
+          <h2>User Information</h2>
+          <p><b>User Name:</b> {identityData.accounts[0].owners[0].names[0]}</p>
+          <p><b>Street Address:</b> {identityData.accounts[0].owners[0].addresses[0].data.street}</p>
+          <p><b>City:</b> {identityData.accounts[0].owners[0].addresses[0].data.city}</p>
+          <p><b>Region:</b> {identityData.accounts[0].owners[0].addresses[0].data.region} </p>
+          <p><b>Postal Code:</b> {identityData.accounts[0].owners[0].addresses[0].data.postal_code}</p>
+          <p><b> Phone Number:</b> {identityData.accounts[0].owners[0].phone_numbers[0].type}: {identityData.accounts[0].owners[0].phone_numbers[0].data}</p>
+          <h2>Account Information</h2>
+          <p>AccountID: {userData.accounts[0].account_id}</p>
+          <p>Name: {userData.accounts[0].official_name}</p>
+          <p>persistent_account_id: {userData.accounts[0].persistent_account_id}</p>
+        
+          {/* Add more user information as needed */}
+         
+
+        </Box>
+      )}
       {publicTokens.length > 0 && <DisplayTransactions publicTokens={publicTokens} />}
     </div>
   );
