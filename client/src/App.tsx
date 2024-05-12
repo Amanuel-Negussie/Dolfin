@@ -11,6 +11,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
+import Highcharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
 import { DataGrid, GridToolbar, GridColDef } from '@mui/x-data-grid';
 
 // Defining the base url for our database 
@@ -18,6 +20,7 @@ axios.defaults.baseURL = "http://localhost:8000";
 
 function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [spendingByCategory, setSpendingByCategory] = useState<{ name: string, y: number }[]>([]);
 
   useEffect(() => {
     async function fetchData() {
@@ -25,7 +28,6 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
         const allTransactions: any[] = [];
 
         for (const publicToken of publicTokens) {
-
           const accessTokenResponse = await axios.post("/exchange_public_token", {
             public_token: publicToken,
           });
@@ -34,18 +36,33 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
             access_token: accessToken,
           });
           allTransactions.push(...transactionsResponse.data.transactions);
-         
         }
+
         setTransactions(allTransactions);
-      
-        
-        console.log(allTransactions);
       } catch (error) {
         console.error("Error fetching transactions:", error);
       }
     }
+
     fetchData();
   }, [publicTokens]);
+
+  useEffect(() => {
+    // Aggregate spending by category
+  const categoryMap = new Map<string, number>();
+  transactions.forEach(transaction => {
+    const category = transaction.personal_finance_category?.primary || "Other";
+    const amount = parseFloat(transaction.amount);
+    categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
+  });
+
+  // Filter out categories with negative or zero spending
+  const spendingData = Array.from(categoryMap.entries())
+    .filter(([name, y]) => y > 0)
+    .map(([name, y]) => ({ name, y }));
+  
+  setSpendingByCategory(spendingData);
+}, [transactions]);
 
   const columns: GridColDef<(typeof rows)[number]>[] = [
     { field: 'id', headerName: 'ID', width: 90 },
@@ -82,10 +99,48 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
     name: transaction.name,
     category: transaction.personal_finance_category?.primary || "", 
   }));
-  ;
+
+  const totalSpent = spendingByCategory.reduce((total, category) => total + category.y, 0);
+
+  const options: Highcharts.Options = {
+    chart: {
+      type: 'pie',
+    },
+    title: {
+      text: `Total Spending by Category`
+    },
+    subtitle: {
+      text: `Total Spent: $${totalSpent.toFixed(2)}`
+    },
+    tooltip: {
+      pointFormatter: function () {
+        // Add type assertions for name and y
+        return `<b>${(this.name as string)}</b>: $${(this.y as number).toFixed(2)}`;
+      }
+    },
+    plotOptions: {
+      pie: {
+        allowPointSelect: true,
+        cursor: 'pointer',
+        dataLabels: {
+          enabled: true,
+          format: '<b>{point.name}</b>: ${point.y:.2f}',
+        },
+        showInLegend: true
+      }
+    },
+    series: [{
+      type: 'pie', // Specify the type of series
+      name: 'Amount',
+      data: spendingByCategory
+    }]
+  };
 
   return (
     <div>
+      <h2>Total Spending by Category</h2>
+      <HighchartsReact highcharts={Highcharts} options={options} />
+
       <h2>Transactions</h2>
       <Box sx={{ height: 800, width: '100%' }}>
       <DataGrid
@@ -102,14 +157,10 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
         checkboxSelection
         disableRowSelectionOnClick
       />
-    </Box>
-
+      </Box>
     </div>
   );
 }
-
-
-
 
 function App() {
   const [linkToken, setLinkToken] = useState("");
