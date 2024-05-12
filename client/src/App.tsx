@@ -192,10 +192,33 @@ function App() {
   
   */
 
+  const saveSecret = async (user_id: string, perpetual_bank_secret_key: string, bank_account_name: string, bank_name: string) => {
+    try {
+      await axios.post("/saving-secret", {
+        user_id,
+        perpetual_bank_secret_key,
+        bank_account_name,
+        bank_name,
+      });
+      alert("Secret saved successfully!");
+    } catch (error) {
+      console.error("Error saving secret:", error);
+      alert("Failed to save secret");
+    }
+  };
+  
 
   useEffect(() => {
     // Log the JSON data to the console when it updates
+    if (userData){
     console.log('JSON Data for UserData:', userData);
+    console.log(userData.accounts[0].persistent_account_id);
+    const perpetual_bank_secret_key = userData.accounts[0].persistent_account_id;
+    const user_id = '1';
+    const bank_account_name = userData.accounts[0].name; // TODO make sure we actually get the bank name
+    const bank_name = userData.accounts[0].official_name;
+    saveSecret(user_id, perpetual_bank_secret_key, bank_account_name, bank_name);
+    }
   }, [userData]); // This useEffect will run whenever jsonData changes
 
 

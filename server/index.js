@@ -1,9 +1,46 @@
 // index.js
 require("dotenv").config();
 const express = require("express");
-const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
+
+//  encryption necessary
+const { encryptData } = require('./encryption');
+
+// Import required modules
+const { Pool } = require('pg');
+
+// Create an Express application instance
+const app = express();
+
+// Create a new pool instance for PostgreSQL connection
+const pool = new Pool({
+  user: 'postgres',
+  host: process.env.HOST_ADDRESS,
+  database: process.env.DATABASE_NAME,
+  password: process.env.DATABASE_PASSWORD,
+  port: process.env.DATABASE_PORT, // default PostgreSQL port
+});
+
+// Test the database connection
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('Error connecting to the database:', err);
+  } else {
+    console.log('Connected to the database at:', res.rows[0].now);
+  }
+});
+
+// Define routes or other middleware here...
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+
+
 
 const {
   Configuration,
@@ -24,6 +61,38 @@ const configuration = new Configuration({
 const plaidClient = new PlaidApi(configuration);
 app.use(cors());
 app.use(bodyParser.json());
+
+// Saving perpetual secret after encrypting it
+
+app.post("/saving-secret", async function (request, response) {
+  try {
+    // Extract parameters from the request body
+    const { user_id, perpetual_bank_secret_key, bank_account_name, bank_name } = request.body;
+
+    // Encrypt the perpetual_bank_secret_key
+    const secretKey = Buffer.from(process.env.SECRET_KEY, 'hex'); // Retrieve the secret key from environment variables
+    const encryptedDataWithIV = encryptData(perpetual_bank_secret_key, secretKey);
+
+    // Construct the SQL INSERT statement
+    const insertQuery = `
+      INSERT INTO bank_accounts (user_id, perpetual_bank_secret_key, bank_account_name, bank_name, created_at)
+      VALUES ($1, $2, $3, $4, NOW())
+    `;
+    
+    // Execute the INSERT statement
+    await pool.query(insertQuery, [user_id, encryptedDataWithIV, bank_account_name, bank_name]);
+
+    // Send a success response
+    response.status(200).send("Secret saved successfully");
+  } catch (error) {
+    console.error("Error saving secret:", error);
+    response.status(500).send("Failed to save secret");
+  }
+});
+
+
+
+
 
 app.post("/create_link_token", async function (request, response) {
   try {
