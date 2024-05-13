@@ -21,7 +21,6 @@ axios.defaults.baseURL = "http://localhost:8000";
 function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [spendingByCategory, setSpendingByCategory] = useState<{ name: string, y: number }[]>([]);
-  const [loading, setLoading] = useState<boolean>(true); // Loading state
 
   useEffect(() => {
     async function fetchData() {
@@ -42,31 +41,28 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
         setTransactions(allTransactions);
       } catch (error) {
         console.error("Error fetching transactions:", error);
-      } finally {
-        setLoading(false); // Set loading to false when data fetching is complete
       }
     }
 
     fetchData();
   }, [publicTokens]);
 
-  //console.log(transactions)
   useEffect(() => {
     // Aggregate spending by category
-    const categoryMap = new Map<string, number>();
-    transactions.forEach(transaction => {
-      const category = transaction.personal_finance_category?.primary || "Other";
-      const amount = parseFloat(transaction.amount);
-      categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
-    });
+  const categoryMap = new Map<string, number>();
+  transactions.forEach(transaction => {
+    const category = transaction.personal_finance_category?.primary || "Other";
+    const amount = parseFloat(transaction.amount);
+    categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
+  });
 
-    // Filter out categories with negative or zero spending
-    const spendingData = Array.from(categoryMap.entries())
-      .filter(([name, y]) => y > 0)
-      .map(([name, y]) => ({ name, y }));
-
-    setSpendingByCategory(spendingData);
-  }, [transactions]);
+  // Filter out categories with negative or zero spending
+  const spendingData = Array.from(categoryMap.entries())
+    .filter(([name, y]) => y > 0)
+    .map(([name, y]) => ({ name, y }));
+  
+  setSpendingByCategory(spendingData);
+}, [transactions]);
 
   const columns: GridColDef<(typeof rows)[number]>[] = [
     { field: 'id', headerName: 'ID', width: 90 },
@@ -142,32 +138,26 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
 
   return (
     <div>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <div>
-          <h2>Total Spending by Category</h2>
-          <HighchartsReact highcharts={Highcharts} options={options} />
-  
-          <h2>Transactions</h2>
-          <Box sx={{ height: 800, width: '100%' }}>
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize: 20,
-                },
-              },
-            }}
-            pageSizeOptions={[20]}
-            checkboxSelection
-            disableRowSelectionOnClick
-          />
-          </Box>
-        </div>
-      )}
+      <h2>Total Spending by Category</h2>
+      <HighchartsReact highcharts={Highcharts} options={options} />
+
+      <h2>Transactions</h2>
+      <Box sx={{ height: 800, width: '100%' }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        initialState={{
+          pagination: {
+            paginationModel: {
+              pageSize: 20,
+            },
+          },
+        }}
+        pageSizeOptions={[20]}
+        checkboxSelection
+        disableRowSelectionOnClick
+      />
+      </Box>
     </div>
   );
 }
