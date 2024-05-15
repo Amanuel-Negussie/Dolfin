@@ -14,9 +14,74 @@ import Box from '@mui/material/Box';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { DataGrid, GridToolbar, GridColDef } from '@mui/x-data-grid';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import CircularProgress from '@mui/material/CircularProgress';
+import Stack from '@mui/material/Stack';
+import * as React from 'react';
+import { styled } from '@mui/material/styles';
+import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 
 // Defining the base url for our database 
 axios.defaults.baseURL = "http://localhost:8000";
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+  typography: {
+    fontFamily: 'Arial, sans-serif',
+  },
+  components: {
+    MuiDataGrid: {
+      styleOverrides: {
+        root: {
+          border: '1px solid #e0e0e0',
+        },
+        cell: {
+          borderBottom: '1px solid #e0e0e0',
+        },
+        columnHeader: {
+          backgroundColor: '#f5f5f5',
+          color: '#333',
+          fontWeight: 'bold',
+        },
+      },
+    },
+  },
+});
+
+const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
+  height: 10,
+  borderRadius: 5,
+  [`&.${linearProgressClasses.colorPrimary}`]: {
+    backgroundColor: theme.palette.grey[theme.palette.mode === 'light' ? 200 : 800],
+  },
+  [`& .${linearProgressClasses.bar}`]: {
+    borderRadius: 5,
+    backgroundColor: theme.palette.mode === 'light' ? '#1a90ff' : '#308fe8',
+  },
+}));
+
+function GradientCircularProgress() {
+  return (
+    <React.Fragment>
+      <svg width={0} height={0}>
+        <defs>
+          <linearGradient id="my_gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#e01cd5" />
+            <stop offset="100%" stopColor="#1CB5E0" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <CircularProgress sx={{ 'svg circle': { stroke: 'url(#my_gradient)' } }} />
+    </React.Fragment>
+  );
+}
 
 function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -50,20 +115,20 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
 
   useEffect(() => {
     // Aggregate spending by category
-  const categoryMap = new Map<string, number>();
-  transactions.forEach(transaction => {
-    const category = transaction.personal_finance_category?.primary || "Other";
-    const amount = parseFloat(transaction.amount);
-    categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
-  });
+    const categoryMap = new Map<string, number>();
+    transactions.forEach(transaction => {
+      const category = transaction.personal_finance_category?.primary || "Other";
+      const amount = parseFloat(transaction.amount);
+      categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
+    });
 
-  // Filter out categories with negative or zero spending
-  const spendingData = Array.from(categoryMap.entries())
-    .filter(([name, y]) => y > 0)
-    .map(([name, y]) => ({ name, y }));
-  
-  setSpendingByCategory(spendingData);
-}, [transactions]);
+    // Filter out categories with negative or zero spending
+    const spendingData = Array.from(categoryMap.entries())
+      .filter(([name, y]) => y > 0)
+      .map(([name, y]) => ({ name, y }));
+    
+    setSpendingByCategory(spendingData);
+  }, [transactions]);
 
   const columns: GridColDef<(typeof rows)[number]>[] = [
     { field: 'id', headerName: 'ID', width: 90 },
@@ -115,7 +180,6 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
     },
     tooltip: {
       pointFormatter: function () {
-        // Add type assertions for name and y
         return `<b>${(this.name as string)}</b>: $${(this.y as number).toFixed(2)}`;
       }
     },
@@ -131,7 +195,7 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
       }
     },
     series: [{
-      type: 'pie', // Specify the type of series
+      type: 'pie',
       name: 'Amount',
       data: spendingByCategory
     }]
@@ -143,21 +207,37 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
       <HighchartsReact highcharts={Highcharts} options={options} />
 
       <h2>Transactions</h2>
-      <Box sx={{ height: 800, width: '100%' }}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 20,
+      <Box sx={{ height: 800, width: '100%', bgcolor: '#fafafa', p: 2, borderRadius: 2, boxShadow: 3 }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 20,
+              },
             },
-          },
-        }}
-        pageSizeOptions={[20]}
-        checkboxSelection
-        disableRowSelectionOnClick
-      />
+          }}
+          pageSizeOptions={[20]}
+          checkboxSelection
+          disableRowSelectionOnClick
+          components={{
+            Toolbar: GridToolbar,
+          }}
+          sx={{
+            '& .MuiDataGrid-row:hover': {
+              backgroundColor: '#e3f2fd',
+            },
+            '& .MuiDataGrid-columnHeader': {
+              backgroundColor: '#e0f7fa',
+              color: '#00695c',
+            },
+            '& .MuiDataGrid-cell': {
+              padding: '8px',
+              fontSize: '1rem',
+            },
+          }}
+        />
       </Box>
     </div>
   );
@@ -188,11 +268,6 @@ function App() {
     },
   });
 
-  /*
-  fetchers - functions that fetch data from backend calls
-
-  */
-
   const fetchUserData = async (accessToken: string) => {
     try {
       const userDataResponse = await axios.post("/user/data", {
@@ -204,8 +279,6 @@ function App() {
     }
   };
 
-
-  // fetch User Identity
   const fetchUserIdentity = async (accessToken: string) => {
     try {
       const identityDataResponse = await axios.post("/user/identity", {
@@ -217,8 +290,6 @@ function App() {
     }
   };
 
-
-
   useEffect(() => {
     if (publicTokens.length > 0) {
       const lastPublicToken = publicTokens[publicTokens.length - 1];
@@ -228,8 +299,8 @@ function App() {
         })
         .then((response) => {
           const accessToken = response.data.accessToken;
-          fetchUserData(accessToken); // Call fetchUserData function with access token
-          fetchUserIdentity(accessToken); // Call fetchUserIdentity function with access token
+          fetchUserData(accessToken);
+          fetchUserIdentity(accessToken);
         })
         .catch((error) => {
           console.error("Error exchanging public token:", error);
@@ -237,55 +308,46 @@ function App() {
     }
   }, [publicTokens]);
 
-
-
-  /*
-  LOGGERS - console logging functions
-  
-  */
-
-
   useEffect(() => {
-    // Log the JSON data to the console when it updates
     console.log('JSON Data for UserData:', userData);
-  }, [userData]); // This useEffect will run whenever jsonData changes
-
+  }, [userData]);
 
   useEffect(() => {
-    // Log the JSON data to the console when it updates
     console.log('JSON Data for identityData:', identityData);
-  }, [identityData]); // This useEffect will run whenever jsonData changes
+  }, [identityData]);
 
-
-
-
-  
   return (
-    <div>
-      <Button onClick={() => open()} variant = "contained" disabled={!ready}>
-        Connect a bank account
-      </Button>
-      {userData && identityData && (
-        <Box>
-          <h2>User Information</h2>
-          <p><b>User Name:</b> {identityData.accounts[0].owners[0].names[0]}</p>
-          <p><b>Street Address:</b> {identityData.accounts[0].owners[0].addresses[0].data.street}</p>
-          <p><b>City:</b> {identityData.accounts[0].owners[0].addresses[0].data.city}</p>
-          <p><b>Region:</b> {identityData.accounts[0].owners[0].addresses[0].data.region} </p>
-          <p><b>Postal Code:</b> {identityData.accounts[0].owners[0].addresses[0].data.postal_code}</p>
-          <p><b> Phone Number:</b> {identityData.accounts[0].owners[0].phone_numbers[0].type}: {identityData.accounts[0].owners[0].phone_numbers[0].data}</p>
-          <h2>Account Information</h2>
-          <p>AccountID: {userData.accounts[0].account_id}</p>
-          <p>Name: {userData.accounts[0].official_name}</p>
-          <p>persistent_account_id: {userData.accounts[0].persistent_account_id}</p>
-        
-          {/* Add more user information as needed */}
-         
-
-        </Box>
-      )}
-      {publicTokens.length > 0 && userData && identityData && <DisplayTransactions publicTokens={publicTokens} />}
-    </div>
+    <ThemeProvider theme={theme}>
+      <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', backgroundColor: '#f0f4f8', minHeight: '100vh' }}>
+        <Button onClick={() => open()} variant="contained" color="primary" disabled={!ready}>
+          Connect a bank account
+        </Button>
+        {!userData || !identityData ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+            <GradientCircularProgress />
+          </Box>
+        ) : (
+          <>
+            {userData && identityData && (
+              <Box sx={{ mt: 4 }}>
+                <h2>User Information</h2>
+                <p><b>User Name:</b> {identityData.accounts[0].owners[0].names[0]}</p>
+                <p><b>Street Address:</b> {identityData.accounts[0].owners[0].addresses[0].data.street}</p>
+                <p><b>City:</b> {identityData.accounts[0].owners[0].addresses[0].data.city}</p>
+                <p><b>Region:</b> {identityData.accounts[0].owners[0].addresses[0].data.region}</p>
+                <p><b>Postal Code:</b> {identityData.accounts[0].owners[0].addresses[0].data.postal_code}</p>
+                <p><b> Phone Number:</b> {identityData.accounts[0].owners[0].phone_numbers[0].type}: {identityData.accounts[0].owners[0].phone_numbers[0].data}</p>
+                <h2>Account Information</h2>
+                <p>AccountID: {userData.accounts[0].account_id}</p>
+                <p>Name: {userData.accounts[0].official_name}</p>
+                <p>persistent_account_id: {userData.accounts[0].persistent_account_id}</p>
+              </Box>
+            )}
+            {publicTokens.length > 0 && userData && identityData && <DisplayTransactions publicTokens={publicTokens} />}
+          </>
+        )}
+      </div>
+    </ThemeProvider>
   );
 }
 
