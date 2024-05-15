@@ -162,7 +162,7 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
     id: index + 1,
     date: transaction.date,
     amount: transaction.amount,
-    name: transaction.name,
+    name: transaction.merchant_name || transaction.name,
     category: transaction.personal_finance_category?.primary || "", 
   }));
 
