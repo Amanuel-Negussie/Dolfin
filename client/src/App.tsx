@@ -248,6 +248,7 @@ function App() {
   const [publicTokens, setPublicTokens] = useState<string[]>([]);
   const [userData, setUserData] = useState<any>(null); // State to store user data
   const [identityData, setIdentityData] = useState<any>(null); // state to store identity data
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchLinkToken() {
@@ -265,6 +266,7 @@ function App() {
     token: linkToken,
     onSuccess: (public_token: string) => {
       setPublicTokens((prevTokens) => [...prevTokens, public_token]);
+      setLoading(true);
     },
   });
 
@@ -322,7 +324,7 @@ function App() {
         <Button onClick={() => open()} variant="contained" color="primary" disabled={!ready}>
           Connect a bank account
         </Button>
-        {!userData || !identityData ? (
+        {loading && (!userData || !identityData) ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
             <GradientCircularProgress />
           </Box>
