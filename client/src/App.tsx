@@ -39,6 +39,7 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
         }
 
         setTransactions(allTransactions);
+        console.log("All transactions:", allTransactions);
       } catch (error) {
         console.error("Error fetching transactions:", error);
       }
@@ -283,7 +284,7 @@ function App() {
 
         </Box>
       )}
-      {publicTokens.length > 0 && <DisplayTransactions publicTokens={publicTokens} />}
+      {publicTokens.length > 0 && userData && identityData && <DisplayTransactions publicTokens={publicTokens} />}
     </div>
   );
 }
