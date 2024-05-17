@@ -20,8 +20,10 @@ import Stack from '@mui/material/Stack';
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
+import Avatar from '@mui/material/Avatar';
+import { deepOrange, deepPurple } from '@mui/material/colors';
 
-// Defining the base url for our database 
+// Defining the base URL for our database 
 axios.defaults.baseURL = "http://localhost:8000";
 
 const theme = createTheme({
@@ -137,7 +139,6 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
     setSpendingByCategory(spendingData);
   }, [transactions]);
 
-
   const columns: GridColDef<(typeof rows)[number]>[] = [
     { field: 'id', headerName: 'ID', width: 90 },
     {
@@ -151,6 +152,23 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
       headerName: 'Amount',
       width: 150,
       valueGetter: (params) => params.row.amount || '',
+    },
+    {
+      field: 'logo',
+      headerName: 'Logo',
+      width: 150,
+      renderCell: (params) => {
+        const name = params.row.name || '';
+        const logoUrl = params.row.logo_url;
+        if (logoUrl) {
+          return <Avatar alt={name} src={logoUrl} />;
+        } else {
+          const initials = name.split(' ').map(word => word[0]).slice(0, 2).join('');
+          const avatarColors = [deepOrange[500], deepPurple[500]];
+          const color = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+          return <Avatar sx={{ bgcolor: color }}>{initials}</Avatar>;
+        }
+      }
     },
     {
       field: 'name',
@@ -172,6 +190,7 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
     amount: transaction.amount >= 0 ? "-$" + transaction.amount : "$" + Math.abs(transaction.amount),
     name: transaction.merchant_name || transaction.name,
     category: capitalizeAndRemoveUnderscores(transaction.personal_finance_category?.primary || ""), 
+    logo_url: transaction.logo_url,
   }));
 
   const totalSpent = spendingByCategory.reduce((total, category) => total + category.y, 0);
@@ -215,7 +234,7 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
       <HighchartsReact highcharts={Highcharts} options={options} />
 
       <h2>Transactions</h2>
-      <Box sx={{ height: 800, width: '100%', bgcolor: '#fafafa', p: 2, borderRadius: 2, boxShadow: 3 }}>
+      <Box sx={{ height: 800, width: '100%', bgcolor: '#fafafa', p: 2, borderRadius: 2,         boxShadow: 3 }}>
         <DataGrid
           rows={rows}
           columns={columns}
@@ -362,3 +381,4 @@ function App() {
 }
 
 export default App;
+
