@@ -83,6 +83,13 @@ function GradientCircularProgress() {
   );
 }
 
+function capitalizeAndRemoveUnderscores(text: string): string {
+  return text
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
 function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [spendingByCategory, setSpendingByCategory] = useState<{ name: string, y: number }[]>([]);
@@ -125,10 +132,11 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
     // Filter out categories with negative or zero spending
     const spendingData = Array.from(categoryMap.entries())
       .filter(([name, y]) => y > 0)
-      .map(([name, y]) => ({ name, y }));
-    
+      .map(([name, y]) => ({ name: capitalizeAndRemoveUnderscores(name), y }));
+
     setSpendingByCategory(spendingData);
   }, [transactions]);
+
 
   const columns: GridColDef<(typeof rows)[number]>[] = [
     { field: 'id', headerName: 'ID', width: 90 },
@@ -161,9 +169,9 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
   const rows = transactions.map((transaction: any, index: number) => ({
     id: index + 1,
     date: transaction.date,
-    amount: transaction.amount,
+    amount: transaction.amount >= 0 ? "-$" + transaction.amount : "$" + Math.abs(transaction.amount),
     name: transaction.merchant_name || transaction.name,
-    category: transaction.personal_finance_category?.primary || "", 
+    category: capitalizeAndRemoveUnderscores(transaction.personal_finance_category?.primary || ""), 
   }));
 
   const totalSpent = spendingByCategory.reduce((total, category) => total + category.y, 0);
