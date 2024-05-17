@@ -163,7 +163,7 @@ function DisplayTransactions({ publicTokens }: { publicTokens: string[] }) {
         if (logoUrl) {
           return <Avatar alt={name} src={logoUrl} />;
         } else {
-          const initials = name.split(' ').map(word => word[0]).slice(0, 2).join('');
+          const initials = name.split(' ').map((word: string) => word[0]).slice(0, 2).join('');
           const avatarColors = [deepOrange[500], deepPurple[500]];
           const color = avatarColors[Math.floor(Math.random() * avatarColors.length)];
           return <Avatar sx={{ bgcolor: color }}>{initials}</Avatar>;
