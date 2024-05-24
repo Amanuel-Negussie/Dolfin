@@ -1,42 +1,45 @@
-const sql = require('mssql');
+// db.js
+const sql = require("mssql");
 
-// Configuration for your database
 const config = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER,
-  database: process.env.DB_DATABASE,
+  user: process.env.SQL_USER,
+  password: process.env.SQL_PASSWORD,
+  server: process.env.SQL_SERVER,
+  database: process.env.SQL_DATABASE,
+  trustServerCertificate: true,
+  trustedConnection: false,
+  enableArithAbort: false,
+  port: parseInt(process.env.SQL_PORT, 10),
   options: {
     encrypt: true, // Use this if you're on Windows Azure
-    trustServerCertificate: true, // Use this if SQL Server uses a self-signed certificate
+    enableArithAbort: true,
   },
 };
 
-// Function to execute a query
-async function queryDatabase(query, parameters = []) {
+async function connectToDatabase() {
   try {
-    // Create a new connection
-    let pool = await sql.connect(config);
-
-    // Create a prepared statement
-    let request = pool.request();
-    parameters.forEach(param => {
-      request.input(param.name, param.type, param.value);
-    });
-
-    // Execute the query
-    let result = await request.query(query);
-
-    // Close the connection
-    await pool.close();
-
-    return result;
+    await sql.connect(config);
+    console.log("Connected to SQL Server");
   } catch (err) {
-    console.error('SQL error', err);
+    console.error("Error connecting to SQL Server:", err);
+  }
+}
+
+async function queryDatabase(query, params) {
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool.request();
+    params.forEach(param => {
+      result.input(param.name, param.type, param.value);
+    });
+    return await result.query(query);
+  } catch (err) {
+    console.error("Error querying database:", err);
     throw err;
   }
 }
 
 module.exports = {
+  connectToDatabase,
   queryDatabase,
 };
