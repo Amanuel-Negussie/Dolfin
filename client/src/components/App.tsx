@@ -8,29 +8,9 @@ import DisplayTransactions from "./DisplayTransactions";
 import UserInformation from "./UserInformation";
 import useFetchLinkToken from "../hooks/useFetchLinkToken";
 import usePlaidLinkCustom from "../hooks/usePlaidLinkCustom";
+import theme from "../theme/theme";
 
 axios.defaults.baseURL = "http://localhost:8000";
-
-const theme = createTheme({
-  palette: {
-    primary: { main: '#1976d2' },
-    secondary: { main: '#dc004e' },
-  },
-  typography: { fontFamily: 'Arial, sans-serif' },
-  components: {
-    MuiDataGrid: {
-      styleOverrides: {
-        root: { border: '1px solid #e0e0e0' },
-        cell: { borderBottom: '1px solid #e0e0e0' },
-        columnHeader: {
-          backgroundColor: '#f5f5f5',
-          color: '#333',
-          fontWeight: 'bold',
-        },
-      },
-    },
-  },
-});
 
 function App() {
   const [publicTokens, setPublicTokens] = useState<string[]>([]);
