@@ -1,4 +1,3 @@
-// index.js
 require("dotenv").config();
 const express = require("express");
 const sql = require('mssql');
@@ -26,6 +25,13 @@ const configuration = new Configuration({
 const plaidClient = new PlaidApi(configuration);
 app.use(cors());
 app.use(bodyParser.json());
+
+const capitalizeAndRemoveUnderscores = (text) => {
+  return text
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
 
 app.post("/create_link_token", async function (request, response) {
   try {
@@ -70,34 +76,35 @@ app.post("/transactions/sync", async function (request, response) {
 
     const transactions = plaidResponse.data.transactions;
 
-// Save transactions to the database
-for (const transaction of transactions) {
-  // Check if the category is a valid string
-  const category = typeof transaction.category === 'string' ? transaction.category : '';
+    // Save transactions to the database
+    for (const transaction of transactions) {
+      const categoryArray = transaction.category || [];
+      const categories = categoryArray.join(", ");
 
-  // Check if the logo_url is a valid string or empty
-  const logoUrl = typeof transaction.logo_url === 'string' ? transaction.logo_url : '';
+      const name = capitalizeAndRemoveUnderscores(transaction.name);
+      const merchantName = capitalizeAndRemoveUnderscores(transaction.merchant_name || transaction.name);
 
-  const accountIdResult = await queryDatabase(
-    `SELECT id FROM Accounts WHERE account_id = @account_id`,
-    [{ name: 'account_id', type: sql.NVarChar, value: transaction.account_id }]
-  );
-  const accountId = accountIdResult.recordset[0].id;
+      const accountIdResult = await queryDatabase(
+        `SELECT id FROM Accounts WHERE account_id = @account_id`,
+        [{ name: 'account_id', type: sql.NVarChar, value: transaction.account_id }]
+      );
+      const accountId = accountIdResult.recordset[0].id;
 
-  await queryDatabase(
-    `INSERT INTO Transactions (account_id, transaction_id, amount, date, name, category, logo_url) 
-     VALUES (@account_id, @transaction_id, @amount, @date, @name, @category, @logo_url)`,
-    [
-      { name: 'account_id', type: sql.Int, value: accountId },
-      { name: 'transaction_id', type: sql.NVarChar, value: transaction.transaction_id },
-      { name: 'amount', type: sql.Float, value: transaction.amount },
-      { name: 'date', type: sql.Date, value: transaction.date },
-      { name: 'name', type: sql.NVarChar, value: transaction.name },
-      { name: 'category', type: sql.NVarChar, value: category }, // Use the validated category value
-      { name: 'logo_url', type: sql.NVarChar, value: logoUrl } // Use the validated logo_url value
-    ]
-  );
-}
+      await queryDatabase(
+        `INSERT INTO Transactions (account_id, transaction_id, amount, date, name, merchant_name, categories, logo_url) 
+         VALUES (@account_id, @transaction_id, @amount, @date, @name, @merchant_name, @categories, @logo_url)`,
+        [
+          { name: 'account_id', type: sql.Int, value: accountId },
+          { name: 'transaction_id', type: sql.NVarChar, value: transaction.transaction_id },
+          { name: 'amount', type: sql.Float, value: transaction.amount },
+          { name: 'date', type: sql.Date, value: transaction.date },
+          { name: 'name', type: sql.NVarChar, value: name },
+          { name: 'merchant_name', type: sql.NVarChar, value: merchantName },
+          { name: 'categories', type: sql.NVarChar, value: categories },
+          { name: 'logo_url', type: sql.NVarChar, value: transaction.logo_url || '' }
+        ]
+      );
+    }
 
     response.json(plaidResponse.data);
   } catch (error) {
@@ -106,19 +113,15 @@ for (const transaction of transactions) {
   }
 });
 
-
 app.post("/user/data", async function (request, response) {
   const accessToken = request.body.access_token;
   try {
-    // Fetch user information using identityGet
     const userInfoResponse = await plaidClient.identityGet({ access_token: accessToken });
     const userInfo = userInfoResponse.data;
 
-    // Extract user information
     const userName = userInfo.accounts[0].owners[0].names[0];
     const userEmail = ""; // Add logic to fetch user email if available
 
-    // Save user data to the database
     const userResult = await queryDatabase(
       `INSERT INTO Users (name, email) OUTPUT INSERTED.id VALUES (@name, @email)`,
       [
@@ -129,7 +132,6 @@ app.post("/user/data", async function (request, response) {
 
     const userId = userResult.recordset[0].id;
 
-    // Save accounts data
     for (const account of userInfo.accounts) {
       await queryDatabase(
         `INSERT INTO Accounts (user_id, account_id, official_name, persistent_account_id) VALUES (@user_id, @account_id, @official_name, @persistent_account_id)`,
@@ -149,7 +151,6 @@ app.post("/user/data", async function (request, response) {
   }
 });
 
-
 app.post("/user/identity", async function (request, response) {
   const accessToken = request.body.access_token;
   try {
@@ -162,7 +163,6 @@ app.post("/user/identity", async function (request, response) {
   }
 });
 
-// Connect to SQL Server and start the server
 connectToDatabase().then(() => {
   app.listen(8000, () => {
     console.log("Server has started");
