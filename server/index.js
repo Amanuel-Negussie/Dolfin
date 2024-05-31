@@ -26,6 +26,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.post("/create_link_token", async function (request, response) {
+  console.log(request.headers.authorization);
   try {
     const plaidRequest = {
       user: {
