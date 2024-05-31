@@ -100,7 +100,7 @@ const DisplayTransactions = ({ publicTokens }: { publicTokens: string[] }) => {
       field: 'category',
       headerName: 'Category',
       width: 150,
-      valueGetter: (params) => params.row.category || '',
+      valueGetter: (params) => params.row.category  || '',
     },
   ];
 

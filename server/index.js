@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
-const sql = require('mssql');
+const bcrypt = require("bcrypt");
+const sql = require("mssql");
 const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -33,6 +34,45 @@ const capitalizeAndRemoveUnderscores = (text) => {
     .join(' ');
 };
 
+// Signup route
+app.post("/signup", async (req, res) => {
+  const { name, email, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await queryDatabase(
+      `INSERT INTO Users (name, email, password) VALUES (@name, @email, @password)`,
+      [
+        { name: 'name', type: sql.NVarChar, value: name },
+        { name: 'email', type: sql.NVarChar, value: email },
+        { name: 'password', type: sql.NVarChar, value: hashedPassword }
+      ]
+    );
+    res.status(201).send("User created successfully");
+  } catch (error) {
+    console.error("Error creating user:", error);
+    res.status(500).send("Error creating user");
+  }
+});
+
+// Login route
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const result = await queryDatabase(
+      `SELECT * FROM Users WHERE email = @Email`,
+      [{ name: 'Email', type: sql.NVarChar, value: email }]
+    );
+    const user = result.recordset[0];
+    if (user && await bcrypt.compare(password, user.password)) {
+      res.status(200).send({ message: "Login successful", userId: user.id });
+    } else {
+      res.status(401).send("Invalid email or password");
+    }
+  } catch (error) {
+    console.error("Error logging in:", error);
+    res.status(500).send("Error logging in");
+  }
+});
 app.post("/create_link_token", async function (request, response) {
   try {
     const plaidRequest = {
