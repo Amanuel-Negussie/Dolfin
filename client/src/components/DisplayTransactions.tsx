@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Box, Avatar } from '@mui/material';
 import { DataGrid, GridToolbar, GridColDef } from '@mui/x-data-grid';
-import Highcharts from 'highcharts';
-import HighchartsReact from 'highcharts-react-official';
 import { deepOrange, deepPurple } from '@mui/material/colors';
-import capitalizeAndRemoveUnderscores from '../utils/capitalizeAndRemoveUnderscores';
+import PieChart from './PieChart';
 
 const DisplayTransactions = ({ publicTokens }: { publicTokens: string[] }) => {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -35,21 +33,23 @@ const DisplayTransactions = ({ publicTokens }: { publicTokens: string[] }) => {
 
   useEffect(() => {
     const categoryMap = new Map<string, number>();
-    transactions.forEach(transaction => {
-      const category = transaction.personal_finance_category?.primary || "Other";
-      const amount = parseFloat(transaction.amount);
-      categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
+    transactions.forEach((transaction) => {
+      console.log('inner loop: ' + transaction.categories);
+      const category = transaction.category[0] || 'Other';
+      const amount = Math.abs(transaction.amount);
+
+      if (categoryMap.has(category)) {
+        categoryMap.set(category, categoryMap.get(category)! + amount);
+      } else {
+        categoryMap.set(category, amount);
+      }
     });
 
-    const spendingData = Array.from(categoryMap.entries())
-      .filter(([name, y]) => y > 0)
-      .map(([name, y]) => ({ name: capitalizeAndRemoveUnderscores(name), y }));
-
-    setSpendingByCategory(spendingData);
+    const spendingByCategoryArray = Array.from(categoryMap, ([name, y]) => ({ name, y }));
+    setSpendingByCategory(spendingByCategoryArray);
   }, [transactions]);
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 90 },
     {
       field: 'date',
       headerName: 'Date',
@@ -91,10 +91,16 @@ const DisplayTransactions = ({ publicTokens }: { publicTokens: string[] }) => {
       valueGetter: (params) => params.row.name || '',
     },
     {
+      field: 'merchant_name',
+      headerName: 'Merchant Name',
+      width: 150,
+      valueGetter: (params) => params.row.merchant_name || '',
+    },
+    {
       field: 'category',
       headerName: 'Category',
       width: 150,
-      valueGetter: (params) => params.row.category || '',
+      valueGetter: (params) => params.row.category  || '',
     },
   ];
 
@@ -102,44 +108,16 @@ const DisplayTransactions = ({ publicTokens }: { publicTokens: string[] }) => {
     id: index + 1,
     date: transaction.date,
     amount: transaction.amount >= 0 ? "-$" + transaction.amount : "$" + Math.abs(transaction.amount),
-    name: transaction.merchant_name || transaction.name,
-    category: capitalizeAndRemoveUnderscores(transaction.personal_finance_category?.primary || ""),
+    name: transaction.name,
+    merchant_name: transaction.merchant_name,
+    category: transaction.category,
     logo_url: transaction.logo_url,
   }));
-
-  const totalSpent = spendingByCategory.reduce((total, category) => total + category.y, 0);
-
-  const options: Highcharts.Options = {
-    chart: { type: 'pie' },
-    title: { text: `Total Spending by Category` },
-    subtitle: { text: `Total Spent: $${totalSpent.toFixed(2)}` },
-    tooltip: {
-      pointFormatter: function () {
-        return `<b>${(this.name as string)}</b>: $${(this.y as number).toFixed(2)}`;
-      }
-    },
-    plotOptions: {
-      pie: {
-        allowPointSelect: true,
-        cursor: 'pointer',
-        dataLabels: {
-          enabled: true,
-          format: '<b>{point.name}</b>: ${point.y:.2f}',
-        },
-        showInLegend: true
-      }
-    },
-    series: [{
-      type: 'pie',
-      name: 'Amount',
-      data: spendingByCategory
-    }]
-  };
 
   return (
     <div>
       <h2>Total Spending by Category</h2>
-      <HighchartsReact highcharts={Highcharts} options={options} />
+      <PieChart spendingByCategory={spendingByCategory} />
       <h2>Transactions</h2>
       <Box sx={{ height: 800, width: '100%', bgcolor: '#fafafa', p: 2, borderRadius: 2, boxShadow: 3 }}>
         <DataGrid
