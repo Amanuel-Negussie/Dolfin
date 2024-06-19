@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import  axiosConfigs, { setAccessToken } from './axiosConfigs';
 
-const useFetchLinkToken = () => {
+const useFetchLinkToken = (accessToken : string) => {
   const [linkToken, setLinkToken] = useState("");
 
   useEffect(() => {
     async function fetchLinkToken() {
       try {
-        const response = await axios.post("/create_link_token");
+        setAccessToken(accessToken);
+        const response = await axiosConfigs.post("/create_link_token");
         setLinkToken(response.data.link_token);
       } catch (error) {
         console.error("Error fetching link token:", error);

@@ -74,6 +74,7 @@ app.post("/login", async (req, res) => {
   }
 });
 app.post("/create_link_token", async function (request, response) {
+  console.log(request.headers.authorization);
   try {
     const plaidRequest = {
       user: {

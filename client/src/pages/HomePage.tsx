@@ -3,14 +3,17 @@ import axios from "axios";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
-import GradientCircularProgress from "./GradientCircularProgress";
-import DisplayTransactions from "./DisplayTransactions";
-import UserInformation from "./UserInformation";
+import GradientCircularProgress from "../components/GradientCircularProgress";
+import DisplayTransactions from "../components/DisplayTransactions";
+import UserInformation from "../components/UserInformation";
 import useFetchLinkToken from "../hooks/useFetchLinkToken";
 import usePlaidLinkCustom from "../hooks/usePlaidLinkCustom";
-import theme from "../theme/theme";
+import { useAuth0 } from "@auth0/auth0-react";
+import LogoutButton from "../components/LogoutButton";
+import useAccessToken from "../hooks/useAccessToken";
+import axiosConfigs from "../hooks/axiosConfigs";
 
-axios.defaults.baseURL = "http://localhost:8000";
+axios.defaults.baseURL = 'http://localhost:8000';
 
 function App() {
   const [publicTokens, setPublicTokens] = useState<string[]>([]);
@@ -18,7 +21,10 @@ function App() {
   const [identityData, setIdentityData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  const linkToken = useFetchLinkToken();
+  const { user } = useAuth0();
+
+  const accessToken = useAccessToken();
+  const linkToken = useFetchLinkToken(accessToken);
   const { open, ready } = usePlaidLinkCustom(linkToken, (public_token: string) => {
     setPublicTokens((prevTokens) => [...prevTokens, public_token]);
     setLoading(true);
@@ -60,6 +66,9 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', backgroundColor: '#f0f4f8', minHeight: '100vh' }}>
+        <div>Welcome, {user?.sub}</div>
+        <LogoutButton />
+        <br />
         <Button onClick={() => open()} variant="contained" color="primary" disabled={!ready}>
           Connect a bank account
         </Button>
