@@ -5,7 +5,7 @@ const sql = require("mssql");
 const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const { connectToDatabase, queryDatabase } = require("./db");
+const { connectToDatabase, updateDatabase, queryDatabase } = require("./db");
 
 const {
   Configuration,
@@ -207,5 +207,10 @@ app.post("/user/identity", async function (request, response) {
 connectToDatabase().then(() => {
   app.listen(8000, () => {
     console.log("Server has started");
+    updateDatabase().then(()=>{
+      console.log("Database status updated");
+    });
   });
 });
+
+

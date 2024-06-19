@@ -64,7 +64,6 @@ function App() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
       <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', backgroundColor: '#f0f4f8', minHeight: '100vh' }}>
         <div>Welcome, {user?.sub}</div>
         <LogoutButton />
@@ -83,7 +82,6 @@ function App() {
           </>
         )}
       </div>
-    </ThemeProvider>
   );
 }
 

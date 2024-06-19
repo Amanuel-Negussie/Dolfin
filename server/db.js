@@ -1,5 +1,6 @@
-// db.js
 const sql = require("mssql");
+const path = require('path'); 
+const fs = require('fs');
 
 const config = {
   user: process.env.SQL_USER,
@@ -25,6 +26,29 @@ async function connectToDatabase() {
   }
 }
 
+async function updateDatabase() {
+  const initDbFilePath = path.join(__dirname, 'init.sql');
+
+  try {
+    // Read the file with the correct encoding (UTF-16LE or UTF-16BE)
+    const sqlScripts = fs.readFileSync(initDbFilePath, 'utf16le');
+
+    // Split scripts by "GO", and filter out empty lines
+    const scriptArray = sqlScripts.split(/\bGO\b/).map(line => line.trim()).filter(line => line);
+
+    for (let script of scriptArray) {
+      if (script) {
+        await sql.query(script);
+        console.log(`Executed SQL script: ${script}`);
+      }
+    }
+
+    console.log('Database update complete');
+  } catch (err) {
+    console.error('Error updating database:', err);
+    throw err;
+  }
+}
 async function queryDatabase(query, params) {
   try {
     const pool = await sql.connect(config);
@@ -41,5 +65,6 @@ async function queryDatabase(query, params) {
 
 module.exports = {
   connectToDatabase,
+  updateDatabase,
   queryDatabase,
 };
