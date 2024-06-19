@@ -15,27 +15,6 @@ import axiosConfigs from "../hooks/axiosConfigs";
 
 axios.defaults.baseURL = 'http://localhost:8000';
 
-const theme = createTheme({
-  palette: {
-    primary: { main: '#1976d2' },
-    secondary: { main: '#dc004e' },
-  },
-  typography: { fontFamily: 'Arial, sans-serif' },
-  components: {
-    MuiDataGrid: {
-      styleOverrides: {
-        root: { border: '1px solid #e0e0e0' },
-        cell: { borderBottom: '1px solid #e0e0e0' },
-        columnHeader: {
-          backgroundColor: '#f5f5f5',
-          color: '#333',
-          fontWeight: 'bold',
-        },
-      },
-    },
-  },
-});
-
 function App() {
   const [publicTokens, setPublicTokens] = useState<string[]>([]);
   const [userData, setUserData] = useState<any>(null);

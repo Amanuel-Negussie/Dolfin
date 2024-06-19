@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import Auth0ProviderWithNavigate from "./utils/Auth0ProviderWithNavigate";
 // import './index.css'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
       <Auth0ProviderWithNavigate>
