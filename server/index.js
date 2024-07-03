@@ -5,7 +5,7 @@ const sql = require("mssql");
 const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const { connectToDatabase, queryDatabase } = require("./db");
+const { connectToDatabase, queryDatabase } = require("./db/db");
 
 const {
   Configuration,
