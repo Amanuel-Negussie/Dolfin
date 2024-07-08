@@ -1,4 +1,4 @@
-const db = require('../');
+const { connectToDatabase, queryDatabase } = require("../db");
 const sql = require('mssql');
 
 /**
@@ -22,7 +22,7 @@ const createAsset = async (userId, description, value) => {
     { name: 'param2', type: sql.NVarChar, value: description },
     { name: 'param3', type: sql.Float, value: value },
   ];
-  const { recordset } = await db.queryDatabase(query, params);
+  const { recordset } = await queryDatabase(query, params);
   return recordset[0];
 };
 
@@ -35,7 +35,7 @@ const createAsset = async (userId, description, value) => {
 const retrieveAssetsByUser = async userId => {
   const query = 'SELECT * FROM assets_table WHERE user_id = @param1';
   const params = [{ name: 'param1', type: sql.Int, value: userId }];
-  const { recordset: assets } = await db.queryDatabase(query, params);
+  const { recordset: assets } = await queryDatabase(query, params);
   return assets;
 };
 
@@ -47,7 +47,7 @@ const retrieveAssetsByUser = async userId => {
 const deleteAssetByAssetId = async assetId => {
   const query = 'DELETE FROM assets_table WHERE id = @param1';
   const params = [{ name: 'param1', type: sql.Int, value: assetId }];
-  await db.queryDatabase(query, params);
+  await queryDatabase(query, params);
 };
 
 module.exports = {

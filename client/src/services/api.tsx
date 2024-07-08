@@ -7,7 +7,7 @@ import { DuplicateItemToastMessage } from '../components';
 const baseURL = '/';
 
 const api = axios.create({
-  baseURL,
+  baseURL: 'http://localhost:8000',
   headers: {
     'Cache-Control': 'no-cache, no-store, must-revalidate',
     Pragma: 'no-cache',
@@ -30,8 +30,8 @@ export const deleteAssetByAssetId = (assetId: number) =>
 // users
 export const getUsers = () => api.get('/users');
 export const getUserById = (userId: number) => api.get(`/users/${userId}`);
-export const addNewUser = (username: string) =>
-  api.post('/users', { username });
+export const addNewUser = (userInfo: { username: string, auth0Id: string }) =>
+  api.post('/users', userInfo);
 export const deleteUserById = (userId: number) =>
   api.delete(`/users/${userId}`);
 

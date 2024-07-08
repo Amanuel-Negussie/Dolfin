@@ -12,7 +12,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import LogoutButton from "../components/LogoutButton";
 import useAccessToken from "../hooks/useAccessToken";
 import axiosConfigs from "../hooks/axiosConfigs";
-
+import { addNewUser } from "../services/api";
 axios.defaults.baseURL = 'http://localhost:8000';
 
 function App() {
@@ -20,8 +20,8 @@ function App() {
   const [userData, setUserData] = useState<any>(null);
   const [identityData, setIdentityData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-
-  const { user } = useAuth0();
+  const [userInfoSent, setUserInfoSent] = useState(false);
+  const { isAuthenticated, user } = useAuth0();
 
   const accessToken = useAccessToken();
   const linkToken = useFetchLinkToken(accessToken);
@@ -45,6 +45,27 @@ function App() {
     }
   }, [publicTokens]);
 
+  useEffect(() => {
+    const createUserInDatabase = async (userInfo: {username: string, auth0Id: string}) => {
+      try{
+        console.log('Sending user info to API:', userInfo);
+        const response = await addNewUser(userInfo);
+        console.log('User created in database:', response.data);
+        setUserInfoSent(true);
+      } catch (error) {
+        console.error("Error creating user in database:", error);
+      }
+    };
+    if (isAuthenticated && user && !userInfoSent){
+      const userInfo = {
+        username: user.nickname ?? user.name ?? 'Default User',
+        auth0Id: user.sub || 'Auth0|12345'
+      };
+
+      createUserInDatabase(userInfo).then(() => {
+    });
+  }
+}, [isAuthenticated, user, userInfoSent]);
   const fetchUserData = async (accessToken: string) => {
     try {
       const userDataResponse = await axios.post("/user/data", { access_token: accessToken });

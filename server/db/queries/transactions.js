@@ -1,5 +1,5 @@
 const { retrieveAccountByPlaidAccountId } = require('./accounts');
-const db = require('../');
+const { connectToDatabase, queryDatabase } = require("../db");
 const sql = require('mssql');
 
 /**
@@ -65,7 +65,7 @@ const createOrUpdateTransactions = async transactions => {
         { name: 'param12', type: sql.Bit, value: pending },
         { name: 'param13', type: sql.NVarChar, value: accountOwner },
       ];
-      await db.queryDatabase(query, params);
+      await queryDatabase(query, params);
     } catch (err) {
       console.error(err);
     }
@@ -82,7 +82,7 @@ const createOrUpdateTransactions = async transactions => {
 const retrieveTransactionsByAccountId = async accountId => {
   const query = 'SELECT * FROM transactions_table WHERE account_id = @param1 ORDER BY date DESC';
   const params = [{ name: 'param1', type: sql.Int, value: accountId }];
-  const { recordset: transactions } = await db.queryDatabase(query, params);
+  const { recordset: transactions } = await queryDatabase(query, params);
   return transactions;
 };
 
@@ -95,7 +95,7 @@ const retrieveTransactionsByAccountId = async accountId => {
 const retrieveTransactionsByItemId = async itemId => {
   const query = 'SELECT * FROM transactions_table WHERE item_id = @param1 ORDER BY date DESC';
   const params = [{ name: 'param1', type: sql.Int, value: itemId }];
-  const { recordset: transactions } = await db.queryDatabase(query, params);
+  const { recordset: transactions } = await queryDatabase(query, params);
   return transactions;
 };
 
@@ -108,7 +108,7 @@ const retrieveTransactionsByItemId = async itemId => {
 const retrieveTransactionsByUserId = async userId => {
   const query = 'SELECT * FROM transactions_table WHERE user_id = @param1 ORDER BY date DESC';
   const params = [{ name: 'param1', type: sql.Int, value: userId }];
-  const { recordset: transactions } = await db.queryDatabase(query, params);
+  const { recordset: transactions } = await queryDatabase(query, params);
   return transactions;
 };
 
@@ -121,7 +121,7 @@ const deleteTransactions = async plaidTransactionIds => {
   const pendingQueries = plaidTransactionIds.map(async transactionId => {
     const query = 'DELETE FROM transactions_table WHERE plaid_transaction_id = @param1';
     const params = [{ name: 'param1', type: sql.NVarChar, value: transactionId }];
-    await db.queryDatabase(query, params);
+    await queryDatabase(query, params);
   });
   await Promise.all(pendingQueries);
 };

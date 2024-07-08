@@ -1,4 +1,4 @@
-const db = require('..');
+const { connectToDatabase, queryDatabase } = require("../db");
 const sql = require('mssql');
 
 /**
@@ -44,7 +44,7 @@ const createLinkEvent = async ({
     { name: 'param6', type: sql.NVarChar, value: errorCode },
     { name: 'param7', type: sql.NVarChar, value: status },
   ];
-  await db.queryDatabase(query, params);
+  await queryDatabase(query, params);
 };
 
 module.exports = {

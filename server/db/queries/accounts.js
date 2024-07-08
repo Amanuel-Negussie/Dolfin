@@ -1,6 +1,5 @@
 const { retrieveItemByPlaidItemId } = require('./items');
-const db = require('../');
-
+const { connectToDatabase, queryDatabase } = require("../db");
 /**
  * Creates multiple accounts related to a single item.
  *
@@ -51,7 +50,7 @@ const createAccounts = async (plaidItemId, accounts) => {
       { name: 'param10', type: sql.NVarChar, value: type },
       { name: 'param11', type: sql.NVarChar, value: subtype },
     ];
-    const { recordset } = await db.queryDatabase(query, params);
+    const { recordset } = await queryDatabase(query, params);
     return recordset[0];
   });
   return await Promise.all(pendingQueries);
@@ -66,7 +65,7 @@ const createAccounts = async (plaidItemId, accounts) => {
 const retrieveAccountByPlaidAccountId = async plaidAccountId => {
   const query = 'SELECT * FROM accounts WHERE plaid_account_id = @param1';
   const params = [{ name: 'param1', type: sql.NVarChar, value: plaidAccountId }];
-  const { recordset } = await db.queryDatabase(query, params);
+  const { recordset } = await queryDatabase(query, params);
   return recordset[0];
 };
 
@@ -79,7 +78,7 @@ const retrieveAccountByPlaidAccountId = async plaidAccountId => {
 const retrieveAccountsByItemId = async itemId => {
   const query = 'SELECT * FROM accounts WHERE item_id = @param1 ORDER BY id';
   const params = [{ name: 'param1', type: sql.Int, value: itemId }];
-  const { recordset: accounts } = await db.queryDatabase(query, params);
+  const { recordset: accounts } = await queryDatabase(query, params);
   return accounts;
 };
 
@@ -93,7 +92,7 @@ const retrieveAccountsByItemId = async itemId => {
 const retrieveAccountsByUserId = async userId => {
   const query = 'SELECT * FROM accounts WHERE user_id = @param1 ORDER BY id';
   const params = [{ name: 'param1', type: sql.Int, value: userId }];
-  const { recordset: accounts } = await db.queryDatabase(query, params);
+  const { recordset: accounts } = await queryDatabase(query, params);
   return accounts;
 };
 

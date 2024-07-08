@@ -16,14 +16,20 @@
     "@mui/material": "^5.15.15",
     "@mui/x-data-grid": "^6.19.11",
     "axios": "^1.6.7",
+    "date-fns": "^3.6.0",
     "highcharts": "^11.4.1",
     "highcharts-react-official": "^3.2.1",
+    "lodash": "^4.17.21",
+    "plaid": "^25.0.0",
+    "plaid-threads": "^14.5.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-plaid-link": "^3.5.1",
-    "react-router-dom": "^6.23.1"
+    "react-router-dom": "^6.23.1",
+    "react-toastify": "^10.0.5"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.6",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
     "@types/react-router-dom": "^5.3.3",

@@ -3,33 +3,27 @@ import axios from 'axios';
 import { Box, Avatar } from '@mui/material';
 import { DataGrid, GridToolbar, GridColDef } from '@mui/x-data-grid';
 import { deepOrange, deepPurple } from '@mui/material/colors';
+import { useAuth0 } from "@auth0/auth0-react";
 import PieChart from './PieChart';
-
-const DisplayTransactions = ({ publicTokens }: { publicTokens: string[] }) => {
+import useTransactions from '../services/transactions';
+const DisplayTransactions = ({ publicTokens }: { publicTokens: string[] }) => 
+  {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [spendingByCategory, setSpendingByCategory] = useState<{ name: string, y: number }[]>([]);
+  const { getTransactionsByUser, transactionsByUser } = useTransactions();
+  const { user } = useAuth0();
+  const userId = Number(user?.sub);
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const allTransactions: any[] = [];
+    // This gets transactions from the database only.
+    // Note that calls to Plaid's transactions/get endpoint are only made in response
+    // to receipt of a transactions webhook.
+    getTransactionsByUser(userId);
+  }, [getTransactionsByUser, userId]);
 
-        for (const publicToken of publicTokens) {
-          const accessTokenResponse = await axios.post("/exchange_public_token", { public_token: publicToken });
-          const accessToken = accessTokenResponse.data.accessToken;
-          const transactionsResponse = await axios.post("/transactions/sync", { access_token: accessToken });
-          allTransactions.push(...transactionsResponse.data.transactions);
-        }
-
-        setTransactions(allTransactions);
-        console.log("All transactions:", allTransactions);
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
-      }
-    }
-
-    fetchData();
-  }, [publicTokens]);
+  useEffect(() => {
+    setTransactions(transactionsByUser[userId] || []);
+  }, [transactionsByUser, userId]);
 
   useEffect(() => {
     const categoryMap = new Map<string, number>();

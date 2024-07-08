@@ -1,4 +1,4 @@
-const db = require('../');
+const { connectToDatabase, queryDatabase } = require("../db");
 const sql = require('mssql');
 
 /**
@@ -33,7 +33,7 @@ const createItem = async (
     { name: 'param4', type: sql.NVarChar, value: plaidInstitutionId },
     { name: 'param5', type: sql.NVarChar, value: status },
   ];
-  const { recordset } = await db.queryDatabase(query, params);
+  const { recordset } = await queryDatabase(query, params);
   return recordset[0];
 };
 
@@ -46,7 +46,7 @@ const createItem = async (
 const retrieveItemById = async itemId => {
   const query = 'SELECT * FROM items WHERE id = @param1';
   const params = [{ name: 'param1', type: sql.Int, value: itemId }];
-  const { recordset } = await db.queryDatabase(query, params);
+  const { recordset } = await queryDatabase(query, params);
   return recordset[0];
 };
 
@@ -59,7 +59,7 @@ const retrieveItemById = async itemId => {
 const retrieveItemByPlaidAccessToken = async accessToken => {
   const query = 'SELECT * FROM items WHERE plaid_access_token = @param1';
   const params = [{ name: 'param1', type: sql.NVarChar, value: accessToken }];
-  const { recordset: existingItems } = await db.queryDatabase(query, params);
+  const { recordset: existingItems } = await queryDatabase(query, params);
   return existingItems[0];
 };
 
@@ -76,7 +76,7 @@ const retrieveItemByPlaidInstitutionId = async (plaidInstitutionId, userId) => {
     { name: 'param1', type: sql.NVarChar, value: plaidInstitutionId },
     { name: 'param2', type: sql.Int, value: userId },
   ];
-  const { recordset: existingItems } = await db.queryDatabase(query, params);
+  const { recordset: existingItems } = await queryDatabase(query, params);
   return existingItems[0];
 };
 
@@ -89,7 +89,7 @@ const retrieveItemByPlaidInstitutionId = async (plaidInstitutionId, userId) => {
 const retrieveItemByPlaidItemId = async plaidItemId => {
   const query = 'SELECT * FROM items WHERE plaid_item_id = @param1';
   const params = [{ name: 'param1', type: sql.NVarChar, value: plaidItemId }];
-  const { recordset } = await db.queryDatabase(query, params);
+  const { recordset } = await queryDatabase(query, params);
   return recordset[0];
 };
 
@@ -102,7 +102,7 @@ const retrieveItemByPlaidItemId = async plaidItemId => {
 const retrieveItemsByUser = async userId => {
   const query = 'SELECT * FROM items WHERE user_id = @param1';
   const params = [{ name: 'param1', type: sql.Int, value: userId }];
-  const { recordset: items } = await db.queryDatabase(query, params);
+  const { recordset: items } = await queryDatabase(query, params);
   return items;
 };
 
@@ -118,7 +118,7 @@ const updateItemStatus = async (itemId, status) => {
     { name: 'param1', type: sql.NVarChar, value: status },
     { name: 'param2', type: sql.Int, value: itemId },
   ];
-  await db.queryDatabase(query, params);
+  await queryDatabase(query, params);
 };
 
 /**
@@ -133,7 +133,7 @@ const updateItemTransactionsCursor = async (plaidItemId, transactionsCursor) => 
     { name: 'param1', type: sql.NVarChar, value: transactionsCursor },
     { name: 'param2', type: sql.NVarChar, value: plaidItemId },
   ];
-  await db.queryDatabase(query, params);
+  await queryDatabase(query, params);
 };
 
 /**
@@ -144,7 +144,7 @@ const updateItemTransactionsCursor = async (plaidItemId, transactionsCursor) => 
 const deleteItem = async itemId => {
   const query = 'DELETE FROM items_table WHERE id = @param1';
   const params = [{ name: 'param1', type: sql.Int, value: itemId }];
-  await db.queryDatabase(query, params);
+  await queryDatabase(query, params);
 };
 
 module.exports = {

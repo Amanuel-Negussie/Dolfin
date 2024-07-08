@@ -29,13 +29,12 @@ async function queryDatabase(query, params) {
   try {
     const pool = await sql.connect(config);
     const request = pool.request();
-    params.forEach((param, index) => {
-      request.input(`param${index + 1}`, param.type, param.value);
+    params.forEach((param) => {
+      request.input(param.name, param.type, param.value);
     });
     return await request.query(query);
   } catch (err) {
-    console.error("Error querying database:", err);
-    throw err;
+    throw new Error(`Error querying database: ${err.message}`);
   }
 }
 

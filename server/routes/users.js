@@ -40,26 +40,43 @@ router.get(
 );
 
 /**
- * Creates a new user (unless the username is already taken).
- *
- * @TODO make this return an array for consistency.
+ * Creates a new user (unless the Auth0 ID is already taken).
  *
  * @param {string} username the username of the new user.
+ * @param {string} auth0Id the Auth0 ID of the new user.
+ * @returns {Object[]} an array containing the new user.
+ */
+/**
+ * Creates a new user (unless the Auth0 ID is already taken).
+ *
+ * @param {string} username the username of the new user.
+ * @param {string} auth0Id the Auth0 ID of the new user.
  * @returns {Object[]} an array containing the new user.
  */
 router.post(
   '/',
   asyncWrapper(async (req, res) => {
-    const { username } = req.body;
-    const usernameExists = await retrieveUserByUsername(username);
-    // prevent duplicates
-    if (usernameExists)
-      throw new Boom('Username already exists', { statusCode: 409 });
-    const newUser = await createUser(username);
-    res.json(sanitizeUsers(newUser));
+    console.log('hello');
+    const { username, auth0Id } = req.body;
+    
+    try {
+        console.log('Checking if user exists:', auth0Id);
+        const userExists = await retrieveUserById(auth0Id);
+        // prevent duplicates
+        if (userExists) {
+            throw new Boom('User with this Auth0 ID already exists', { statusCode: 409 });
+        }
+
+        console.log('Creating new user:', username);
+        const newUser = await createUser(username, auth0Id);
+        console.log('New user created:', newUser);
+        res.json(sanitizeUsers(newUser));
+    } catch (error) {
+        console.error('Error during user creation:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
   })
 );
-
 /**
  * Retrieves user information for a single user.
  *

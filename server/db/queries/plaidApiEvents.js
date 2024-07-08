@@ -1,4 +1,4 @@
-const db = require('../');
+const { connectToDatabase, queryDatabase } = require("../db");
 const sql = require('mssql');
 
 /**
@@ -45,7 +45,7 @@ const createPlaidApiEvent = async (
     { name: 'param6', type: sql.NVarChar, value: errorType },
     { name: 'param7', type: sql.NVarChar, value: errorCode },
   ];
-  await db.queryDatabase(query, params);
+  await queryDatabase(query, params);
 };
 
 module.exports = {
