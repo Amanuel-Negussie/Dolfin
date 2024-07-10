@@ -39,6 +39,27 @@ function HomePage() {
     }
   }, [publicTokens]);
 
+  useEffect(() => {
+    const createUserInDatabase = async (userInfo: {username: string, auth0Id: string}) => {
+      try{
+        console.log('Sending user info to API:', userInfo);
+        const response = await addNewUser(userInfo);
+        console.log('User created in database:', response.data);
+        setUserInfoSent(true);
+      } catch (error) {
+        console.error("Error creating user in database:", error);
+      }
+    };
+    if (isAuthenticated && user && !userInfoSent){
+      const userInfo = {
+        username: user.nickname ?? user.name ?? 'Default User',
+        auth0Id: user.sub || 'Auth0|12345'
+      };
+
+      createUserInDatabase(userInfo).then(() => {
+    });
+  }
+}, [isAuthenticated, user, userInfoSent]);
   const fetchUserData = async (accessToken: string) => {
     try {
       const userDataResponse = await axiosConfigs.post("/user/data", { access_token: accessToken });
