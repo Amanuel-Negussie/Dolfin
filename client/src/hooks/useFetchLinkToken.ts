@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import  axiosConfigs, { setAccessToken } from './axiosConfigs';
+import  axiosConfigs from './axiosConfigs';
 
-const useFetchLinkToken = (accessToken : string) => {
+const useFetchLinkToken = () => {
   const [linkToken, setLinkToken] = useState("");
 
   useEffect(() => {
     async function fetchLinkToken() {
       try {
-        setAccessToken(accessToken);
         const response = await axiosConfigs.post("/create_link_token");
         setLinkToken(response.data.link_token);
       } catch (error) {
