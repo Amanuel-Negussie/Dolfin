@@ -6,6 +6,7 @@ export function MainNav({ className, ...props }: React.HTMLAttributes<HTMLElemen
     { path: "/home", label: "Dashboard" },
     { path: "/transactions", label: "Transactions" },
     { path: "/accounts", label: "Accounts" },
+    { path: "/networth", label: "Networth"}
     //{ path: "/recurring", label: "Recurring" },
     //{ path: "/spending", label: "Spending" },
     //{ path: "/budgets", label: "Budgets" },

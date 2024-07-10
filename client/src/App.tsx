@@ -6,6 +6,8 @@ import { PageLayout } from "./pages/PageLayout";
 import { Dashboard } from "./pages/Dashboard";
 import { Transactions } from "./pages/Transactions";
 import { AccountPage } from "./pages/AccountsPage";
+import { NetworthPage } from "./pages/NetworthPage";
+
 //import { Auth } from "./pages/Auth";
 import HomePage from "./pages/HomePage";
 
@@ -16,6 +18,7 @@ const routes = [
   { path: "/transactions", element: <Transactions /> },
   { path: "/accounts/*", element: <AccountPage /> },
   { path: "/old", element: <HomePage /> },
+  { path: "/networth/", element: <NetworthPage/>}
   //{ path: "/example", element: <ExamplePage />},
 ];
 
