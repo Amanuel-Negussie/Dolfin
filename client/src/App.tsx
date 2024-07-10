@@ -6,7 +6,7 @@ import { PageLayout } from "./pages/PageLayout";
 import { Dashboard } from "./pages/Dashboard";
 import { Transactions } from "./pages/Transactions";
 import { AccountPage } from "./pages/AccountsPage";
-import { Auth } from "./pages/Auth";
+//import { Auth } from "./pages/Auth";
 import HomePage from "./pages/HomePage";
 
 const LandingPage = React.lazy(() => import("./pages/LandingPage"));
@@ -32,7 +32,7 @@ export const App: React.FC = () => {
     <Routes>
       <Route path="/" element={<LandingPage />} />
 
-      <Route path="/auth" element={<Auth />} />
+      {/*<Route path="/auth" element={<Auth />} />*/}
       
       {routes.map(({ path, element }) => (
         <Route key={path} path={path} element={<ProtectedRoute component={() => <PageLayout element={element}/>} />} />
