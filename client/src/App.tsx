@@ -6,6 +6,7 @@ import { PageLayout } from "./pages/PageLayout";
 import { Dashboard } from "./pages/Dashboard";
 import { Transactions } from "./pages/Transactions";
 import { AccountPage } from "./pages/AccountsPage";
+import { RecurringPage } from "./pages/RecurringPage";
 //import { Auth } from "./pages/Auth";
 import HomePage from "./pages/HomePage";
 
@@ -15,6 +16,7 @@ const routes = [
   { path: "/home", element: <Dashboard /> },
   { path: "/transactions", element: <Transactions /> },
   { path: "/accounts/*", element: <AccountPage /> },
+  { path: "/recurring/*", element: <RecurringPage /> },
   { path: "/old", element: <HomePage /> },
   //{ path: "/example", element: <ExamplePage />},
 ];
