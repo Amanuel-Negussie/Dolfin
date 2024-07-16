@@ -52,15 +52,16 @@ import {
      * @desc Requests details for a single User.
      */
     const login = useCallback(
-      async (username: string) => {
+      async (auth0Id: string) => {
+        console.log(auth0Id);
         try {
-          const { data: payload } = await apiGetLoginUser(username);
+          const { data: payload } = await apiGetLoginUser(auth0Id);
           if (payload != null) {
-            toast.success(`Successful login.  Welcome back ${username}`);
+            toast.success(`Successful login.  Welcome back ${auth0Id}`);
             dispatch({ type: 'SUCCESSFUL_GET', payload: payload[0] });
-            navigate(`/user/${payload[0].id}`);
           } else {
-            toast.error(`Username ${username} is invalid.  Try again. `);
+            console.log(`Username ${auth0Id} is invalid.  Try again. `);
+            toast.error(`Username ${auth0Id} is invalid.  Try again. `);
             dispatch({ type: 'FAILED_GET' });
           }
         } catch (err) {
@@ -76,7 +77,6 @@ import {
           const { data: payload } = await apiGetLoginUser(username);
           if (payload != null) {
             dispatch({ type: 'SUCCESSFUL_GET', payload: payload[0] });
-            navigate(`/user/${payload[0].id}`);
           } else {
             dispatch({ type: 'FAILED_GET' });
           }

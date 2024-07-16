@@ -4,8 +4,8 @@ const sql = require('mssql');
 /**
  * Creates a single Plaid api event log entry.
  *
- * @param {string} itemId the item id in the request.
- * @param {string} userId the user id in the request.
+ * @param {number} itemId the item id in the request.
+ * @param {number} userId the user id in the request.
  * @param {string} plaidMethod the Plaid client method called.
  * @param {Array} clientMethodArgs the arguments passed to the Plaid client method.
  * @param {Object} response the Plaid api response object.
@@ -20,7 +20,7 @@ const createPlaidApiEvent = async (
   const {
     error_code: errorCode,
     error_type: errorType,
-    request_id: requestId,
+    data: { request_id: requestId },
   } = response;
   const query = `
       INSERT INTO plaid_api_events_table
@@ -37,8 +37,8 @@ const createPlaidApiEvent = async (
         (@param1, @param2, @param3, @param4, @param5, @param6, @param7);
     `;
   const params = [
-    { name: 'param1', type: sql.NVarChar, value: itemId },
-    { name: 'param2', type: sql.NVarChar, value: userId },
+    { name: 'param1', type: sql.Int, value: itemId },
+    { name: 'param2', type: sql.Int, value: userId },
     { name: 'param3', type: sql.NVarChar, value: plaidMethod },
     { name: 'param4', type: sql.NVarChar, value: JSON.stringify(clientMethodArgs) },
     { name: 'param5', type: sql.NVarChar, value: requestId },

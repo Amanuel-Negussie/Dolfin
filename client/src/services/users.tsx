@@ -1,152 +1,170 @@
 import React, {
-    createContext,
-    useContext,
-    useMemo,
-    useReducer,
-    useCallback,
-    Dispatch,
-    ReactNode,
-  } from 'react';
-  import groupBy from 'lodash/groupBy';
-  import keyBy from 'lodash/keyBy';
-  import omitBy from 'lodash/omitBy';
-  import { AccountType } from '../components/types';
-  
-  import {
-    getAccountsByItem as apiGetAccountsByItem,
-    getAccountsByUser as apiGetAccountsByUser,
-  } from './api';
-  
-  interface AccountsState {
-    [accountId: number]: AccountType;
+  createContext,
+  useContext,
+  useMemo,
+  useRef,
+  useReducer,
+  useCallback,
+  Dispatch,
+} from 'react';
+import keyBy from 'lodash/keyBy';
+import omit from 'lodash/omit';
+import { toast } from 'react-toastify';
+
+import { UserType } from '../components/types';
+import { useAccounts, useItems, useTransactions } from '.';
+import {
+  getUsers as apiGetUsers,
+  getUserById as apiGetUserById,
+  addNewUser as apiAddNewUser,
+  deleteUserById as apiDeleteUserById,
+} from './api';
+import { AxiosError } from 'axios';
+
+interface UsersState {
+  [key: string]: UserType | any;
+}
+
+const initialState = {};
+type UsersAction =
+  | {
+    type: 'SUCCESSFUL_GET';
+    payload: UserType;
   }
-  
-  const initialState: AccountsState = {};
-  type AccountsAction =
-    | {
-        type: 'SUCCESSFUL_GET';
-        payload: AccountType[];
+  | { type: 'SUCCESSFUL_DELETE'; payload: number };
+
+interface UsersContextShape extends UsersState {
+  dispatch: Dispatch<UsersAction>;
+}
+const UsersContext = createContext<UsersContextShape>(
+  initialState as UsersContextShape
+);
+
+/**
+ * @desc Maintains the Users context state and provides functions to update that state.
+ */
+export function UsersProvider(props: any) {
+  const [usersById, dispatch] = useReducer(reducer, {});
+  const { deleteAccountsByUserId } = useAccounts();
+  const { deleteItemsByUserId } = useItems();
+  const { deleteTransactionsByUserId } = useTransactions();
+
+  const hasRequested = useRef<{
+    all: Boolean;
+    byId: { [id: number]: boolean };
+  }>({
+    all: false,
+    byId: {},
+  });
+
+  /**
+   * @desc Creates a new user
+   */
+  const addNewUser = useCallback(async (userInfo: { username: string, auth0Id: string }) => {
+    try {
+      const { data: payload } = await apiAddNewUser(userInfo);
+      dispatch({ type: 'SUCCESSFUL_GET', payload: payload });
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response && error.response.status === 409) {
+        toast.error(`Username ${userInfo.username} already exists`);
+      } else {
+        toast.error('Error adding new user');
       }
-    | { type: 'DELETE_BY_ITEM'; payload: number }
-    | { type: 'DELETE_BY_USER'; payload: number };
-  
-  interface AccountsContextShape extends AccountsState {
-    dispatch: Dispatch<AccountsAction>;
-    accountsByItem: { [itemId: number]: AccountType[] };
-    deleteAccountsByItemId: (itemId: number) => void;
-    getAccountsByUser: (userId: number) => void;
-    accountsByUser: { [user_id: number]: AccountType[] };
-    deleteAccountsByUserId: (userId: number) => void;
-  }
-  const AccountsContext = createContext<AccountsContextShape>(
-    initialState as AccountsContextShape
+    }
+  }, []);
+
+  /**
+   * @desc Requests all Users.
+   * The api request will be bypassed if the data has already been fetched.
+   * A 'refresh' parameter can force a request for new data even if local state exists.
+   */
+  const getUsers = useCallback(async (refresh: boolean) => {
+    if (!hasRequested.current.all || refresh) {
+      hasRequested.current.all = true;
+      const { data: payload } = await apiGetUsers();
+      dispatch({ type: 'SUCCESSFUL_GET', payload: payload });
+    }
+  }, []);
+
+  /**
+   * @desc Requests details for a single User.
+   * The api request will be bypassed if the data has already been fetched.
+   * A 'refresh' parameter can force a request for new data even if local state exists.
+   */
+  const getUserById = useCallback(async (id: number, refresh: boolean) => {
+    if (!hasRequested.current.byId[id] || refresh) {
+      hasRequested.current.byId[id] = true;
+      const { data: payload } = await apiGetUserById(id);
+      dispatch({ type: 'SUCCESSFUL_GET', payload: payload });
+    }
+  }, []);
+
+  /**
+   * @desc Will delete User by userId.
+   */
+  const deleteUserById = useCallback(
+    async (id: number) => {
+      await apiDeleteUserById(id); // this will delete all items associated with user
+      deleteItemsByUserId(id);
+      deleteAccountsByUserId(id);
+      deleteTransactionsByUserId(id);
+      dispatch({ type: 'SUCCESSFUL_DELETE', payload: id });
+      delete hasRequested.current.byId[id];
+    },
+    [deleteItemsByUserId, deleteAccountsByUserId, deleteTransactionsByUserId]
   );
-  
+
   /**
-   * @desc Maintains the Accounts context state and provides functions to update that state.
+   * @desc Builds a more accessible state shape from the Users data. useMemo will prevent
+   * these from being rebuilt on every render unless usersById is updated in the reducer.
    */
-  export const AccountsProvider: React.FC<{ children: ReactNode }> = (props: any) => {
-    const [accountsById, dispatch] = useReducer(reducer, initialState);
-  
-    /**
-     * @desc Requests all Accounts that belong to an individual Item.
-     */
-    const getAccountsByItem = useCallback(async (itemId: number) => {
-      const { data: payload } = await apiGetAccountsByItem(itemId);
-      dispatch({ type: 'SUCCESSFUL_GET', payload: payload });
-    }, []);
-  
-    /**
-     * @desc Requests all Accounts that belong to an individual User.
-     */
-    const getAccountsByUser = useCallback(async (userId: number) => {
-      const { data: payload } = await apiGetAccountsByUser(userId);
-      dispatch({ type: 'SUCCESSFUL_GET', payload: payload });
-    }, []);
-  
-    /**
-     * @desc Will delete all accounts that belong to an individual Item.
-     * There is no api request as apiDeleteItemById in items delete all related transactions
-     */
-    const deleteAccountsByItemId = useCallback((itemId: number) => {
-      dispatch({ type: 'DELETE_BY_ITEM', payload: itemId });
-    }, []);
-  
-    /**
-     * @desc Will delete all accounts that belong to an individual User.
-     * There is no api request as apiDeleteItemById in items delete all related transactions
-     */
-    const deleteAccountsByUserId = useCallback((userId: number) => {
-      dispatch({ type: 'DELETE_BY_USER', payload: userId });
-    }, []);
-  
-    /**
-     * @desc Builds a more accessible state shape from the Accounts data. useMemo will prevent
-     * these from being rebuilt on every render unless accountsById is updated in the reducer.
-     */
-    const value = useMemo(() => {
-      const allAccounts = Object.values(accountsById);
-  
-      return {
-        allAccounts,
-        accountsById,
-        accountsByItem: groupBy(allAccounts, 'item_id'),
-        accountsByUser: groupBy(allAccounts, 'user_id'),
-        getAccountsByItem,
-        getAccountsByUser,
-        deleteAccountsByItemId,
-        deleteAccountsByUserId,
-      };
-    }, [
-      accountsById,
-      getAccountsByItem,
-      getAccountsByUser,
-      deleteAccountsByItemId,
-      deleteAccountsByUserId,
-    ]);
-  
-    return <AccountsContext.Provider value={value} {...props} />;
-  };
-  
-  /**
-   * @desc Handles updates to the Accounts state as dictated by dispatched actions.
-   */
-  function reducer(state: AccountsState, action: AccountsAction) {
-    switch (action.type) {
-      case 'SUCCESSFUL_GET':
-        if (!action.payload.length) {
-          return state;
-        }
-        return {
-          ...state,
-          ...keyBy(action.payload, 'id'),
-        };
-      case 'DELETE_BY_ITEM':
-        return omitBy(
-          state,
-          transaction => transaction.item_id === action.payload
-        );
-      case 'DELETE_BY_USER':
-        return omitBy(
-          state,
-          transaction => transaction.user_id === action.payload
-        );
-      default:
-        console.warn('unknown action');
+  const value = useMemo(() => {
+    const allUsers = Object.values(usersById);
+    return {
+      allUsers,
+      usersById,
+      getUsers,
+      getUserById,
+      getUsersById: getUserById,
+      addNewUser,
+      deleteUserById,
+    };
+  }, [usersById, getUsers, getUserById, addNewUser, deleteUserById]);
+
+  return <UsersContext.Provider value={value} {...props} />;
+}
+
+/**
+ * @desc Handles updates to the Users state as dictated by dispatched actions.
+ */
+function reducer(state: UsersState, action: UsersAction | any) {
+  switch (action.type) {
+    case 'SUCCESSFUL_GET':
+      if (!action.payload.length) {
         return state;
-    }
+      }
+      return {
+        ...state,
+        ...keyBy(action.payload, 'id'),
+      };
+    case 'SUCCESSFUL_DELETE':
+      return omit(state, [action.payload]);
+    default:
+      console.warn('unknown action: ', action.type, action.payload);
+      return state;
   }
-  
-  /**
-   * @desc A convenience hook to provide access to the Accounts context state in components.
-   */
-  export default function useAccounts() {
-    const context = useContext(AccountsContext);
-  
-    if (!context) {
-      throw new Error(`useAccounts must be used within an AccountsProvider`);
-    }
-  
-    return context;
+}
+
+/**
+ * @desc A convenience hook to provide access to the Users context state in components.
+ */
+export default function useUsers() {
+  const context = useContext(UsersContext);
+
+  if (!context) {
+    throw new Error(`useUsers must be used within a UsersProvider`);
   }
-  
+
+  return context;
+}

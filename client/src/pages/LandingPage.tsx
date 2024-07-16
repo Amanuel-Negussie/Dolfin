@@ -22,12 +22,6 @@ function LandingPage() {
     };
   }, []);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      window.location.href = "/home";
-    }
-  }, [isAuthenticated]);
-
   return (
     <>
       <div className="md:hidden">

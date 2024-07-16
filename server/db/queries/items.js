@@ -44,7 +44,7 @@ const createItem = async (
  * @returns {Object} an item.
  */
 const retrieveItemById = async itemId => {
-  const query = 'SELECT * FROM items WHERE id = @param1';
+  const query = 'SELECT * FROM items_table WHERE id = @param1';
   const params = [{ name: 'param1', type: sql.Int, value: itemId }];
   const { recordset } = await queryDatabase(query, params);
   return recordset[0];
@@ -57,7 +57,7 @@ const retrieveItemById = async itemId => {
  * @returns {Object} the item.
  */
 const retrieveItemByPlaidAccessToken = async accessToken => {
-  const query = 'SELECT * FROM items WHERE plaid_access_token = @param1';
+  const query = 'SELECT * FROM items_table WHERE plaid_access_token = @param1';
   const params = [{ name: 'param1', type: sql.NVarChar, value: accessToken }];
   const { recordset: existingItems } = await queryDatabase(query, params);
   return existingItems[0];
@@ -71,7 +71,7 @@ const retrieveItemByPlaidAccessToken = async accessToken => {
  * @returns {Object} an item.
  */
 const retrieveItemByPlaidInstitutionId = async (plaidInstitutionId, userId) => {
-  const query = 'SELECT * FROM items WHERE plaid_institution_id = @param1 AND user_id = @param2';
+  const query = 'SELECT * FROM items_table WHERE plaid_institution_id = @param1 AND user_id = @param2';
   const params = [
     { name: 'param1', type: sql.NVarChar, value: plaidInstitutionId },
     { name: 'param2', type: sql.Int, value: userId },
@@ -87,7 +87,7 @@ const retrieveItemByPlaidInstitutionId = async (plaidInstitutionId, userId) => {
  * @returns {Object} an item.
  */
 const retrieveItemByPlaidItemId = async plaidItemId => {
-  const query = 'SELECT * FROM items WHERE plaid_item_id = @param1';
+  const query = 'SELECT * FROM items_table WHERE plaid_item_id = @param1';
   const params = [{ name: 'param1', type: sql.NVarChar, value: plaidItemId }];
   const { recordset } = await queryDatabase(query, params);
   return recordset[0];
@@ -100,7 +100,7 @@ const retrieveItemByPlaidItemId = async plaidItemId => {
  * @returns {Object[]} an array of items.
  */
 const retrieveItemsByUser = async userId => {
-  const query = 'SELECT * FROM items WHERE user_id = @param1';
+  const query = 'SELECT * FROM items_table WHERE user_id = @param1';
   const params = [{ name: 'param1', type: sql.Int, value: userId }];
   const { recordset: items } = await queryDatabase(query, params);
   return items;
@@ -113,7 +113,7 @@ const retrieveItemsByUser = async userId => {
  * @param {string} status the status of the item.
  */
 const updateItemStatus = async (itemId, status) => {
-  const query = 'UPDATE items SET status = @param1 WHERE id = @param2';
+  const query = 'UPDATE items_table SET status = @param1 WHERE id = @param2';
   const params = [
     { name: 'param1', type: sql.NVarChar, value: status },
     { name: 'param2', type: sql.Int, value: itemId },
@@ -128,7 +128,7 @@ const updateItemStatus = async (itemId, status) => {
  * @param {string} transactionsCursor latest observed transactions cursor on this item.
  */
 const updateItemTransactionsCursor = async (plaidItemId, transactionsCursor) => {
-  const query = 'UPDATE items SET transactions_cursor = @param1 WHERE plaid_item_id = @param2';
+  const query = 'UPDATE items_table SET transactions_cursor = @param1 WHERE plaid_item_id = @param2';
   const params = [
     { name: 'param1', type: sql.NVarChar, value: transactionsCursor },
     { name: 'param2', type: sql.NVarChar, value: plaidItemId },

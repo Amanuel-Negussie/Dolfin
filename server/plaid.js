@@ -116,7 +116,8 @@ class PlaidClientWrapper {
         await log(clientMethod, args, res);
         return res;
       } catch (err) {
-        await log(clientMethod, args, err.response.data);
+        const errorData = err.response ? err.response.data : err.message;
+        await log(clientMethod, args, errorData);
         throw err;
       }
     };

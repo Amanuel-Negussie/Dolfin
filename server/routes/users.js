@@ -61,7 +61,7 @@ router.post(
     
     try {
         console.log('Checking if user exists:', auth0Id);
-        const userExists = await retrieveUserById(auth0Id);
+        const userExists = await retrieveUserByUsername(auth0Id);
         // prevent duplicates
         if (userExists) {
             throw new Boom('User with this Auth0 ID already exists', { statusCode: 409 });
@@ -80,7 +80,7 @@ router.post(
 /**
  * Retrieves user information for a single user.
  *
- * @param {string} userId the ID of the user.
+ * @param {number} userId the ID of the user.
  * @returns {Object[]} an array containing a single user.
  */
 router.get(
@@ -95,7 +95,7 @@ router.get(
 /**
  * Retrieves all items associated with a single user.
  *
- * @param {string} userId the ID of the user.
+ * @param {number} userId the ID of the user.
  * @returns {Object[]} an array of items.
  */
 router.get(
@@ -110,7 +110,7 @@ router.get(
 /**
  * Retrieves all accounts associated with a single user.
  *
- * @param {string} userId the ID of the user.
+ * @param {number} userId the ID of the user.
  * @returns {Object[]} an array of accounts.
  */
 router.get(
@@ -125,7 +125,7 @@ router.get(
 /**
  * Retrieves all transactions associated with a single user.
  *
- * @param {string} userId the ID of the user.
+ * @param {number} userId the ID of the user.
  * @returns {Object[]} an array of transactions
  */
 router.get(
@@ -140,7 +140,7 @@ router.get(
 /**
  * Deletes a user and its related items
  *
- * @param {string} userId the ID of the user.
+ * @param {number} userId the ID of the user.
  */
 router.delete(
   '/:userId',

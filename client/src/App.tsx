@@ -1,13 +1,14 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "./utils/ProtectedRoute";
 import { PageLayout } from "./pages/PageLayout";
 import { Dashboard } from "./pages/Dashboard";
 import { Transactions } from "./pages/Transactions";
 import { AccountPage } from "./pages/AccountsPage";
-//import { Auth } from "./pages/Auth";
+import { AuthHandler } from "./pages/AuthHandler";
 import HomePage from "./pages/HomePage";
+import useCurrentUser from "./services/currentUser";
 
 const LandingPage = React.lazy(() => import("./pages/LandingPage"));
 
@@ -20,7 +21,13 @@ const routes = [
 ];
 
 export const App: React.FC = () => {
-  const { isLoading, error } = useAuth0();
+  const { isLoading } = useAuth0();
+  const { setNewUser } = useCurrentUser();
+
+  // Set the user to Guest if the user is not logged in
+  useEffect(() => {
+    setNewUser("Guest");
+  }, []);
 
   if (isLoading) {
     return (
@@ -32,10 +39,10 @@ export const App: React.FC = () => {
     <Routes>
       <Route path="/" element={<LandingPage />} />
 
-      {/*<Route path="/auth" element={<Auth />} />*/}
-      
+      <Route path="/auth" element={<AuthHandler />} />
+
       {routes.map(({ path, element }) => (
-        <Route key={path} path={path} element={<ProtectedRoute component={() => <PageLayout element={element}/>} />} />
+        <Route key={path} path={path} element={<ProtectedRoute component={() => <PageLayout element={element} />} />} />
       ))}
 
       {/* Redirect to the root path if the route doesn't exist */}

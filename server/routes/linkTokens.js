@@ -26,26 +26,26 @@ router.post(
     try {
       const { userId, itemId } = req.body;
       let accessToken = null;
-      let products = ['transactions']; // must include transactions in order to receive transactions webhooks
+      let products = ["auth", "transactions"]; // must include transactions in order to receive transactions webhooks
       if (itemId != null) {
         // for the link update mode, include access token and an empty products array
         const itemIdResponse = await retrieveItemById(itemId);
         accessToken = itemIdResponse.plaid_access_token;
         products = [];
       }
-      const response = await fetch('http://ngrok:4040/api/tunnels');
-      const { tunnels } = await response.json();
-      const httpsTunnel = tunnels.find(t => t.proto === 'https');
+      // const response = await fetch('http://ngrok:4040/api/tunnels');
+      // const { tunnels } = await response.json();
+      // const httpsTunnel = tunnels.find(t => t.proto === 'https');
       const linkTokenParams = {
         user: {
           // This should correspond to a unique id for the current user.
-          client_user_id: 'uniqueId' + userId,
+          client_user_id: "id " + userId,
         },
         client_name: 'Pattern',
         products,
         country_codes: ['US'],
         language: 'en',
-        webhook: httpsTunnel.public_url + '/services/webhook',
+        //webhook: httpsTunnel.public_url + '/services/webhook',
         access_token: accessToken,
       };
       // If user has entered a redirect uri in the .env file
