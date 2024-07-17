@@ -7,6 +7,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { Transactions } from "./pages/Transactions";
 import { AccountPage } from "./pages/AccountsPage";
 import { RecurringPage } from "./pages/RecurringPage";
+import { LoadingSpinner } from "./components/ui/loading-spinner";
 //import { Auth } from "./pages/Auth";
 import HomePage from "./pages/HomePage";
 
@@ -26,7 +27,9 @@ export const App: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div>Loading... 1</div>
+      <div>
+        <LoadingSpinner />
+      </div>
     );
   }
 
