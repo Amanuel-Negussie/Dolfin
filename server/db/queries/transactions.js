@@ -93,7 +93,7 @@ const retrieveTransactionsByAccountId = async accountId => {
  * @returns {Object[]} an array of transactions.
  */
 const retrieveTransactionsByItemId = async itemId => {
-  const query = 'SELECT * FROM transactions_table WHERE item_id = @param1 ORDER BY date DESC';
+  const query = 'SELECT * FROM transactions WHERE item_id = @param1 ORDER BY date DESC';
   const params = [{ name: 'param1', type: sql.Int, value: itemId }];
   const { recordset: transactions } = await queryDatabase(query, params);
   return transactions;
@@ -106,7 +106,7 @@ const retrieveTransactionsByItemId = async itemId => {
  * @returns {Object[]} an array of transactions.
  */
 const retrieveTransactionsByUserId = async userId => {
-  const query = 'SELECT * FROM transactions_table WHERE user_id = @param1 ORDER BY date DESC';
+  const query = 'SELECT * FROM transactions WHERE user_id = @param1 ORDER BY date DESC';
   const params = [{ name: 'param1', type: sql.Int, value: userId }];
   const { recordset: transactions } = await queryDatabase(query, params);
   return transactions;
