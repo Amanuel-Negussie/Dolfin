@@ -8,6 +8,7 @@ import { Transactions } from "./pages/Transactions";
 import { AccountPage } from "./pages/AccountsPage";
 //import { Auth } from "./pages/Auth";
 import HomePage from "./pages/HomePage";
+import { BudgetPage } from "./pages/Budget";
 
 const LandingPage = React.lazy(() => import("./pages/LandingPage"));
 
@@ -15,6 +16,7 @@ const routes = [
   { path: "/home", element: <Dashboard /> },
   { path: "/transactions", element: <Transactions /> },
   { path: "/accounts/*", element: <AccountPage /> },
+  { path: "/budgets/*", element: <BudgetPage /> },
   { path: "/old", element: <HomePage /> },
   //{ path: "/example", element: <ExamplePage />},
 ];
