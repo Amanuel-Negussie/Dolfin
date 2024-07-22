@@ -21,8 +21,10 @@ router.post(
     const { auth0Id } = req.body;
     const user = await retrieveUserByUsername(auth0Id);
     if (user != null) {
+      console.log(`User ${user.username}`)
       res.json(sanitizeUsers(user));
     } else {
+      console.log('User not found')
       res.json(null);
     }
   })

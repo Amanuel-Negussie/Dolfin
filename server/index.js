@@ -185,9 +185,8 @@ app.post("/transactions/sync", async function (request, response) {
 
     // Save transactions to the database
     for (const transaction of transactions) {
-      const categoryArray = transaction.category || [];
-      const categories = categoryArray.join(", ");
-
+      const category = transaction.personal_finance_category
+      console.log(category);
       const name = capitalizeAndRemoveUnderscores(transaction.name);
       const merchantName = capitalizeAndRemoveUnderscores(transaction.merchant_name || transaction.name);
 
@@ -195,11 +194,14 @@ app.post("/transactions/sync", async function (request, response) {
         `SELECT id FROM Accounts WHERE account_id = @account_id`,
         [{ name: 'account_id', type: sql.NVarChar, value: transaction.account_id }]
       );
+
       const accountId = accountIdResult.recordset[0].id;
 
+      console.log(accountId);
+
       await queryDatabase(
-        `INSERT INTO Transactions (account_id, transaction_id, amount, date, name, merchant_name, categories, logo_url) 
-         VALUES (@account_id, @transaction_id, @amount, @date, @name, @merchant_name, @categories, @logo_url)`,
+        `INSERT INTO Transactions (account_id, transaction_id, amount, date, name, merchant_name, category, logo_url) 
+         VALUES (@account_id, @transaction_id, @amount, @date, @name, @merchant_name, @category, @logo_url)`,
         [
           { name: 'account_id', type: sql.Int, value: accountId },
           { name: 'transaction_id', type: sql.NVarChar, value: transaction.transaction_id },
@@ -207,7 +209,7 @@ app.post("/transactions/sync", async function (request, response) {
           { name: 'date', type: sql.Date, value: transaction.date },
           { name: 'name', type: sql.NVarChar, value: name },
           { name: 'merchant_name', type: sql.NVarChar, value: merchantName },
-          { name: 'categories', type: sql.NVarChar, value: categories },
+          { name: 'category', type: sql.NVarChar, value: category },
           { name: 'logo_url', type: sql.NVarChar, value: transaction.logo_url || '' }
         ]
       );
