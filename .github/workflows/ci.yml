@@ -20,10 +20,10 @@ jobs:
         ports:
           - 1433:1433
         env:
-          SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
+          SA_PASSWORD: "Apple123"
           ACCEPT_EULA: "Y"
         options: >-
-          --health-cmd /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${{ secrets.SA_PASSWORD }} -Q "SELECT 1"
+          --health-cmd /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -Q "SELECT 1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -37,12 +37,12 @@ jobs:
 
     - name: Run Initialization Script
       run: |
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${{ secrets.SA_PASSWORD }} -i db/init_db.sql
+        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i db/init_db.sql
 
     - name: Input Dummy Data 
       run: |
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${{ secrets.SA_PASSWORD }} -i db/tests/dummy_data.sql
+        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $'Apple123' -i db/tests/dummy_data.sql
 
     - name: Run Tests
       run: |
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${{ secrets.SA_PASSWORD }} -Q "SELECT * FROM dbo.transactions"
+        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -Q "SELECT * FROM dbo.transactions"
