@@ -1,0 +1,48 @@
+name: SQL Server CI
+
+on:
+  push:
+    branches:
+      - main
+      - DT-30-postfix-GITHUBACTIONS  # Add your specific branch here
+  pull_request:
+    branches:
+      - main
+      - your-branch-name  # Add your specific branch here
+
+jobs:
+  sqlserver-setup:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        ports:
+          - 1433:1433
+        env:
+          SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
+          ACCEPT_EULA: "Y"
+        options: >-
+          --health-cmd /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${{ secrets.SA_PASSWORD }} -Q "SELECT 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install SQLCMD
+      run: sudo apt-get install -y mssql-tools
+
+    - name: Run Initialization Script
+      run: |
+        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${{ secrets.SA_PASSWORD }} -i db/init_db.sql
+
+    - name: Input Dummy Data 
+      run: |
+        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${{ secrets.SA_PASSWORD }} -i db/tests/dummy_data.sql
+
+    - name: Run Tests
+      run: |
+        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${{ secrets.SA_PASSWORD }} -Q "SELECT * FROM dbo.transactions"
