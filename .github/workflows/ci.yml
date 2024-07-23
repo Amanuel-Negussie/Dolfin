@@ -8,7 +8,7 @@ on:
   pull_request:
     branches:
       - main
-      - your-branch-name  # Add your specific branch here
+      - DT-30-postfix-GITHUBACTIONS  # Add your specific branch here
 
 jobs:
   sqlserver-setup:
@@ -46,3 +46,4 @@ jobs:
     - name: Run Tests
       run: |
         /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${{ secrets.SA_PASSWORD }} -Q "SELECT * FROM dbo.transactions"
+
