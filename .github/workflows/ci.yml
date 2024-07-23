@@ -46,4 +46,3 @@ jobs:
     - name: Run Tests
       run: |
         /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${{ secrets.SA_PASSWORD }} -Q "SELECT * FROM dbo.transactions"
-
