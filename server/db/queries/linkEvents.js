@@ -5,7 +5,7 @@ const sql = require('mssql');
  * Creates a link event.
  *
  * @param {Object} event the link event.
- * @param {string} event.userId the ID of the user.
+ * @param {number} event.userId the ID of the user.
  * @param {string} event.type displayed as 'success' or 'exit' based on the callback.
  * @param {string} event.link_session_id the session ID created when connecting with link.
  * @param {string} event.request_id the request ID created only on error when connecting with link.
@@ -37,7 +37,7 @@ const createLinkEvent = async ({
     `;
   const params = [
     { name: 'param1', type: sql.NVarChar, value: type },
-    { name: 'param2', type: sql.NVarChar, value: userId },
+    { name: 'param2', type: sql.Int, value: userId },
     { name: 'param3', type: sql.NVarChar, value: linkSessionId },
     { name: 'param4', type: sql.NVarChar, value: requestId },
     { name: 'param5', type: sql.NVarChar, value: errorType },

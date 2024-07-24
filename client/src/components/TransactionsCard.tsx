@@ -6,50 +6,23 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { TransactionDataTable } from "./TransactionDataTable"
-
-export const columns: ColumnDef<Payment>[] = [
-    {
-        accessorKey: "date",
-        header: "Date",
-    },
-    {
-        accessorKey: "name",
-        header: "Name",
-    },
-    {
-        accessorKey: "amount",
-        header: "Amount",
-    },
-]
 
 import {
-    ColumnDef,
-} from "@tanstack/react-table"
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+} from "@/components/ui/avatar"
 
-type Payment = {
-    id: string
-    amount: number
-    status: string
-    name: string
-}
+import { Transaction } from "./types";
+import { format } from "date-fns";
 
-export const payments: Payment[] = [
-    {
-        id: "728ed52f",
-        amount: 100,
-        status: "7/2",
-        name: "Uber",
-    },
-    {
-        id: "489e1d42",
-        amount: 125,
-        status: "7/2",
-        name: "Steam",
-    },
-]
 
-export const TransactionsCard: React.FC = () => {
+
+interface TransactionCardProps {
+    transactions: Transaction[];
+};
+
+export const TransactionsCard: React.FC<TransactionCardProps> = ({transactions}) => {
     return (
         <>
             <Card>
@@ -57,7 +30,19 @@ export const TransactionsCard: React.FC = () => {
                     <CardTitle>Recent Transactions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <TransactionDataTable columns={columns} data={payments} />
+                    {transactions.map((transaction) => (
+                        <div key={transaction.id} className="flex items-center" >
+                            <Avatar className="h-9 w-9">
+                                <AvatarImage src="/avatars/05.png" alt="Avatar" />
+                                <AvatarFallback>TH</AvatarFallback>
+                            </Avatar>
+                            <div className="ml-4 space-y-1">
+                                <p className="text-sm font-medium leading-none">{transaction.name}</p>
+                                <p className="text-sm text-muted-foreground">{format(new Date(transaction.date), 'yyyy-MM-dd')}</p>
+                            </div>
+                            <div className="ml-auto font-medium">{transaction.amount}</div>
+                        </div>
+                    ))}
                 </CardContent>
             </Card>
         </>

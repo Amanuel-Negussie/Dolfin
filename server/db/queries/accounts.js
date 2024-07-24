@@ -1,5 +1,6 @@
 const { retrieveItemByPlaidItemId } = require('./items');
 const { connectToDatabase, queryDatabase } = require("../db");
+const sql = require('mssql');
 /**
  * Creates multiple accounts related to a single item.
  *

@@ -41,26 +41,26 @@ const deleteUsers = async userId => {
  * @param {number} userId the ID of the user.
  * @returns {Object} a user.
  */
-const retrieveUserById = async auth0_id => {
+const retrieveUserById = async userId => {
   const query = `
-    SELECT * FROM users_table WHERE auth0_id = @param1;
+    SELECT * FROM users_table WHERE id = @param1;
   `;
-  const params = [{ name: 'param1', type: sql.NVarChar, value: auth0_id }];
+  const params = [{ name: 'param1', type: sql.Int, value: userId }];
   const { recordset } = await queryDatabase(query, params);
   return recordset[0];
 };
 
-/**
+/**createUser
  * Retrieves a single user.
  *
- * @param {string} username the username to search for.
+ * @param {string} auth0Id the Auth0 ID of the user.
  * @returns {Object} a single user.
  */
-const retrieveUserByUsername = async username => {
+const retrieveUserByUsername = async auth0Id => {
   const query = `
-    SELECT * FROM users_table WHERE username = @param1;
+    SELECT * FROM users_table WHERE auth0_id = @param1;
   `;
-  const params = [{ name: 'param1', type: sql.NVarChar, value: username }];
+  const params = [{ name: 'param1', type: sql.NVarChar, value: auth0Id }];
   const { recordset: users } = await queryDatabase(query, params);
   return users[0];
 };
