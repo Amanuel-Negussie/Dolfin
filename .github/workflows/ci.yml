@@ -4,11 +4,9 @@ on:
   push:
     branches:
       - main
-      - DT-30-postfix-GITHUBACTIONS  # Add your specific branch here
   pull_request:
     branches:
       - main
-      - DT-30-postfix-GITHUBACTIONS  # Add your specific branch here
 
 jobs:
   sqlserver-setup:
