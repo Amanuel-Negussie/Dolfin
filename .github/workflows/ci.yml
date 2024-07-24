@@ -45,7 +45,7 @@ jobs:
 
     - name: Run Tests
       run: |
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -Q -i db/tests/tests/transactions-tests.sql
+        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i db/tests/tests/transactions-tests.sql
    
    
     - name: Run All SQL Scripts
