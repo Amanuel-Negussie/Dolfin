@@ -6,6 +6,7 @@ import { PageLayout } from "./pages/PageLayout";
 import { Dashboard } from "./pages/Dashboard";
 import { Transactions } from "./pages/Transactions";
 import { AccountPage } from "./pages/AccountsPage";
+import { NetworthPage } from "./pages/NetworthPage.tsx";
 import { AuthHandler } from "./pages/AuthHandler";
 import HomePage from "./pages/HomePage";
 import useCurrentUser from "./services/currentUser";
@@ -18,7 +19,9 @@ const routes = [
   { path: "/home", element: <Dashboard /> },
   { path: "/transactions", element: <Transactions /> },
   { path: "/accounts/*", element: <AccountPage /> },
+  { path: "/networth/", element: <NetworthPage/>},
   { path: "/old", element: <HomePage /> },
+  
   //{ path: "/example", element: <ExamplePage />},
 ];
 
