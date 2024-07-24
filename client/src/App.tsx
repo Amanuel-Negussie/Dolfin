@@ -9,6 +9,8 @@ import { AccountPage } from "./pages/AccountsPage";
 import { AuthHandler } from "./pages/AuthHandler";
 import HomePage from "./pages/HomePage";
 import useCurrentUser from "./services/currentUser";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const LandingPage = React.lazy(() => import("./pages/LandingPage"));
 
@@ -30,23 +32,42 @@ export const App: React.FC = () => {
   }, []);
 
   if (isLoading) {
-    return (
-      <div>Loading... 1</div>
-    );
+    return <div>Loading... 1</div>;
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
+    <>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
 
-      <Route path="/auth" element={<AuthHandler />} />
+        <Route path="/auth" element={<AuthHandler />} />
 
-      {routes.map(({ path, element }) => (
-        <Route key={path} path={path} element={<ProtectedRoute component={() => <PageLayout element={element} />} />} />
-      ))}
+        {routes.map(({ path, element }) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <ProtectedRoute
+                component={() => <PageLayout element={element} />}
+              />
+            }
+          />
+        ))}
 
-      {/* Redirect to the root path if the route doesn't exist */}
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
+        {/* Redirect to the root path if the route doesn't exist */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+    </>
   );
 };
