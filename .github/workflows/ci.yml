@@ -45,4 +45,4 @@ jobs:
 
     - name: Run Tests
       run: |
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -Q "IF (SELECT Amount FROM dbo.transactions WHERE account_id = 1)=100.00 PRINT 'Transaction Amount 100.00 is validated" ELSE THROW 5000, '100.00 expected but received', 1;
+        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -Q "IF (SELECT TOP 1 Amount FROM dbo.transactions WHERE account_id = 1)=100.00 PRINT 'Transaction Amount 100.00 is validated' ELSE THROW 50000, '100.00 expected but received', 1;"
