@@ -2,13 +2,13 @@ import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from "recharts";
 
 interface CustomPieChartProps {
   data: any[];
-  title: string; // Add title as a prop
-  theHeight: number;
+  title: string;
+  aspect?: number; // Optional aspect ratio prop
 }
 
 const COLORS = ["#8884d8", "#82ca9d", "#FFBB28", "#FF8042"]; // Default colors
 
-export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, title, theHeight }) => {
+export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, title, aspect = 1 }) => {
   const generateColors = (numColors: number) => {
     const hueStep = 360 / numColors;
     return Array.from({ length: numColors }).map((_, index) => `hsl(${index * hueStep}, 70%, 50%)`);
@@ -28,8 +28,8 @@ export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, title, the
   }
 
   return (
-    <div className={`h-[${theHeight}px]`}>
-     <div className="text-center mt-2 font-bold text-xl">{title}</div>
+    <div style={{ width: '80%', aspectRatio: aspect, margin: '0 auto' }}>
+      <div className="text-center mt-2 font-bold text-xl">{title}</div>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -38,15 +38,15 @@ export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, title, the
             nameKey="name"
             cx="50%"
             cy="50%"
-            outerRadius={100}
-            label={(entry) => `$${formatter(entry.value)}`} // Updated to use formatter for labels
+            outerRadius="80%" // Use percentage for responsive radius
+            label={(entry) => `$${formatter(entry.value)}`}
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={colors[index]} />
             ))}
           </Pie>
           <Tooltip
-            formatter={(value: number) => `$${formatter(value)}`} // Updated to use formatter for tooltip
+            formatter={(value: number) => `$${formatter(value)}`}
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 return (
@@ -74,4 +74,3 @@ export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, title, the
 
 // Formatter function to convert the number to a currency string with commas for thousands
 const formatter = (value: number) => value.toLocaleString();
-

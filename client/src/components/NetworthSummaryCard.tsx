@@ -208,7 +208,7 @@ export const NetworthSummaryCard: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                     <TabsContent value="summary">
-                        <CustomPieChart data={AssetData} title='Total Asset' theHeight={300}/>
+                        <CustomPieChart data={AssetData} title="Total Asset" aspect={2} />
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
                                 Total Assets
@@ -222,7 +222,7 @@ export const NetworthSummaryCard: React.FC = () => {
                                 +352.52% from last week
                             </p>
                         </CardContent>
-                        <CustomPieChart data={DebtData} title = 'Total Debt' theHeight={300}/>
+                        <CustomPieChart data={DebtData} title = 'Total Debt' aspect={2}/>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
                                 Total Debt
