@@ -25,8 +25,15 @@ const createOrUpdateTransactions = async transactions => {
       date: transactionDate,
       pending,
       account_owner: accountOwner,
+      logo_url,
     } = transaction;
 
+
+    // Apply the conditional formatting to the amount
+    const formattedAmount = amount >= 0 ? "-$" + amount : "$" + Math.abs(amount);
+    // console.log('amount: ', amount);
+    // console.log('formatted: ', formattedAmount);
+    // console.log('logo_url: ', logo_url);
     // Retrieve the account ID
     const { id: accountId } = await retrieveAccountByPlaidAccountId(plaidAccountId);
 
@@ -35,8 +42,8 @@ const createOrUpdateTransactions = async transactions => {
       // SQL query for MERGE
       const query = `
         MERGE transactions_table AS target
-        USING (VALUES (@param1, @param2, @param3, @param4, @param5, @param6, @param7, @param8, @param9, @param10, @param11, @param12, @param13)) AS source 
-          (account_id, plaid_transaction_id, plaid_category_id, category, subcategory, type, name, amount, iso_currency_code, unofficial_currency_code, date, pending, account_owner)
+        USING (VALUES (@param1, @param2, @param3, @param4, @param5, @param6, @param7, @param8, @param9, @param10, @param11, @param12, @param13, @param14)) AS source 
+          (account_id, plaid_transaction_id, plaid_category_id, category, subcategory, type, name, amount, iso_currency_code, unofficial_currency_code, date, pending, account_owner, logo_url)
         ON (target.plaid_transaction_id = source.plaid_transaction_id)
         WHEN MATCHED THEN 
           UPDATE SET 
@@ -50,10 +57,11 @@ const createOrUpdateTransactions = async transactions => {
             unofficial_currency_code = source.unofficial_currency_code,
             date = source.date,
             pending = source.pending,
-            account_owner = source.account_owner
+            account_owner = source.account_owner,
+            logo_url = source.logo_url
         WHEN NOT MATCHED THEN
-          INSERT (account_id, plaid_transaction_id, plaid_category_id, category, subcategory, type, name, amount, iso_currency_code, unofficial_currency_code, date, pending, account_owner)
-          VALUES (source.account_id, source.plaid_transaction_id, source.plaid_category_id, source.category, source.subcategory, source.type, source.name, source.amount, source.iso_currency_code, source.unofficial_currency_code, source.date, source.pending, source.account_owner);
+          INSERT (account_id, plaid_transaction_id, plaid_category_id, category, subcategory, type, name, amount, iso_currency_code, unofficial_currency_code, date, pending, account_owner, logo_url)
+          VALUES (source.account_id, source.plaid_transaction_id, source.plaid_category_id, source.category, source.subcategory, source.type, source.name, source.amount, source.iso_currency_code, source.unofficial_currency_code, source.date, source.pending, source.account_owner, source.logo_url);
       `;
 
       // Parameters for the query
@@ -65,12 +73,13 @@ const createOrUpdateTransactions = async transactions => {
         { name: 'param5', type: sql.NVarChar, value: subcategory || '' },  // Ensure it's a valid string
         { name: 'param6', type: sql.NVarChar, value: transactionType || '' },  // Ensure it's a valid string
         { name: 'param7', type: sql.NVarChar, value: transactionName || '' },  // Ensure it's a valid string
-        { name: 'param8', type: sql.Decimal(28, 10), value: amount },  // Use sql.Decimal for numeric values
+        { name: 'param8', type: sql.NVarChar, value: formattedAmount },  // Use sql.Decimal for numeric values
         { name: 'param9', type: sql.NVarChar, value: isoCurrencyCode || '' },  // Ensure it's a valid string
         { name: 'param10', type: sql.NVarChar, value: unofficialCurrencyCode || '' },  // Ensure it's a valid string
         { name: 'param11', type: sql.Date, value: transactionDate },
         { name: 'param12', type: sql.Bit, value: pending },
-        { name: 'param13', type: sql.NVarChar, value: accountOwner || '' }  // Ensure it's a valid string
+        { name: 'param13', type: sql.NVarChar, value: accountOwner || '' },  // Ensure it's a valid string
+        { name: 'param14', type: sql.NVarChar, value: logo_url || '' }  // Ensure it's a valid string
       ];
 
       await queryDatabase(query, params);
@@ -81,7 +90,6 @@ const createOrUpdateTransactions = async transactions => {
 
   await Promise.all(pendingQueries);
 };
-
 /**
  * Retrieves all transactions for a single account.
  *

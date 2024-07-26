@@ -32,7 +32,6 @@ export const AccountSummaryCard: React.FC = () => {
                         </div>
                     </div>
 
-                    <Button onClick={navigateToTarget}>Add Bank</Button>
                 </CardContent>
             </Card>
         </>

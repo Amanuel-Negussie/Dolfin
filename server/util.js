@@ -80,6 +80,7 @@ const sanitizeTransactions = transactions =>
     'date',
     'category',
     'amount',
+    'logo_url',
     'created_at',
     'updated_at',
   ]);
