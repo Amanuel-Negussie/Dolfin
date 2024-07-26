@@ -25,7 +25,7 @@ const createOrUpdateTransactions = async transactions => {
       date: transactionDate,
       pending,
       account_owner: accountOwner,
-      logo_url,
+      logo_url: logo_url,
     } = transaction;
 
 
@@ -33,7 +33,7 @@ const createOrUpdateTransactions = async transactions => {
     const formattedAmount = amount >= 0 ? -amount : Math.abs(amount);
     // console.log('amount: ', amount);
     // console.log('formatted: ', formattedAmount);
-    // console.log('logo_url: ', logo_url);
+    //console.log('logo_url: ', transaction.logo_url);
     // Retrieve the account ID
     const { id: accountId } = await retrieveAccountByPlaidAccountId(plaidAccountId);
 
