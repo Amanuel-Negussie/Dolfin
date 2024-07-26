@@ -30,7 +30,7 @@ const createOrUpdateTransactions = async transactions => {
 
 
     // Apply the conditional formatting to the amount
-    const formattedAmount = amount >= 0 ? "-$" + amount : "$" + Math.abs(amount);
+    const formattedAmount = amount >= 0 ? -amount : Math.abs(amount);
     // console.log('amount: ', amount);
     // console.log('formatted: ', formattedAmount);
     // console.log('logo_url: ', logo_url);
@@ -73,7 +73,7 @@ const createOrUpdateTransactions = async transactions => {
         { name: 'param5', type: sql.NVarChar, value: subcategory || '' },  // Ensure it's a valid string
         { name: 'param6', type: sql.NVarChar, value: transactionType || '' },  // Ensure it's a valid string
         { name: 'param7', type: sql.NVarChar, value: transactionName || '' },  // Ensure it's a valid string
-        { name: 'param8', type: sql.NVarChar, value: formattedAmount },  // Use sql.Decimal for numeric values
+        { name: 'param8', type: sql.Decimal(28, 10), value: formattedAmount },  // Use sql.Decimal for numeric values
         { name: 'param9', type: sql.NVarChar, value: isoCurrencyCode || '' },  // Ensure it's a valid string
         { name: 'param10', type: sql.NVarChar, value: unofficialCurrencyCode || '' },  // Ensure it's a valid string
         { name: 'param11', type: sql.Date, value: transactionDate },

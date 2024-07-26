@@ -27,6 +27,10 @@ const getAvatarDetails = (name: string, logoUrl: string | null) => {
     }
 };
 
+const formatAmount = (amount: number): string => {
+    return amount >= 0 ? `$${amount.toFixed(2)}` : `-$${Math.abs(amount).toFixed(2)}`;
+};
+
 export const TransactionsCard: React.FC<TransactionCardProps> = ({ transactions }) => {
     // Get the most recent 10 transactions
     const recentTransactions = transactions.slice(-10);
@@ -51,7 +55,7 @@ export const TransactionsCard: React.FC<TransactionCardProps> = ({ transactions 
                                     <p className="text-sm font-medium leading-none">{transaction.name}</p>
                                     <p className="text-sm text-muted-foreground">{format(new Date(transaction.date), 'yyyy-MM-dd')}</p>
                                 </div>
-                                <div className="ml-auto font-medium">{transaction.amount}</div>
+                                <div className="ml-auto font-medium">{formatAmount(transaction.amount)}</div>
                             </div>
                         );
                     })}
