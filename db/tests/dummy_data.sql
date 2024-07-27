@@ -28,8 +28,10 @@ VALUES
 -- Insert into [dbo].[accounts_table]
 INSERT INTO [dbo].[accounts_table] (item_id, plaid_account_id, name, mask, official_name, current_balance, available_balance, iso_currency_code, unofficial_currency_code, type, subtype, created_at, updated_at)
 VALUES 
-(1, 'account1', 'Checking Account', '1234', 'Official Checking', 1000.00, 950.00, 'USD', 'USD', 'checking', 'savings', GETDATE(), GETDATE()),
-(2, 'account2', 'Savings Account', '5678', 'Official Savings', 5000.00, 4800.00, 'USD', 'USD', 'savings', 'retirement', GETDATE(), GETDATE());
+-- Depository Account (Checking)
+(1, 'account1', 'Checking Account', '1234', 'Official Checking', 1000.00, 950.00, 'USD', 'USD', 'depository', 'checking', GETDATE(), GETDATE()),
+-- Depository Account (Savings)
+(2, 'account2', 'Savings Account', '5678', 'Official Savings', 5000.00, 4800.00, 'USD', 'USD', 'depository', 'savings', GETDATE(), GETDATE());
 
 -- Insert into [dbo].[assets_table]
 INSERT INTO [dbo].[assets_table] (user_id, value, description, created_at, updated_at)
@@ -40,8 +42,10 @@ VALUES
 -- Insert into [dbo].[transactions_table]
 INSERT INTO [dbo].[transactions_table] (account_id, plaid_transaction_id, plaid_category_id, category, subcategory, type, name, amount, iso_currency_code, unofficial_currency_code, date, pending, account_owner, created_at, updated_at)
 VALUES 
+-- Credit Transaction (deposit)
 (1, 'trans1', 'category1', 'Category 1', 'Subcategory 1', 'credit', 'Transaction 1', 100.00, 'USD', 'USD', GETDATE(), 0, 'owner1', GETDATE(), GETDATE()),
-(2, 'trans2', 'category2', 'Category 2', 'Subcategory 2', 'debit', 'Transaction 2', 50.00, 'USD', 'USD', GETDATE(), 1, 'owner2', GETDATE(), GETDATE());
+-- Debit Transaction (withdrawal)
+(2, 'trans2', 'category2', 'Category 2', 'Subcategory 2', 'debit', 'Transaction 2', -50.00, 'USD', 'USD', GETDATE(), 1, 'owner2', GETDATE(), GETDATE());
 
 -- Commit Transaction
 COMMIT TRANSACTION;
