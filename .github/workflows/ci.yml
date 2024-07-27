@@ -1,0 +1,53 @@
+name: SQL Server CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sqlserver-setup:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        ports:
+          - 1433:1433
+        env:
+          SA_PASSWORD: "Apple123"
+          ACCEPT_EULA: "Y"
+        options: >-
+          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -Q \"SELECT 1\""
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install SQLCMD
+      run: sudo apt-get install -y mssql-tools
+
+    - name: Run Initialization Script
+      run: |
+        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i db/init_db.sql
+
+    - name: Input Dummy Data 
+      run: |
+        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i db/tests/dummy_data.sql
+
+    - name: Run Tests
+      run: |
+        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i db/tests/tests/transactions-tests.sql
+   
+   
+    - name: Run All SQL Scripts
+      run: |
+        for file in db/tests/tests/*.sql; do
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i "$file"
+        done
