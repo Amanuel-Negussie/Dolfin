@@ -41,12 +41,27 @@ router.post(
           // This should correspond to a unique id for the current user.
           client_user_id: "id " + userId,
         },
-        client_name: 'Pattern',
+        client_name: 'Dolfin',
         products,
-        country_codes: ['US'],
+        country_codes: ['US','CA'],
         language: 'en',
         //webhook: httpsTunnel.public_url + '/services/webhook',
         access_token: accessToken,
+        link_customization_name: 'dolfin',
+        account_filters: {
+
+          depository: {
+      
+            account_subtypes: ['checking', 'savings']
+      
+          },
+      
+          credit: {
+      
+            account_subtypes: ['credit card']
+      
+          }
+        }
       };
       // If user has entered a redirect uri in the .env file
       if (redirect_uri.indexOf('http') === 0) {

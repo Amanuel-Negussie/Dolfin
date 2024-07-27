@@ -23,7 +23,7 @@ const {
 const PLAID_SECRET =
   PLAID_ENV === 'production' ? PLAID_SECRET_PRODUCTION : PLAID_SECRET_SANDBOX;
 
-const OPTIONS = { clientApp: 'Plaid-Pattern' };
+const OPTIONS = { clientApp: 'Dolfin' };
 
 // We want to log requests to / responses from the Plaid API (via the Plaid client), as this data
 // can be useful for troubleshooting.

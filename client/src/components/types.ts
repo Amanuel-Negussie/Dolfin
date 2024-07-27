@@ -17,6 +17,7 @@ export interface RouteInfo {
   
   export interface AccountType {
     id: number;
+    debt: number;
     item_id: number;
     user_id: number;
     plaid_account_id: string;

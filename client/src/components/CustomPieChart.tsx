@@ -1,12 +1,12 @@
-import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from "recharts";
+import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from 'recharts';
 
 interface CustomPieChartProps {
-  data: any[];
+  data: { name: string; value: number }[]; // Data should include name and value
   title: string;
   aspect?: number; // Optional aspect ratio prop
 }
 
-const COLORS = ["#8884d8", "#82ca9d", "#FFBB28", "#FF8042"]; // Default colors
+const COLORS = ['#8884d8', '#82ca9d', '#FFBB28', '#FF8042']; // Default colors
 
 export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, title, aspect = 1 }) => {
   const generateColors = (numColors: number) => {
@@ -15,7 +15,7 @@ export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, title, asp
   };
 
   let colors: string[];
-
+  console.log("Asset data: ",data); 
   if (data.length <= COLORS.length) {
     // If data points fit within predefined COLORS array, use them
     colors = COLORS.slice(0, data.length);
@@ -39,7 +39,7 @@ export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, title, asp
             cx="50%"
             cy="50%"
             outerRadius="80%" // Use percentage for responsive radius
-            label={(entry) => `$${formatter(entry.value)}`}
+            label={({ name, value }) => `${name}: $${formatter(value)}`}
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={colors[index]} />
@@ -55,7 +55,7 @@ export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, title, asp
                       <span className="text-[0.70rem] uppercase text-muted-foreground">
                         {payload[0].name}
                       </span>
-                      <span className="font-bold ">
+                      <span className="font-bold">
                         {formatter(payload[0].value)}
                       </span>
                     </div>

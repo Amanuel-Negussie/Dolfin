@@ -12,6 +12,8 @@ import HomePage from "./pages/HomePage";
 import useCurrentUser from "./services/currentUser";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import './styles.css';
+
 
 const LandingPage = React.lazy(() => import("./pages/LandingPage"));
 
