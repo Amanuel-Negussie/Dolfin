@@ -21,19 +21,19 @@ export const Dashboard: React.FC = () => {
     }, [userId]);
 
     useEffect(() => {
-        if(Object.keys(transactionsByUser).length > 0) {
+        if (Object.keys(transactionsByUser).length > 0) {
             setTransactions(Object.values(transactionsByUser)[0]);
             setIsLoading(false);
         }
     }, [transactionsByUser]);
 
     useEffect(() => {
-        if(Object.keys(accountsByUser).length > 0) {
+        if (Object.keys(accountsByUser).length > 0) {
             //console.log(accountsByUser);
         }
     }, [accountsByUser]);
 
-    if(isLoading) {
+    if (isLoading) {
         return <div>Loading...</div>
     }
 
@@ -44,10 +44,13 @@ export const Dashboard: React.FC = () => {
                 <div>
                     <AccountSummaryCard />
                 </div>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-                    <TransactionTrendsCard />
-
-                    <TransactionsCard transactions={transactions}/>
+                <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
+                    <div className="flex-1">
+                        <TransactionTrendsCard />
+                    </div>
+                    <div className="flex-1">
+                        <TransactionsCard transactions={transactions} />
+                    </div>
                 </div>
             </div>
         </div>
