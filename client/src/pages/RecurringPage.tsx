@@ -1,8 +1,37 @@
 import * as React from "react";
 import { TransactionsCard } from "@/components/TransactionsCard";
 import { RecurringCalendar } from "@/components/RecurringCalendar";
+import useTransactions from "../services/transactions";
+import { TransactionType } from "../components/types";
+import { RecurringCard } from "@/components/recurringTables";
 
 export const RecurringPage: React.FC = () => {
+  const { getRecurringTransactions, recurringTransactions } = useTransactions();
+  const [next7DaysTransactions, setNext7DaysTransactions] = React.useState<TransactionType[]>([]);
+  const [comingLaterTransactions, setComingLaterTransactions] = React.useState<TransactionType[]>([]);
+
+  React.useEffect(() => {
+    const fetchRecurringTransactions = async () => {
+      await getRecurringTransactions(1); // Adjust the accountId as needed
+
+      const now = new Date();
+      const next7Days = recurringTransactions.filter(transaction => {
+        const transactionDate = new Date(transaction.date);
+        return transactionDate <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      });
+
+      const later = recurringTransactions.filter(transaction => {
+        const transactionDate = new Date(transaction.date);
+        return transactionDate > new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      });
+
+      setNext7DaysTransactions(next7Days);
+      setComingLaterTransactions(later);
+    };
+
+    fetchRecurringTransactions();
+  }, [getRecurringTransactions, recurringTransactions]);
+
   return (
     <>
       <div className="hidden flex-col md:flex h-full">
@@ -17,13 +46,13 @@ export const RecurringPage: React.FC = () => {
                 <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mb-4">
                   Next 7 Days
                 </h4>
-                <TransactionsCard />
+                <RecurringCard transactions={next7DaysTransactions} />
               </div>
               <div className="space-y-2">
                 <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mb-4">
                   Coming later
                 </h4>
-                <TransactionsCard />
+                <RecurringCard transactions={comingLaterTransactions} />
               </div>
             </div>
             <div className="flex-shrink-0 self-start mt-12">
