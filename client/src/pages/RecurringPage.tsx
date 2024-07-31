@@ -1,8 +1,8 @@
 import * as React from "react";
-import { TransactionsCard } from "@/components/TransactionsCard";
 import { RecurringCalendar } from "@/components/RecurringCalendar";
 import useTransactions from "../services/transactions";
 import { TransactionType } from "../components/types";
+import { RecurringCard } from "@/components/RecurringCard";
 
 
 export const RecurringPage: React.FC = () => {
@@ -46,13 +46,13 @@ export const RecurringPage: React.FC = () => {
                 <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mb-4">
                   Next 7 Days
                 </h4>
-                <TransactionsCard transactions={next7DaysTransactions} />
+                <RecurringCard transactions={next7DaysTransactions} />
               </div>
               <div className="space-y-2">
                 <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mb-4">
                   Coming later
                 </h4>
-                <TransactionsCard transactions={comingLaterTransactions} />
+                <RecurringCard transactions={comingLaterTransactions} />
               </div>
             </div>
             <div className="flex-shrink-0 self-start mt-12">
