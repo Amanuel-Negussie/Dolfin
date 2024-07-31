@@ -60,6 +60,8 @@ export interface RouteInfo {
     account_owner: string;
     created_at: string;
     updated_at: string;
+    frequency?: number; // Optional, as not all transactions will have this field
+    last_transaction_date?: string; // Optional, as not all transactions will have this field
   }
   
   export interface AssetType {

@@ -13,6 +13,7 @@ const {
   retrieveItemsByUser,
   retrieveTransactionsByUserId,
   retrieveUserById,
+  retrieveRecurringTransactionsByUserId,
 } = require('../db/queries');
 const { asyncWrapper } = require('../middleware');
 const {
@@ -46,13 +47,6 @@ router.get(
  * @param {string} auth0Id the Auth0 ID of the new user.
  * @returns {Object[]} an array containing the new user.
  */
-/**
- * Creates a new user (unless the Auth0 ID is already taken).
- *
- * @param {string} username the username of the new user.
- * @param {string} auth0Id the Auth0 ID of the new user.
- * @returns {Object[]} an array containing the new user.
- */
 router.post(
   '/',
   asyncWrapper(async (req, res) => {
@@ -77,6 +71,7 @@ router.post(
     }
   })
 );
+
 /**
  * Retrieves user information for a single user.
  *
@@ -134,6 +129,21 @@ router.get(
     const { userId } = req.params;
     const transactions = await retrieveTransactionsByUserId(userId);
     res.json(sanitizeTransactions(transactions));
+  })
+);
+
+/**
+ * Retrieves all recurring transactions associated with a single user.
+ *
+ * @param {string} userId the ID of the user.
+ * @returns {Object[]} an array of recurring transactions
+ */
+router.get(
+  '/:userId/recurring-transactions',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    const recurringTransactions = await retrieveRecurringTransactionsByUserId(userId);
+    res.json(sanitizeTransactions(recurringTransactions));
   })
 );
 

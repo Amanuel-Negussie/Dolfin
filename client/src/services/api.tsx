@@ -66,8 +66,8 @@ export const getTransactionsByItem = (itemId: number) =>
   api.get(`/items/${itemId}/transactions`);
 export const getTransactionsByUser = (userId: number) =>
   api.get(`/users/${userId}/transactions`);
-export const getRecurringTransactions = (accountId: number) =>
-  api.get(`/accounts/${accountId}/recurring-transactions`);
+export const getRecurringTransactionsByUser = (userId: number) =>
+  api.get(`/users/${userId}/recurring-transactions`);
 
 // institutions
 export const getInstitutionById = (instId: string) =>
@@ -101,4 +101,3 @@ export const exchangeToken = async (
     }
   }
 };
-

@@ -6,31 +6,37 @@ import { TransactionType } from "../components/types";
 import { RecurringCard } from "@/components/recurringTables";
 
 export const RecurringPage: React.FC = () => {
-  const { getRecurringTransactions, recurringTransactions } = useTransactions();
+  const { getRecurringTransactionsByUser, recurringTransactionsByUser } = useTransactions();
   const [next7DaysTransactions, setNext7DaysTransactions] = React.useState<TransactionType[]>([]);
   const [comingLaterTransactions, setComingLaterTransactions] = React.useState<TransactionType[]>([]);
 
   React.useEffect(() => {
     const fetchRecurringTransactions = async () => {
-      await getRecurringTransactions(1); // Adjust the accountId as needed
+      if (typeof getRecurringTransactionsByUser === "function") {
+        console.log("Recurring");
+        await getRecurringTransactionsByUser(17); // Adjust the userId as needed
 
-      const now = new Date();
-      const next7Days = recurringTransactions.filter(transaction => {
-        const transactionDate = new Date(transaction.date);
-        return transactionDate <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-      });
+        const now = new Date();
+        const recurringTransactions = recurringTransactionsByUser[17] || [];
+        const next7Days = recurringTransactions.filter(transaction => {
+          const transactionDate = new Date(transaction.date);
+          return transactionDate <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        });
 
-      const later = recurringTransactions.filter(transaction => {
-        const transactionDate = new Date(transaction.date);
-        return transactionDate > new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-      });
+        const later = recurringTransactions.filter(transaction => {
+          const transactionDate = new Date(transaction.date);
+          return transactionDate > new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        });
 
-      setNext7DaysTransactions(next7Days);
-      setComingLaterTransactions(later);
+        setNext7DaysTransactions(next7Days);
+        setComingLaterTransactions(later);
+      } else {
+        console.log("getRecurringTransactionsByUser is not a function");
+      }
     };
 
     fetchRecurringTransactions();
-  }, [getRecurringTransactions, recurringTransactions]);
+  }, [getRecurringTransactionsByUser, recurringTransactionsByUser]);
 
   return (
     <>

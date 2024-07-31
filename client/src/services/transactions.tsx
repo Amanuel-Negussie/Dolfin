@@ -6,7 +6,6 @@ import {
   useReducer,
   useCallback,
   Dispatch,
-  useState,
 } from 'react';
 import groupBy from 'lodash/groupBy';
 import keyBy from 'lodash/keyBy';
@@ -18,15 +17,20 @@ import {
   getTransactionsByAccount as apiGetTransactionsByAccount,
   getTransactionsByItem as apiGetTransactionsByItem,
   getTransactionsByUser as apiGetTransactionsByUser,
-  getRecurringTransactions as apiGetRecurringTransactions,
+  getRecurringTransactionsByUser as apiGetRecurringTransactionsByUser,
 } from './api';
 import { Dictionary } from 'lodash';
 
 interface TransactionsState {
-  [transactionId: number]: TransactionType;
+  transactionsById: Dictionary<TransactionType>;
+  recurringTransactionsById: Dictionary<TransactionType[]>;
 }
 
-const initialState = {};
+const initialState: TransactionsState = {
+  transactionsById: {},
+  recurringTransactionsById: {},
+};
+
 type TransactionsAction =
   | {
       type: 'SUCCESSFUL_GET';
@@ -41,34 +45,34 @@ type TransactionsAction =
 
 interface TransactionsContextShape extends TransactionsState {
   dispatch: Dispatch<TransactionsAction>;
-  transactionsByAccount: Dictionary<any>;
+  transactionsByAccount: Dictionary<TransactionType[]>;
   getTransactionsByAccount: (accountId: number, refresh?: boolean) => void;
   deleteTransactionsByItemId: (itemId: number) => void;
   deleteTransactionsByUserId: (userId: number) => void;
-  transactionsByUser: Dictionary<any>;
+  transactionsByUser: Dictionary<TransactionType[]>;
   getTransactionsByUser: (userId: number) => void;
-  transactionsByItem: Dictionary<any>;
-  getRecurringTransactions: (accountId: number) => void;
-  recurringTransactions: TransactionType[];
+  transactionsByItem: Dictionary<TransactionType[]>;
+  getRecurringTransactionsByUser: (userId: number) => Promise<void>;
+  recurringTransactionsByUser: Dictionary<TransactionType[]>;
 }
+
 const TransactionsContext = createContext<TransactionsContextShape>(
   initialState as TransactionsContextShape
 );
 
 export function TransactionsProvider(props: any) {
-  const [transactionsById, dispatch] = useReducer(reducer, initialState);
-  const [recurringTransactions, setRecurringTransactions] = useState<TransactionType[]>([]);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const hasRequested = useRef<{
-    byAccount: { [accountId: number]: boolean };
+    byUser: { [userId: number]: boolean };
   }>({
-    byAccount: {},
+    byUser: {},
   });
 
   const getTransactionsByAccount = useCallback(
     async (accountId: number, refresh?: boolean) => {
-      if (!hasRequested.current.byAccount[accountId] || refresh) {
-        hasRequested.current.byAccount[accountId] = true;
+      if (!hasRequested.current.byUser[accountId] || refresh) {
+        hasRequested.current.byUser[accountId] = true;
         const { data: payload } = await apiGetTransactionsByAccount(accountId);
         dispatch({ type: 'SUCCESSFUL_GET', payload: payload });
       }
@@ -76,10 +80,9 @@ export function TransactionsProvider(props: any) {
     []
   );
 
-  const getRecurringTransactions = useCallback(async (accountId: number) => {
-    const { data: payload } = await apiGetRecurringTransactions(accountId);
+  const getRecurringTransactionsByUser = useCallback(async (userId: number) => {
+    const { data: payload } = await apiGetRecurringTransactionsByUser(userId);
     dispatch({ type: 'SUCCESSFUL_GET_RECURRING', payload: payload });
-    setRecurringTransactions(payload);
   }, []);
 
   const getTransactionsByItem = useCallback(async (itemId: number) => {
@@ -101,66 +104,73 @@ export function TransactionsProvider(props: any) {
   }, []);
 
   const value = useMemo(() => {
-    const allTransactions = Object.values(transactionsById);
+    const allTransactions = Object.values(state.transactionsById);
+    const recurringTransactions = Object.values(state.recurringTransactionsById).flat();
 
     return {
       dispatch,
       allTransactions,
-      transactionsById,
+      recurringTransactions,
+      transactionsById: state.transactionsById,
       transactionsByAccount: groupBy(allTransactions, 'account_id'),
       transactionsByItem: groupBy(allTransactions, 'item_id'),
       transactionsByUser: groupBy(allTransactions, 'user_id'),
+      recurringTransactionsByUser: groupBy(recurringTransactions, 'user_id'),
       getTransactionsByAccount,
       getTransactionsByItem,
       getTransactionsByUser,
-      getRecurringTransactions,
+      getRecurringTransactionsByUser,
       deleteTransactionsByItemId,
       deleteTransactionsByUserId,
-      recurringTransactions,
     };
   }, [
     dispatch,
-    transactionsById,
+    state,
     getTransactionsByAccount,
     getTransactionsByItem,
     getTransactionsByUser,
-    getRecurringTransactions,
+    getRecurringTransactionsByUser,
     deleteTransactionsByItemId,
     deleteTransactionsByUserId,
-    recurringTransactions,
   ]);
 
   return <TransactionsContext.Provider value={value} {...props} />;
 }
 
-function reducer(state: TransactionsState, action: TransactionsAction) {
+function reducer(state: TransactionsState, action: TransactionsAction): TransactionsState {
   switch (action.type) {
     case 'SUCCESSFUL_GET':
-      if (!action.payload.length) {
-        return state;
-      }
       return {
         ...state,
-        ...keyBy(action.payload, 'id'),
+        transactionsById: {
+          ...state.transactionsById,
+          ...keyBy(action.payload, 'id'),
+        },
       };
     case 'SUCCESSFUL_GET_RECURRING':
-      if (!action.payload.length) {
-        return state;
-      }
       return {
         ...state,
-        recurringTransactions: action.payload,
+        recurringTransactionsById: {
+          ...state.recurringTransactionsById,
+          ...groupBy(action.payload, 'user_id'),
+        },
       };
     case 'DELETE_BY_ITEM':
-      return omitBy(
-        state,
-        transaction => transaction.item_id === action.payload
-      );
+      return {
+        ...state,
+        transactionsById: omitBy(
+          state.transactionsById,
+          transaction => transaction.item_id === action.payload
+        ),
+      };
     case 'DELETE_BY_USER':
-      return omitBy(
-        state,
-        transaction => transaction.user_id === action.payload
-      );
+      return {
+        ...state,
+        transactionsById: omitBy(
+          state.transactionsById,
+          transaction => transaction.user_id === action.payload
+        ),
+      };
     default:
       console.warn('unknown action: ', action);
       return state;
