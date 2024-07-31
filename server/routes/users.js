@@ -12,6 +12,8 @@ const {
   deleteUsers,
   retrieveItemsByUser,
   retrieveTransactionsByUserId,
+  retrieveTransactionAssetsByUserId,
+  retrieveTransactionLiabilitiesByUserId,
   retrieveUserById,
 } = require('../db/queries');
 const { asyncWrapper } = require('../middleware');
@@ -20,7 +22,10 @@ const {
   sanitizeItems,
   sanitizeUsers,
   sanitizeTransactions,
+  sanitizeTransactionAssets,
+  sanitizeTransactionLiabilities,
 } = require('../util');
+
 
 const router = express.Router();
 
@@ -136,6 +141,29 @@ router.get(
     res.json(sanitizeTransactions(transactions));
   })
 );
+
+
+// transaction assets
+router.get(
+  '/:userId/transaction-assets',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    const transactions = await retrieveTransactionAssetsByUserId(userId);
+    
+    res.json(sanitizeTransactionAssets(transactions));
+  })
+);
+
+// transaction liabilities
+router.get(
+  '/:userId/transaction-liabilities',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    const transactions = await retrieveTransactionLiabilitiesByUserId(userId);
+    res.json(sanitizeTransactionLiabilities(transactions));
+  })
+);
+
 
 /**
  * Deletes a user and its related items

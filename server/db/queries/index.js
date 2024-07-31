@@ -33,6 +33,8 @@ const {
     retrieveUsers,
     retrieveUserById,
     retrieveUserByUsername,
+    retrieveTransactionAssetsByUserId,
+    retrieveTransactionLiabilitiesByUserId
   } = require('./users');
   const { createLinkEvent } = require('./linkEvents');
   
@@ -66,6 +68,9 @@ const {
     deleteTransactions,
     createOrUpdateTransactions,
     updateItemTransactionsCursor,
+    retrieveTransactionAssetsByUserId,
+    retrieveTransactionLiabilitiesByUserId,
+
     // users
     createUser,
     deleteUsers,

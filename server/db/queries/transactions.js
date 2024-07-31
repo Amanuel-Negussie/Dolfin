@@ -116,6 +116,11 @@ const retrieveTransactionsByItemId = async itemId => {
   return transactions;
 };
 
+
+
+
+
+
 /**
  * Retrieves all transactions for a single user.
  *
@@ -148,5 +153,5 @@ module.exports = {
   retrieveTransactionsByAccountId,
   retrieveTransactionsByItemId,
   retrieveTransactionsByUserId,
-  deleteTransactions,
+  deleteTransactions
 };
