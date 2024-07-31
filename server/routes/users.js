@@ -13,6 +13,7 @@ const {
   retrieveItemsByUser,
   retrieveTransactionsByUserId,
   retrieveUserById,
+  retrieveRecurringTransactionsByUserId,
 } = require('../db/queries');
 const { asyncWrapper } = require('../middleware');
 const {
@@ -162,6 +163,22 @@ router.delete(
     // delete from the db
     await deleteUsers(userId);
     res.sendStatus(204);
+  })
+);
+
+/**
+ * Retrieves all recurring transactions associated with a single user.
+ *
+ * @param {string} userId the ID of the user.
+ * @returns {Object[]} an array of recurring transactions
+ */
+router.get(
+  '/:userId/recurring-transactions',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    console.log("Recurring Transactions Yo");
+    const recurringTransactions = await retrieveRecurringTransactionsByUserId(userId);
+    res.json(sanitizeTransactions(recurringTransactions));
   })
 );
 

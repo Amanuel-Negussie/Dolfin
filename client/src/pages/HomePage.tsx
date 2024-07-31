@@ -9,6 +9,7 @@ import usePlaidLinkCustom from "../hooks/usePlaidLinkCustom";
 import { useAuth0 } from "@auth0/auth0-react";
 import LogoutButton from "../components/LogoutButton";
 import axiosConfigs from "@/hooks/axiosConfigs";
+import { addNewUser } from "@/services/api";
 
 function HomePage() {
   const [publicTokens, setPublicTokens] = useState<string[]>([]);
@@ -16,7 +17,8 @@ function HomePage() {
   const [identityData, setIdentityData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  const { user } = useAuth0();
+  const [userInfoSent, setUserInfoSent] = useState(false);
+  const { user, isAuthenticated } = useAuth0();
 
   const linkToken = useFetchLinkToken();
   const { open, ready } = usePlaidLinkCustom(linkToken, (public_token: string) => {

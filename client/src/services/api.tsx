@@ -16,9 +16,10 @@ const api = axios.create({
 });
 
 export default api;
+
 // currentUser
-export const getLoginUser = (auth0Id: string) =>
-  api.post('/sessions', { auth0Id });
+export const getLoginUser = (username: string) =>
+  api.post('/sessions', { username });
 
 // assets
 export const addAsset = (userId: number, description: string, value: number) =>
@@ -65,6 +66,8 @@ export const getTransactionsByItem = (itemId: number) =>
   api.get(`/items/${itemId}/transactions`);
 export const getTransactionsByUser = (userId: number) =>
   api.get(`/users/${userId}/transactions`);
+export const getRecurringTransactionsByUser = (userId: number) =>
+  api.get(`/users/${userId}/recurring-transactions`);
 
 // institutions
 export const getInstitutionById = (instId: string) =>

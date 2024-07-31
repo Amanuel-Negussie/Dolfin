@@ -6,11 +6,13 @@ import { PageLayout } from "./pages/PageLayout";
 import { Dashboard } from "./pages/Dashboard";
 import { Transactions } from "./pages/Transactions";
 import { AccountPage } from "./pages/AccountsPage";
+import { RecurringPage } from "./pages/RecurringPage";
 import { AuthHandler } from "./pages/AuthHandler";
 import HomePage from "./pages/HomePage";
 import useCurrentUser from "./services/currentUser";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { LoadingSpinner } from "./components/ui/loading-spinner";
 
 const LandingPage = React.lazy(() => import("./pages/LandingPage"));
 
@@ -19,6 +21,7 @@ const routes = [
   { path: "/transactions", element: <Transactions /> },
   { path: "/accounts/*", element: <AccountPage /> },
   { path: "/old", element: <HomePage /> },
+  { path: "/recurring/*", element: <RecurringPage /> },
   //{ path: "/example", element: <ExamplePage />},
 ];
 
@@ -32,7 +35,9 @@ export const App: React.FC = () => {
   }, []);
 
   if (isLoading) {
-    return <div>Loading... 1</div>;
+    return <div>
+    <LoadingSpinner />
+  </div>;
   }
 
   return (

@@ -26,6 +26,7 @@ const {
     retrieveTransactionsByItemId,
     retrieveTransactionsByUserId,
     deleteTransactions,
+    retrieveRecurringTransactionsByUserId,
   } = require('./transactions');
   const {
     createUser,
@@ -66,6 +67,7 @@ const {
     deleteTransactions,
     createOrUpdateTransactions,
     updateItemTransactionsCursor,
+    retrieveRecurringTransactionsByUserId,
     // users
     createUser,
     deleteUsers,
