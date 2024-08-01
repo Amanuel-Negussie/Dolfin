@@ -4,11 +4,11 @@ import useTransactions from "../services/transactions";
 import { TransactionType } from "../components/types";
 import { RecurringCard } from "@/components/RecurringCard";
 
-
 export const RecurringPage: React.FC = () => {
   const { getRecurringTransactionsByUser, recurringTransactions } = useTransactions();
   const [next7DaysTransactions, setNext7DaysTransactions] = React.useState<TransactionType[]>([]);
   const [comingLaterTransactions, setComingLaterTransactions] = React.useState<TransactionType[]>([]);
+  const [hasFetched, setHasFetched] = React.useState(false);
 
   React.useEffect(() => {
     const fetchRecurringTransactions = async () => {
@@ -27,10 +27,13 @@ export const RecurringPage: React.FC = () => {
 
       setNext7DaysTransactions(next7Days);
       setComingLaterTransactions(later);
+      setHasFetched(true);
     };
 
-    fetchRecurringTransactions();
-  }, [getRecurringTransactionsByUser, recurringTransactions]);
+    if (!hasFetched) {
+      fetchRecurringTransactions();
+    }
+  }, [hasFetched, getRecurringTransactionsByUser]);
 
   return (
     <>
