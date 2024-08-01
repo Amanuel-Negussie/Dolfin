@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/avatar";
 
 import { TransactionType } from "./types";
-import { format } from "date-fns";
+import { format, addDays, differenceInDays, differenceInHours, differenceInMonths } from "date-fns";
 
 interface TransactionCardProps {
     transactions: TransactionType[];
@@ -40,30 +40,59 @@ const getFrequencyLabel = (frequency: number | null | undefined): string => {
     return "One Time";
 };
 
+const getDueInLabel = (lastPaymentDate: string | undefined, frequency: number | undefined): string => {
+    if (!lastPaymentDate || !frequency) return "N/A";
+    const now = new Date();
+    const nextDueDate = addDays(new Date(lastPaymentDate), frequency);
+
+    const hoursDiff = differenceInHours(nextDueDate, now);
+    if (hoursDiff < 24) {
+        return `Due in ${hoursDiff} hours`;
+    }
+
+    const daysDiff = differenceInDays(nextDueDate, now);
+    if (daysDiff < 30) {
+        return `Due in ${daysDiff} days`;
+    }
+
+    const monthsDiff = differenceInMonths(nextDueDate, now);
+    return `Due in ${monthsDiff} months`;
+};
+
 export const RecurringCard: React.FC<TransactionCardProps> = ({ transactions }) => {
-
-
     return (
         <>
             <Card>
                 <CardHeader>
-                    <CardTitle>Recent Transactions</CardTitle>
+                    <CardTitle>Subscriptions</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {transactions.map((transaction) => {
-                        const { name, logo_url: logoUrl, frequency } = transaction;
+                        const { name, logo_url: logoUrl, frequency, last_transaction_date, official_name} = transaction;
                         const { src, fallback } = getAvatarDetails(name, logoUrl);
 
                         return (
-                            <div key={transaction.id} className="flex items-center mb-4">
-                                <Avatar className="h-9 w-9">
-                                    {src ? <AvatarImage src={src} alt={name} /> : <AvatarFallback>{fallback}</AvatarFallback>}
-                                </Avatar>
-                                <div className="ml-4 space-y-1">
-                                    <p className="text-sm font-medium leading-none">{transaction.name}</p>
-                                    <p className="text-sm text-muted-foreground">{getFrequencyLabel(frequency)}</p>
+                            <div key={transaction.id} className="grid grid-cols-4 gap-4 items-center mb-4">
+                                <div className="flex items-center">
+                                    <Avatar className="h-9 w-9">
+                                        {src ? <AvatarImage src={src} alt={name} /> : <AvatarFallback>{fallback}</AvatarFallback>}
+                                    </Avatar>
+                                    <div className="ml-4 space-y-1">
+                                        <p className="text-sm font-medium leading-none">{transaction.name}</p>
+                                        <p className="text-sm text-muted-foreground">{getFrequencyLabel(frequency)}</p>
+                                    </div>
                                 </div>
-                                <div className="ml-auto font-medium">{formatAmount(transaction.amount)}</div>
+                                <div className="text-center">
+                                    <p className="text-sm font-medium leading-none">Due</p>
+                                    <p className="text-sm text-muted-foreground">{getDueInLabel(last_transaction_date, frequency)}</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-sm font-medium leading-none">Account</p>
+                                    <p className="text-sm text-muted-foreground">{transaction.official_name}</p>
+                                </div>
+                                <div className="text-right font-medium">
+                                    {formatAmount(transaction.amount)}
+                                </div>
                             </div>
                         );
                     })}

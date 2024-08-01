@@ -3,37 +3,62 @@ import { RecurringCalendar } from "@/components/RecurringCalendar";
 import useTransactions from "../services/transactions";
 import { TransactionType } from "../components/types";
 import { RecurringCard } from "@/components/RecurringCard";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { addDays } from "date-fns";
 
 export const RecurringPage: React.FC = () => {
   const { getRecurringTransactionsByUser, recurringTransactions } = useTransactions();
   const [next7DaysTransactions, setNext7DaysTransactions] = React.useState<TransactionType[]>([]);
   const [comingLaterTransactions, setComingLaterTransactions] = React.useState<TransactionType[]>([]);
-  const [hasFetched, setHasFetched] = React.useState(false);
+  const [highlightedDates, setHighlightedDates] = React.useState<Date[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
     const fetchRecurringTransactions = async () => {
+      setIsLoading(true);
       await getRecurringTransactionsByUser(17); // Adjust the accountId as needed
-
-      const now = new Date();
-      const next7Days = recurringTransactions.filter(transaction => {
-        const transactionDate = new Date(transaction.date);
-        return transactionDate <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-      });
-
-      const later = recurringTransactions.filter(transaction => {
-        const transactionDate = new Date(transaction.date);
-        return transactionDate > new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-      });
-
-      setNext7DaysTransactions(next7Days);
-      setComingLaterTransactions(later);
-      setHasFetched(true);
+      setIsLoading(false);
     };
 
-    if (!hasFetched) {
-      fetchRecurringTransactions();
+    fetchRecurringTransactions();
+  }, [getRecurringTransactionsByUser]);
+
+  React.useEffect(() => {
+    if (recurringTransactions.length > 0) {
+      const now = new Date();
+      const next7Days: { transaction: TransactionType, nextDueDate: Date }[] = [];
+      const later: { transaction: TransactionType, nextDueDate: Date }[] = [];
+      const dates: Date[] = [];
+
+      recurringTransactions.forEach(transaction => {
+        const lastTransactionDate = transaction.last_transaction_date ? new Date(transaction.last_transaction_date) : new Date();
+        const nextDueDate = addDays(lastTransactionDate, transaction.frequency || 0);
+
+        dates.push(nextDueDate);
+
+        if (nextDueDate <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)) {
+          next7Days.push({ transaction, nextDueDate });
+        } else {
+          later.push({ transaction, nextDueDate });
+        }
+      });
+
+      next7Days.sort((a, b) => a.nextDueDate.getTime() - b.nextDueDate.getTime());
+      later.sort((a, b) => a.nextDueDate.getTime() - b.nextDueDate.getTime());
+      console.log(next7Days);
+      setNext7DaysTransactions(next7Days.map(item => item.transaction));
+      setComingLaterTransactions(later.map(item => item.transaction));
+      setHighlightedDates(dates);
     }
-  }, [hasFetched, getRecurringTransactionsByUser]);
+  }, [recurringTransactions]);
+
+  if (isLoading) {
+    return (
+      <div>
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -59,7 +84,7 @@ export const RecurringPage: React.FC = () => {
               </div>
             </div>
             <div className="flex-shrink-0 self-start mt-12">
-              <RecurringCalendar />
+              <RecurringCalendar highlightedDates={highlightedDates} />
             </div>
           </div>
         </div>

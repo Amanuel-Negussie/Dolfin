@@ -84,6 +84,7 @@ const sanitizeTransactions = transactions =>
     'logo_url',
     'frequency',
     'last_transaction_date',
+    'official_name',
     'created_at',
     'updated_at',
   ]);

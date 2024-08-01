@@ -61,6 +61,7 @@ export interface TransactionType {
   logo_url: string;
   frequency?: number; // Optional, as not all transactions will have this field
   last_transaction_date?: string; // Optional, as not all transactions will have this field
+  official_name?: string;
   created_at: string;
   updated_at: string;
 }
