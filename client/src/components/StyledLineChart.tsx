@@ -8,10 +8,7 @@ interface StyledLineChartProps {
   title: string; // Prop for custom title
 }
 
-const formatDate = (date: string) => {
-  // Format the date to a more readable format
-  return format(new Date(date), 'MMM dd, yyyy');
-};
+
 
 export const StyledLineChart: React.FC<StyledLineChartProps> = ({ data, title }) => {
   return (
@@ -27,7 +24,6 @@ export const StyledLineChart: React.FC<StyledLineChartProps> = ({ data, title })
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis 
                 dataKey="date" 
-                tickFormatter={formatDate}
                 tick={{ fontSize: 12, fill: '#6b7280' }} 
               />
               <YAxis 
