@@ -18,8 +18,8 @@ const api = axios.create({
 export default api;
 
 // currentUser
-export const getLoginUser = (username: string) =>
-  api.post('/sessions', { username });
+export const getLoginUser = (auth0Id: string) =>
+  api.post('/sessions', { auth0Id });
 
 // assets
 export const addAsset = (userId: number, description: string, value: number) =>
