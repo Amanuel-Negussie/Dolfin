@@ -142,7 +142,7 @@ export const NetworthPage: React.FC = () => {
   const transactionLiabilitiesByDay = aggregateTransactionsByDay(transactionLiabilities);
 
   const computeBalances = (initialBalance: number, transactionsByDay: { [key: string]: number }) => {
-    const days = Object.keys(transactionsByDay).sort(); // Sort days in ascending order
+    const days = Object.keys(transactionsByDay); // it's in reverse order
     let balances: { date: string; amount: number }[] = [];
     let previousBalance = initialBalance;
   
@@ -164,9 +164,15 @@ export const NetworthPage: React.FC = () => {
   
 
   useEffect(() => {
+    console.log('Initial BALANCES ASSET: ', initialAssetsBalance);
+    console.log ('Iniitial BALANCES  Liabilities : ', initialLiabilitiesBalance);
+    console.log('Transaction Assets: ', transactionAssets); 
+    console.log('Transaction LIabiilites', transactionLiabilities);
+    console.log('Transaction Assets ', transactionAssetsByDay);
+    console.log('Transactions Liabilities By Day ' , transactionLiabilitiesByDay);
     console.log('accountsByUser: ', accountsByUser[userId]);
-    console.log(transactionAssetsByDay); 
-    console.log(transactionLiabilitiesByDay);
+    console.log('Transaction Assets',transactionAssetsByDay); 
+    console.log('Transactioins Liabilities ', transactionLiabilitiesByDay);
     console.log('Asset Balances by Day:', assetBalancesByDay);
     console.log('Liability Balances by Day:', liabilityBalancesByDay);
   }, [assetBalancesByDay, liabilityBalancesByDay]);

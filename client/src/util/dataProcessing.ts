@@ -1,4 +1,4 @@
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, getISOWeek } from 'date-fns';
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachWeekOfInterval, eachMonthOfInterval, getISOWeek } from 'date-fns';
 
 interface Transaction {
   date: string;
@@ -6,8 +6,9 @@ interface Transaction {
 }
 
 export const preprocessDailyData = (data: Transaction[]) => {
+  // No need to change date format, just parse and sort
   const processedData = data.map(item => ({
-    date: new Date(item.date).toLocaleDateString(), // Adjust format if needed
+    date: item.date, // Keep original date
     amount: item.amount
   }));
 
@@ -42,7 +43,7 @@ export const preprocessWeeklyData = (data: Transaction[]) => {
     return { date: weekLabel, amount: latestTransaction.amount };
   });
 
-  // Sort the weekly data in ascending order by date
+  // Sort the weekly data in ascending order by week start date
   return weeklyData.sort((a, b) => new Date(a.date.split(' - ')[1].split(' to ')[0]).getTime() - new Date(b.date.split(' - ')[1].split(' to ')[0]).getTime());
 };
 
@@ -72,6 +73,6 @@ export const preprocessMonthlyData = (data: Transaction[]) => {
     return { date: format(month, 'MMM yyyy'), amount: latestTransaction.amount };
   });
 
-  // Sort the monthly data in ascending order by date
-  return monthlyData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  // Sort the monthly data in ascending order by month start date
+  return monthlyData.sort((a, b) => new Date(a.date + ' 01').getTime() - new Date(b.date + ' 01').getTime());
 };

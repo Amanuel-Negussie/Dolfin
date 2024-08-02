@@ -13,7 +13,9 @@ const TransactionTrendsOverview: React.FC<TransactionTrendsOverviewProps> = ({
   transactionAssets,
   transactionLiabilities,
 }) => {
+  console.log('Daily Assets Transaction Trends OVerview: ', transactionAssets); 
   const dailyAssets = preprocessDailyData(transactionAssets);
+  console.log('Preprocess Assets Transaction Trends OVerview: ', dailyAssets); 
   const weeklyAssets = preprocessWeeklyData(transactionAssets);
   const monthlyAssets = preprocessMonthlyData(transactionAssets);
 
