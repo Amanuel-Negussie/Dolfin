@@ -5,6 +5,11 @@ import { Input } from "./ui/input";
 import { ColumnDef } from "@tanstack/react-table";
 import { Transaction } from "./types";
 import { format } from "date-fns";
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+} from "@/components/ui/avatar";
 
 interface TransactionCardProps {
     transactions: Transaction[];
@@ -12,6 +17,15 @@ interface TransactionCardProps {
 
 const formatAmount = (amount: number): string => {
     return amount >= 0 ? `$${amount.toFixed(2)}` : `-$${Math.abs(amount).toFixed(2)}`;
+};
+
+const getAvatarDetails = (name: string, logoUrl: string | null) => {
+    if (logoUrl) {
+        return { src: logoUrl, fallback: null };
+    } else {
+        const initials = name.split(' ').map(word => word[0]).slice(0, 2).join('');
+        return { src: null, fallback: initials };
+    }
 };
 
 export const TransactionPageCard: React.FC<TransactionCardProps> = ({ transactions }) => {
@@ -30,6 +44,21 @@ export const TransactionPageCard: React.FC<TransactionCardProps> = ({ transactio
 
     const columns: ColumnDef<Transaction>[] = [
         {
+            header: 'Avatar',
+            accessorKey: 'logo_url',
+            cell: ({ row }) => {
+                const { name, logo_url: logoUrl } = row.original;
+                const { src, fallback } = getAvatarDetails(name, logoUrl);
+
+                return (
+                    <Avatar className="h-9 w-9">
+                        {src ? <AvatarImage src={src} alt={name} /> : <AvatarFallback>{fallback}</AvatarFallback>}
+                    </Avatar>
+                );
+            },
+            enableSorting: false,
+        },
+        {
             header: 'Name',
             accessorKey: 'name',
             cell: ({ row }) => row.getValue("name"),
@@ -38,7 +67,7 @@ export const TransactionPageCard: React.FC<TransactionCardProps> = ({ transactio
         {
             header: 'Date',
             accessorKey: 'date',
-            cell: ({ row }) => <div className="font-normal">{format(new Date(row.getValue("date") as string | number | Date), 'yyyy-MM-dd')}</div>,
+            cell: ({ row }) => format(new Date(row.getValue("date") as string | number | Date), 'yyyy-MM-dd'),
             enableSorting: true,
         },
         {
@@ -50,7 +79,7 @@ export const TransactionPageCard: React.FC<TransactionCardProps> = ({ transactio
                     style: "currency",
                     currency: "USD",
                 }).format(amount);
-                return <div className="font-medium">{formatted}</div>;
+                return formatted;
             },
             enableSorting: true,
         },
