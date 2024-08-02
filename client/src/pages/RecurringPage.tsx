@@ -5,6 +5,7 @@ import { TransactionType } from "../components/types";
 import { RecurringCard } from "@/components/RecurringCard";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { addDays } from "date-fns";
+import useLogin from "@/hooks/useLogin";
 
 export const RecurringPage: React.FC = () => {
   const { getRecurringTransactionsByUser, recurringTransactions } = useTransactions();
@@ -12,16 +13,20 @@ export const RecurringPage: React.FC = () => {
   const [comingLaterTransactions, setComingLaterTransactions] = React.useState<TransactionType[]>([]);
   const [highlightedDates, setHighlightedDates] = React.useState<Date[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const userId = Number(useLogin());
 
   React.useEffect(() => {
-    const fetchRecurringTransactions = async () => {
-      setIsLoading(true);
-      await getRecurringTransactionsByUser(17); // Adjust the accountId as needed
-      setIsLoading(false);
-    };
+    if (!isNaN(userId)) {
+      const fetchRecurringTransactions = async () => {
+        setIsLoading(true);
+        console.log('userID', userId);
+        await getRecurringTransactionsByUser(userId); // Adjust the accountId as needed
+        setIsLoading(false);
+      };
 
-    fetchRecurringTransactions();
-  }, [getRecurringTransactionsByUser]);
+      fetchRecurringTransactions();
+    }
+  }, [userId, getRecurringTransactionsByUser]);
 
   React.useEffect(() => {
     if (recurringTransactions.length > 0) {

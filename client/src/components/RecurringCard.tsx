@@ -79,16 +79,16 @@ export const RecurringCard: React.FC<TransactionCardProps> = ({ transactions }) 
                                     </Avatar>
                                     <div className="ml-4 space-y-1">
                                         <p className="text-sm font-medium leading-none">{transaction.name}</p>
-                                        <p className="text-sm text-muted-foreground">{getFrequencyLabel(frequency)}</p>
+                                        <p className="text-sm text-muted-foreground text-left">{getFrequencyLabel(frequency)}</p>
                                     </div>
                                 </div>
-                                <div className="text-center">
+                                <div className="text-left">
                                     <p className="text-sm font-medium leading-none">Due</p>
-                                    <p className="text-sm text-muted-foreground">{getDueInLabel(last_transaction_date, frequency)}</p>
+                                    <p className="text-sm text-muted-foreground text-left">{getDueInLabel(last_transaction_date, frequency)}</p>
                                 </div>
-                                <div className="text-center">
+                                <div className="text-left">
                                     <p className="text-sm font-medium leading-none">Account</p>
-                                    <p className="text-sm text-muted-foreground">{transaction.official_name}</p>
+                                    <p className="text-sm text-muted-foreground text-left">{transaction.official_name}</p>
                                 </div>
                                 <div className="text-right font-medium">
                                     {formatAmount(transaction.amount)}
