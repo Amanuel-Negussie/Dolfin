@@ -16,11 +16,14 @@ export const NetworthPage: React.FC = () => {
   const [items, setItems] = useState<ItemType[]>([]);
   const [token, setToken] = useState('');
   const [numOfItems, setNumOfItems] = useState(0);
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<AccountType[]>([]);
   const [assets, setAssets] = useState<AssetType[]>([]);
-  const [transactionAssets, setTransactionAssets] = useState([]);
-  const [transactionLiabilities, setTransactionLiabilities] = useState([]);
+  const [transactionAssets, setTransactionAssets] = useState<any[]>([]);
+  const [transactionLiabilities, setTransactionLiabilities] = useState<any[]>([]);
+
+  const [initialAssetsBalance, setInitialAssetsBalance] = useState(0);
+  const [initialLiabilitiesBalance, setInitialLiabilitiesBalance] = useState(0);
 
   const { getTransactionsByUser, transactionsByUser } = useTransactions();
   const { getAccountsByUser, accountsByUser } = useAccounts();
@@ -95,14 +98,26 @@ export const NetworthPage: React.FC = () => {
   }, [getAccountsByUser, userId]);
 
   useEffect(() => {
-    setAccounts(accountsByUser[userId] || []);
+    if (accountsByUser[userId]) {
+      setAccounts(accountsByUser[userId]);
+
+      // Calculate initial balances
+      const initialAssets = accountsByUser[userId].reduce((total, account) => 
+        (account.type === 'depository' || account.type === 'investment') 
+          ? total + account.current_balance 
+          : total, 
+      0);
+      const initialLiabilities = accountsByUser[userId].reduce((total, account) => 
+        (account.type !== 'depository' && account.type !== 'investment') 
+          ? total + account.current_balance 
+          : total, 
+      0);
+
+      setInitialAssetsBalance(initialAssets);
+      setInitialLiabilitiesBalance(initialLiabilities);
+    }
   }, [accountsByUser, userId]);
 
-  useEffect(() => {
-    setToken(linkTokens.byUser[userId]);
-  }, [linkTokens, userId, numOfItems]);
-
-  // Fetch transaction assets and liabilities
   useEffect(() => {
     if (userId) {
       (async () => {
@@ -115,22 +130,46 @@ export const NetworthPage: React.FC = () => {
     }
   }, [userId, getTransactionAssetsByUser, getTransactionLiabilitiesByUser]);
 
-  // Preprocess transaction data
-  const preprocessData = (data: any[]) => {
-    return data.map(item => ({
-      date: new Date(item.created_at).toLocaleDateString(), // format the date if needed
-      amount: item.amount
-    }));
+  const aggregateTransactionsByDay = (data: any[]) => {
+    return data.reduce((acc: { [key: string]: number }, item) => {
+      const date = new Date(item.created_at).toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+      acc[date] = (acc[date] || 0) + item.amount;
+      return acc;
+    }, {});
   };
 
-  const processedTransactionAssets = preprocessData(transactionAssets);
-  const processedTransactionLiabilities = preprocessData(transactionLiabilities);
+  const transactionAssetsByDay = aggregateTransactionsByDay(transactionAssets);
+  const transactionLiabilitiesByDay = aggregateTransactionsByDay(transactionLiabilities);
 
-  // Log processed transaction data
+  const computeBalances = (initialBalance: number, transactionsByDay: { [key: string]: number }) => {
+    const days = Object.keys(transactionsByDay).sort(); // Sort days in ascending order
+    let balances: { date: string; amount: number }[] = [];
+    let previousBalance = initialBalance;
+  
+    days.forEach(day => {
+      balances.unshift({ date: day, amount: previousBalance }); // Prepend to the start
+      previousBalance -= transactionsByDay[day] || 0;
+    });
+  
+    return balances;
+  };
+  
+  
+
+
+
+  const assetBalancesByDay =computeBalances(initialAssetsBalance, transactionAssetsByDay);
+  const liabilityBalancesByDay = computeBalances(initialLiabilitiesBalance, transactionLiabilitiesByDay);
+
+  
+
   useEffect(() => {
-    console.log('Processed Transaction Assets:', processedTransactionAssets);
-    console.log('Processed Transaction Liabilities:', processedTransactionLiabilities);
-  }, [processedTransactionAssets, processedTransactionLiabilities]);
+    console.log('accountsByUser: ', accountsByUser[userId]);
+    console.log(transactionAssetsByDay); 
+    console.log(transactionLiabilitiesByDay);
+    console.log('Asset Balances by Day:', assetBalancesByDay);
+    console.log('Liability Balances by Day:', liabilityBalancesByDay);
+  }, [assetBalancesByDay, liabilityBalancesByDay]);
 
   const initiateLink = async () => {
     await generateLinkToken(userId, null);
@@ -140,8 +179,8 @@ export const NetworthPage: React.FC = () => {
     <div>
       <div>
         <TransactionTrendsOverview
-          transactionAssets={processedTransactionAssets}
-          transactionLiabilities={processedTransactionLiabilities}
+          transactionAssets={assetBalancesByDay}
+          transactionLiabilities={liabilityBalancesByDay}
         />
       </div>
       <div className="hidden flex-col md:flex">

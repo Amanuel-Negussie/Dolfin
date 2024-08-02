@@ -6,10 +6,13 @@ interface Transaction {
 }
 
 export const preprocessDailyData = (data: Transaction[]) => {
-  return data.map(item => ({
+  const processedData = data.map(item => ({
     date: new Date(item.date).toLocaleDateString(), // Adjust format if needed
     amount: item.amount
   }));
+
+  // Sort the data in ascending order by date
+  return processedData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 };
 
 export const preprocessWeeklyData = (data: Transaction[]) => {
@@ -21,17 +24,26 @@ export const preprocessWeeklyData = (data: Transaction[]) => {
     end: endOfWeek(maxDate)
   });
 
-  return weeks.map(week => {
+  const weeklyData = weeks.map(week => {
     const weekData = data.filter(item => {
       const itemDate = new Date(item.date);
       return itemDate >= startOfWeek(week) && itemDate <= endOfWeek(week);
     });
 
-    const weekLabel = `Week ${getISOWeek(week)} - ${format(startOfWeek(week), 'MMM dd')} to ${format(endOfWeek(week), 'MMM dd')}`;
-    const amount = weekData.reduce((acc, cur) => acc + cur.amount, 0);
+    if (weekData.length === 0) {
+      return { date: `Week ${getISOWeek(week)} - ${format(startOfWeek(week), 'MMM dd')} to ${format(endOfWeek(week), 'MMM dd')}`, amount: 0 };
+    }
 
-    return { date: weekLabel, amount };
+    const latestTransaction = weekData.reduce((latest, current) => 
+      new Date(current.date) > new Date(latest.date) ? current : latest
+    );
+
+    const weekLabel = `Week ${getISOWeek(week)} - ${format(startOfWeek(week), 'MMM dd')} to ${format(endOfWeek(week), 'MMM dd')}`;
+    return { date: weekLabel, amount: latestTransaction.amount };
   });
+
+  // Sort the weekly data in ascending order by date
+  return weeklyData.sort((a, b) => new Date(a.date.split(' - ')[1].split(' to ')[0]).getTime() - new Date(b.date.split(' - ')[1].split(' to ')[0]).getTime());
 };
 
 export const preprocessMonthlyData = (data: Transaction[]) => {
@@ -43,15 +55,23 @@ export const preprocessMonthlyData = (data: Transaction[]) => {
     end: endOfMonth(maxDate)
   });
 
-  return months.map(month => {
+  const monthlyData = months.map(month => {
     const monthData = data.filter(item => {
       const itemDate = new Date(item.date);
       return itemDate >= startOfMonth(month) && itemDate <= endOfMonth(month);
     });
 
-    const monthLabel = format(month, 'MMM yyyy');
-    const amount = monthData.reduce((acc, cur) => acc + cur.amount, 0);
+    if (monthData.length === 0) {
+      return { date: format(month, 'MMM yyyy'), amount: 0 };
+    }
 
-    return { date: monthLabel, amount };
+    const latestTransaction = monthData.reduce((latest, current) => 
+      new Date(current.date) > new Date(latest.date) ? current : latest
+    );
+
+    return { date: format(month, 'MMM yyyy'), amount: latestTransaction.amount };
   });
+
+  // Sort the monthly data in ascending order by date
+  return monthlyData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 };

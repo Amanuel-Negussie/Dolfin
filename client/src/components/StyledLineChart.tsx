@@ -1,25 +1,41 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { Card, CardContent, CardTitle } from '@/components/ui/card'; // Use UI components for styling
-import { format } from 'date-fns'; // Date formatting library
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 
 interface StyledLineChartProps {
   data: { date: string; amount: number }[];
   title: string; // Prop for custom title
 }
 
-
-
 export const StyledLineChart: React.FC<StyledLineChartProps> = ({ data, title }) => {
+  const [leftMargin, setLeftMargin] = useState(10);
+  const yAxisRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (yAxisRef.current) {
+      const maxLabelWidth = Math.max(...data.map(d => {
+        const span = document.createElement('span');
+        span.style.visibility = 'hidden';
+        span.style.position = 'absolute';
+        span.innerText = `$${d.amount.toFixed(2)}`;
+        document.body.appendChild(span);
+        const width = span.getBoundingClientRect().width;
+        document.body.removeChild(span);
+        return width;
+      }));
+      setLeftMargin(maxLabelWidth + 10);
+    }
+  }, [data]);
+
   return (
     <Card className="shadow-lg rounded-lg border border-gray-200 bg-white">
       <CardContent>
         <CardTitle className="text-xl font-semibold text-gray-800">{title}</CardTitle>
-        <div className="h-[300px]">
+        <div ref={yAxisRef} className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={data}
-              margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+              margin={{ top: 10, right: 10, left: leftMargin, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis 
@@ -51,7 +67,7 @@ export const StyledLineChart: React.FC<StyledLineChartProps> = ({ data, title })
                 type="monotone"
                 dataKey="amount"
                 strokeWidth={2}
-                stroke="#4a90e2"
+                stroke="#82ca9d"
                 activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}
               />
             </LineChart>
