@@ -54,9 +54,9 @@ export const NetworthSummaryCard: React.FC<Props> = ({ userId, assets, accounts 
       <Tabs defaultValue="summary">
         <CardHeader>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="summary" className="text-lg font-semibold">Summary</TabsTrigger>
-            <TabsTrigger value="assets" className="text-lg font-semibold">Assets</TabsTrigger>
-            <TabsTrigger value="debt" className="text-lg font-semibold">Debt</TabsTrigger>
+            <TabsTrigger value="summary" className="">Summary</TabsTrigger>
+            <TabsTrigger value="assets" className="">Assets</TabsTrigger>
+            <TabsTrigger value="debt" className="">Debt</TabsTrigger>
           </TabsList>
         </CardHeader>
         <CardContent>
