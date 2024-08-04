@@ -66,34 +66,41 @@ export const RecurringPage: React.FC = () => {
   }
 
   return (
-    <>
-      <div className="hidden flex-col md:flex h-full">
-        <div className="flex-1 space-y-4 p-20 pt-6 h-full">
-          <h2 className="text-3xl font-bold tracking-tight">
-            Recurring Payments
-          </h2>
+    <div className="flex flex-col min-h-screen h-screen">
+      <div className="flex-1 flex flex-col space-y-4 p-20 pt-6">
+        <h2 className="text-3xl font-bold tracking-tight">
+          Recurring Payments
+        </h2>
 
-          <div className="flex gap-4 h-full">
-            <div className="flex flex-col flex-grow space-y-4">
-              <div className="space-y-2">
-                <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mb-4">
-                  Next 7 Days
-                </h4>
+        <div className="flex flex-1 gap-4">
+          <div className="flex flex-col flex-grow space-y-4">
+            <div className="space-y-2">
+              <h4 className="text-xl font-semibold tracking-tight mb-4">
+                Next 7 Days
+              </h4>
+              {next7DaysTransactions.length > 0 ? (
                 <RecurringCard transactions={next7DaysTransactions} />
-              </div>
+              ) : (
+                <div className="p-8 bg-gray-100 text-center rounded-md">
+                  <p className="text-xl font-semibold">Nothing due soon</p>
+                  <p className="text-gray-600">You can relax, you have nothing due within the next 7 days.</p>
+                </div>
+              )}
+            </div>
+            {comingLaterTransactions.length > 0 && (
               <div className="space-y-2">
-                <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mb-4">
+                <h4 className="text-xl font-semibold tracking-tight mb-4">
                   Coming later
                 </h4>
                 <RecurringCard transactions={comingLaterTransactions} />
               </div>
-            </div>
-            <div className="flex-shrink-0 self-start mt-12">
-              <RecurringCalendar highlightedDates={highlightedDates} />
-            </div>
+            )}
+          </div>
+          <div className="flex-shrink-0 self-start mt-0">
+            <RecurringCalendar highlightedDates={highlightedDates} />
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
