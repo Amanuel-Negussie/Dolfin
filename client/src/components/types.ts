@@ -27,17 +27,17 @@ export interface AccountType {
   available_balance: number;
   iso_currency_code: string;
   unofficial_currency_code: string;
-  type: 'depository' | 'investment' | 'loan' | 'credit';
+  type: "depository" | "investment" | "loan" | "credit";
   subtype:
-    | 'checking'
-    | 'savings'
-    | 'cd'
-    | 'money market'
-    | 'ira'
-    | '401k'
-    | 'student'
-    | 'mortgage'
-    | 'credit card';
+    | "checking"
+    | "savings"
+    | "cd"
+    | "money market"
+    | "ira"
+    | "401k"
+    | "student"
+    | "mortgage"
+    | "credit card";
   created_at: string;
   updated_at: string;
 }
@@ -59,6 +59,9 @@ export interface TransactionType {
   pending: boolean;
   account_owner: string;
   logo_url: string;
+  frequency?: number; // Optional, as not all transactions will have this field
+  last_transaction_date?: string; // Optional, as not all transactions will have this field
+  official_name?: string;
   created_at: string;
   updated_at: string;
 }
@@ -92,4 +95,4 @@ export interface Transaction {
   logo_url: string;
   created_at: string;
   updated_at: string;
-};
+}

@@ -37,6 +37,7 @@ const sanitizeAccounts = accounts =>
     'unofficial_currency_code',
     'type',
     'subtype',
+    'logo_url',
     'created_at',
     'updated_at',
   ]);
@@ -81,6 +82,9 @@ const sanitizeTransactions = transactions =>
     'category',
     'amount',
     'logo_url',
+    'frequency',
+    'last_transaction_date',
+    'official_name',
     'created_at',
     'updated_at',
   ]);
