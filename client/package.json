@@ -35,7 +35,7 @@
     "nextjs": "^0.0.3",
     "radix-ui": "^1.0.1",
     "react": "^18.2.0",
-    "react-day-picker": "^9.0.7",
+    "react-day-picker": "^8.10.1",
     "react-dom": "^18.2.0",
     "react-image": "^4.1.0",
     "react-plaid-link": "^3.5.1",
