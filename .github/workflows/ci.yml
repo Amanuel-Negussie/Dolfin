@@ -14,21 +14,22 @@ jobs:
 
     services:
       sqlserver:
-        image: mcr.microsoft.com/mssql/server:2019-latest
+        image: mcr.microsoft.com/mssql/server:2022-latest
         ports:
           - 1433:1433
         env:
           SA_PASSWORD: "Apple123"
           ACCEPT_EULA: "Y"
-        options: >-
-          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -Q \"SELECT 1\""
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+    - run: npm install
 
     - name: Install SQLCMD
       run: sudo apt-get install -y mssql-tools
