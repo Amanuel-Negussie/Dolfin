@@ -21,7 +21,7 @@ jobs:
           SA_PASSWORD: "Apple123"
           ACCEPT_EULA: "Y"
         options: >-
-          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Apple123' -Q \"SELECT 1\""
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Apple123' -Q \"SELECT 1\"" -N -C
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -35,19 +35,19 @@ jobs:
 
     - name: Run Initialization Script
       run: |
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i db/init_db.sql
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i db/init_db.sql
 
     - name: Input Dummy Data 
       run: |
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i db/tests/dummy_data.sql
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i db/tests/dummy_data.sql
 
     - name: Run Tests
       run: |
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i db/tests/tests/transactions-tests.sql
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i db/tests/tests/transactions-tests.sql
    
    
     - name: Run All SQL Scripts
       run: |
         for file in db/tests/tests/*.sql; do
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i "$file"
+          /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Apple123' -i "$file"
         done
