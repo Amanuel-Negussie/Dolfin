@@ -178,6 +178,7 @@ export function TransactionsProvider(props: any) {
           getTransactionsByAccount,
           getTransactionsByItem,
           getTransactionsByUser,
+          getRecurringTransactionsByUser,
           deleteTransactionsByItemId,
           deleteTransactionsByUserId,
           assetTrendData: trends.assets,
