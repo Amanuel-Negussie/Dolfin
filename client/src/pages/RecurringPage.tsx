@@ -1,3 +1,4 @@
+// RecurringPage.tsx
 import * as React from "react";
 import { RecurringCalendar } from "@/components/RecurringCalendar";
 import useTransactions from "../services/transactions";
@@ -96,7 +97,7 @@ export const RecurringPage: React.FC = () => {
               </div>
             )}
           </div>
-          <div className="flex-shrink-0 self-start mt-0">
+          <div className="flex-shrink-0 self-start mt-12">
             <RecurringCalendar highlightedDates={highlightedDates} />
           </div>
         </div>

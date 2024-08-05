@@ -9,14 +9,20 @@ export const RecurringCalendar: React.FC<RecurringCalendarProps> = ({ highlighte
   const [date, setDate] = React.useState<Date | undefined>(new Date());
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full max-w-sm max-h-screen overflow-auto">
       <Calendar
         mode="single"
         selected={date}
         onSelect={setDate}
-        highlightedDates={highlightedDates} // Pass the highlighted dates
+        modifiers={{
+          highlighted: highlightedDates,
+        }}
+        modifiersClassNames={{
+          highlighted: 'highlighted',
+        }}
         className="w-full h-full rounded-md border shadow"
       />
     </div>
   );
 };
+
