@@ -6,6 +6,7 @@ import {
   useReducer,
   useCallback,
   Dispatch,
+  useState,
 } from 'react';
 import groupBy from 'lodash/groupBy';
 import keyBy from 'lodash/keyBy';
@@ -15,6 +16,7 @@ import {
   getTransactionsByAccount as apiGetTransactionsByAccount,
   getTransactionsByItem as apiGetTransactionsByItem,
   getTransactionsByUser as apiGetTransactionsByUser,
+  getRecurringTransactionsByUser as apiGetRecurringTransactionsByUser,
 } from './api';
 import { Dictionary } from 'lodash';
 
@@ -25,8 +27,12 @@ interface TransactionsState {
 const initialState = {};
 type TransactionsAction =
   | {
-        type: 'SUCCESSFUL_GET';
-        payload: TransactionType[];
+      type: 'SUCCESSFUL_GET';
+      payload: TransactionType[];
+    }
+  | {
+      type: 'SUCCESSFUL_GET_RECURRING';
+      payload: TransactionType[];
     }
   | { type: 'DELETE_BY_ITEM'; payload: number }
   | { type: 'DELETE_BY_USER'; payload: number };
@@ -42,11 +48,13 @@ interface TransactionsContextShape extends TransactionsState {
   transactionsByItem: Dictionary<any>;
   assetTrendData: any[];
   liabilityTrendData: any[];
+  getRecurringTransactionsByUser: (userId: number) => void;
+  recurringTransactions: TransactionType[];
 }
-
 const TransactionsContext = createContext<TransactionsContextShape>(
   initialState as TransactionsContextShape
 );
+
 
 /**
 * @desc Calculates trends for assets and liabilities.
@@ -82,6 +90,7 @@ const calculateTrends = (transactions: TransactionType[]) => {
 */
 export function TransactionsProvider(props: any) {
   const [transactionsById, dispatch] = useReducer(reducer, initialState);
+  const [recurringTransactions, setRecurringTransactions] = useState<TransactionType[]>([]);
 
   const hasRequested = useRef<{
       byAccount: { [accountId: number]: boolean };
@@ -104,6 +113,17 @@ export function TransactionsProvider(props: any) {
       },
       []
   );
+
+  /**
+   *  @desc Requests all Recurring Transactions that belong to an individual User.
+   * The api request will be bypassed if the data has already been fetched.
+   */
+
+  const getRecurringTransactionsByUser = useCallback(async (userId: number) => {
+    const { data: payload } = await apiGetRecurringTransactionsByUser(userId);
+    dispatch({ type: 'SUCCESSFUL_GET_RECURRING', payload: payload });
+    setRecurringTransactions(payload);
+  }, []);
 
   /**
    * @desc Requests all Transactions that belong to an individual Item.
@@ -162,60 +182,65 @@ export function TransactionsProvider(props: any) {
           deleteTransactionsByUserId,
           assetTrendData: trends.assets,
           liabilityTrendData: trends.liabilities,
+          trends,
+          recurringTransactions,
       };
   }, [
-      dispatch,
-      transactionsById,
-      getTransactionsByAccount,
-      getTransactionsByItem,
-      getTransactionsByUser,
-      deleteTransactionsByItemId,
-      deleteTransactionsByUserId,
-      trends,
+    dispatch,
+    transactionsById,
+    getTransactionsByAccount,
+    getTransactionsByItem,
+    getTransactionsByUser,
+    getRecurringTransactionsByUser,
+    deleteTransactionsByItemId,
+    deleteTransactionsByUserId,
+    recurringTransactions,
   ]);
 
   return <TransactionsContext.Provider value={value} {...props} />;
 }
 
-/**
-* @desc Handles updates to the Transactions state as dictated by dispatched actions.
-*/
 function reducer(state: TransactionsState, action: TransactionsAction) {
   switch (action.type) {
-      case 'SUCCESSFUL_GET':
-          if (!action.payload.length) {
-              return state;
-          }
-          return {
-              ...state,
-              ...keyBy(action.payload, 'id'),
-          };
-      case 'DELETE_BY_ITEM':
-          return omitBy(
-              state,
-              transaction => transaction.item_id === action.payload
-          );
-      case 'DELETE_BY_USER':
-          return omitBy(
-              state,
-              transaction => transaction.user_id === action.payload
-          );
-      default:
-          console.warn('unknown action: ', action);
-          return state;
+    case 'SUCCESSFUL_GET':
+      if (!action.payload.length) {
+        return state;
+      }
+      return {
+        ...state,
+        ...keyBy(action.payload, 'id'),
+      };
+    case 'SUCCESSFUL_GET_RECURRING':
+      if (!action.payload.length) {
+        return state;
+      }
+      return {
+        ...state,
+        recurringTransactions: action.payload,
+      };
+    case 'DELETE_BY_ITEM':
+      return omitBy(
+        state,
+        transaction => transaction.item_id === action.payload
+      );
+    case 'DELETE_BY_USER':
+      return omitBy(
+        state,
+        transaction => transaction.user_id === action.payload
+      );
+    default:
+      console.warn('unknown action: ', action);
+      return state;
   }
 }
 
-/**
-* @desc A convenience hook to provide access to the Transactions context state in components.
-*/
 export default function useTransactions() {
   const context = useContext(TransactionsContext);
 
   if (!context) {
-      throw new Error(
-          `useTransactions must be used within a TransactionsProvider`
-      );
+    throw new Error(
+      `useTransactions must be used within a TransactionsProvider`
+    );
   }
 
   return context;

@@ -2,6 +2,7 @@ import { AccountSummaryCard } from "@/components/AccountSummaryCard";
 import { TransactionTrendsCard } from "@/components/TransactionTrendsCard";
 import { TransactionsCard } from "@/components/TransactionsCard";
 import { Transaction } from "@/components/types";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import useLogin from "@/hooks/useLogin";
 import { useAccounts, useTransactions } from "@/services";
 import { useEffect, useState } from "react";
@@ -34,7 +35,9 @@ export const Dashboard: React.FC = () => {
     }, [accountsByUser]);
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return <div>
+        <LoadingSpinner />
+      </div>
     }
 
     return (

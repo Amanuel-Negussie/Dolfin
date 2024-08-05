@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { setAccessToken } from '../hooks/axiosConfigs';
 import { MainNav } from "@/components/MainNav";
 import { AccountMenu } from "@/components/AccountMenu";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface PageLayoutProps {
   element: ReactElement;
@@ -14,7 +15,9 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ element }) => {
   const [isFetched, setIsFetched] = useState<boolean>(false);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>
+    <LoadingSpinner />
+  </div>;
   }
 
   if (!isAuthenticated) {
