@@ -48,7 +48,7 @@ router.get(
     const { instId } = req.params;
     const request = {
       institution_id: instId,
-      country_codes: ['US'],
+      country_codes: ['US','CA'],
       options: {
         include_optional_metadata: true,
       },
@@ -62,3 +62,4 @@ router.get(
 );
 
 module.exports = router;
+

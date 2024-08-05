@@ -10,6 +10,7 @@ import React, {
 import keyBy from 'lodash/keyBy';
 import omit from 'lodash/omit';
 import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
 
 import { UserType } from '../components/types';
 import { useAccounts, useItems, useTransactions } from '.';
@@ -18,8 +19,9 @@ import {
   getUserById as apiGetUserById,
   addNewUser as apiAddNewUser,
   deleteUserById as apiDeleteUserById,
+  getTransactionAssetsByUser as apiGetTransactionAssetsByUser,
+  getTransactionLiabilitiesByUser as apiGetTransactionLiabilitiesByUser,
 } from './api';
-import { AxiosError } from 'axios';
 
 interface UsersState {
   [key: string]: UserType | any;
@@ -27,11 +29,8 @@ interface UsersState {
 
 const initialState = {};
 type UsersAction =
-  | {
-    type: 'SUCCESSFUL_GET';
-    payload: UserType;
-  }
-  | { type: 'SUCCESSFUL_DELETE'; payload: number };
+  | { type: 'SUCCESSFUL_GET'; payload: UserType; }
+  | { type: 'SUCCESSFUL_DELETE'; payload: number; };
 
 interface UsersContextShape extends UsersState {
   dispatch: Dispatch<UsersAction>;
@@ -40,9 +39,6 @@ const UsersContext = createContext<UsersContextShape>(
   initialState as UsersContextShape
 );
 
-/**
- * @desc Maintains the Users context state and provides functions to update that state.
- */
 export function UsersProvider(props: any) {
   const [usersById, dispatch] = useReducer(reducer, {});
   const { deleteAccountsByUserId } = useAccounts();
@@ -57,9 +53,6 @@ export function UsersProvider(props: any) {
     byId: {},
   });
 
-  /**
-   * @desc Creates a new user
-   */
   const addNewUser = useCallback(async (userInfo: { username: string, auth0Id: string }) => {
     try {
       const { data: payload } = await apiAddNewUser(userInfo);
@@ -74,11 +67,6 @@ export function UsersProvider(props: any) {
     }
   }, []);
 
-  /**
-   * @desc Requests all Users.
-   * The api request will be bypassed if the data has already been fetched.
-   * A 'refresh' parameter can force a request for new data even if local state exists.
-   */
   const getUsers = useCallback(async (refresh: boolean) => {
     if (!hasRequested.current.all || refresh) {
       hasRequested.current.all = true;
@@ -87,11 +75,6 @@ export function UsersProvider(props: any) {
     }
   }, []);
 
-  /**
-   * @desc Requests details for a single User.
-   * The api request will be bypassed if the data has already been fetched.
-   * A 'refresh' parameter can force a request for new data even if local state exists.
-   */
   const getUserById = useCallback(async (id: number, refresh: boolean) => {
     if (!hasRequested.current.byId[id] || refresh) {
       hasRequested.current.byId[id] = true;
@@ -100,9 +83,6 @@ export function UsersProvider(props: any) {
     }
   }, []);
 
-  /**
-   * @desc Will delete User by userId.
-   */
   const deleteUserById = useCallback(
     async (id: number) => {
       await apiDeleteUserById(id); // this will delete all items associated with user
@@ -115,10 +95,17 @@ export function UsersProvider(props: any) {
     [deleteItemsByUserId, deleteAccountsByUserId, deleteTransactionsByUserId]
   );
 
-  /**
-   * @desc Builds a more accessible state shape from the Users data. useMemo will prevent
-   * these from being rebuilt on every render unless usersById is updated in the reducer.
-   */
+  // New functions for getting transaction assets and liabilities
+  const getTransactionAssetsByUser = useCallback(async (userId: number) => {
+    const { data } = await apiGetTransactionAssetsByUser(userId);
+    return data;
+  }, []);
+
+  const getTransactionLiabilitiesByUser = useCallback(async (userId: number) => {
+    const { data } = await apiGetTransactionLiabilitiesByUser(userId);
+    return data;
+  }, []);
+
   const value = useMemo(() => {
     const allUsers = Object.values(usersById);
     return {
@@ -129,15 +116,14 @@ export function UsersProvider(props: any) {
       getUsersById: getUserById,
       addNewUser,
       deleteUserById,
+      getTransactionAssetsByUser,
+      getTransactionLiabilitiesByUser,
     };
-  }, [usersById, getUsers, getUserById, addNewUser, deleteUserById]);
+  }, [usersById, getUsers, getUserById, addNewUser, deleteUserById, getTransactionAssetsByUser, getTransactionLiabilitiesByUser]);
 
   return <UsersContext.Provider value={value} {...props} />;
 }
 
-/**
- * @desc Handles updates to the Users state as dictated by dispatched actions.
- */
 function reducer(state: UsersState, action: UsersAction | any) {
   switch (action.type) {
     case 'SUCCESSFUL_GET':
@@ -156,9 +142,6 @@ function reducer(state: UsersState, action: UsersAction | any) {
   }
 }
 
-/**
- * @desc A convenience hook to provide access to the Users context state in components.
- */
 export default function useUsers() {
   const context = useContext(UsersContext);
 

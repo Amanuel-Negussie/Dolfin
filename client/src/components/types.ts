@@ -4,6 +4,7 @@ export interface RouteInfo {
   userId: string;
 }
 
+
 export interface ItemType {
   id: number;
   plaid_item_id: string;

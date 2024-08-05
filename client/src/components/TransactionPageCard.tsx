@@ -1,15 +1,20 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DataTable } from "./dataTable";
 import { Input } from "./ui/input";
 import { ColumnDef } from "@tanstack/react-table";
 import { Transaction } from "./types";
 import { format } from "date-fns";
+
+
+
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
 } from "@/components/ui/avatar";
+import { OurDataTable } from "./OurDataTable";
+
+
 
 interface TransactionCardProps {
     transactions: Transaction[];
@@ -108,7 +113,7 @@ export const TransactionPageCard: React.FC<TransactionCardProps> = ({ transactio
                     <CardTitle>Recent Transactions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <DataTable 
+                    <OurDataTable 
                         columns={columns}
                         data={filteredTransactions}
                     />

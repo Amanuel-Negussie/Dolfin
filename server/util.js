@@ -4,7 +4,7 @@ const pick = require('lodash/pick');
 /**
  * Wraps input in an array if needed.
  *
- * @param {*} input the data to be wrapped in array if needed.
+ * @param {*} input the data to be wrapped in an array if needed.
  * @returns {*[]} an array based on the input.
  */
 const toArray = input => (isArray(input) ? [...input] : [input]);
@@ -66,9 +66,9 @@ const sanitizeUsers = users =>
   sanitizeWith(users, ['id', 'username', 'created_at', 'updated_at']);
 
 /**
- * Returns an array of transactions
+ * Returns an array of sanitized transactions.
  *
- * @param {(Object|Object[])} transactions a single transaction of an array of transactions.
+ * @param {(Object|Object[])} transactions a single transaction or an array of transactions.
  */
 const sanitizeTransactions = transactions =>
   sanitizeWith(transactions, [
@@ -89,6 +89,36 @@ const sanitizeTransactions = transactions =>
     'updated_at',
   ]);
 
+/**
+ * Returns an array of sanitized transaction assets.
+ *
+ * @param {(Object|Object[])} transactionAssets a single transaction asset or an array of transaction assets.
+ */
+const sanitizeTransactionAssets = transactionAssets =>
+  sanitizeWith(transactionAssets, [
+    'id',
+    'account_id',
+    'category',
+    'amount',
+    'created_at',
+    'type'
+  ]);
+
+/**
+ * Returns an array of sanitized transaction liabilities.
+ *
+ * @param {(Object|Object[])} transactionLiabilities a single transaction liability or an array of transaction liabilities.
+ */
+const sanitizeTransactionLiabilities = transactionLiabilities =>
+  sanitizeWith(transactionLiabilities, [
+    'id',
+    'account_id',
+    'category',
+    'amount',
+    'created_at',
+    'type'
+  ]);
+
 const validItemStatuses = new Set(['good', 'bad']);
 const isValidItemStatus = status => validItemStatuses.has(status);
 
@@ -98,6 +128,8 @@ module.exports = {
   sanitizeItems,
   sanitizeUsers,
   sanitizeTransactions,
+  sanitizeTransactionAssets,
+  sanitizeTransactionLiabilities,
   validItemStatuses,
   isValidItemStatus,
 };

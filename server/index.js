@@ -146,11 +146,27 @@ app.post("/create_link_token", async function (request, response) {
       user: {
         client_user_id: "user",
       },
-      client_name: "Plaid Test App",
-      products: ["auth", "transactions"],
-      language: "en",
-      redirect_uri: "http://localhost:5173/",
-      country_codes: ["US"],
+      client_name: 'Dolfin',
+      products,
+      country_codes: ['US','CA'],
+      language: 'en',
+      //webhook: httpsTunnel.public_url + '/services/webhook',
+      access_token: accessToken,
+      link_customization_name: 'dolfin',
+      account_filters: {
+
+        depository: {
+    
+          account_subtypes: ['checking', 'savings']
+    
+        },
+    
+        credit: {
+    
+          account_subtypes: ['credit card']
+    
+        }
+      }
     };
     const createTokenResponse = await plaidClient.linkTokenCreate(plaidRequest);
     response.json(createTokenResponse.data);
