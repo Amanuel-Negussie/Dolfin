@@ -10,7 +10,7 @@ const {
   deleteTransactions,
   updateItemTransactionsCursor,
   updateRecurringTransactions,
-  identifyRecurringTransactions,
+  retrieveRecurringTransactionsByUserId,
 } = require('./db/queries');
 
 
@@ -97,8 +97,8 @@ const updateTransactions = async (plaidItemId) => {
   await updateItemTransactionsCursor(plaidItemId, cursor);
 
   // Identify and store recurring transactions
-  const recurringTransactions = identifyRecurringTransactions(added.concat(modified));
-  await updateRecurringTransactions(recurringTransactions);
+  const recurringTransactions = retrieveRecurringTransactionsByUserId(added.concat(modified));
+  //xawait updateRecurringTransactions(recurringTransactions);
 
   return {
     addedCount: added.length,
