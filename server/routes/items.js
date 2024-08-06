@@ -43,12 +43,6 @@ router.post(
       institutionId,
       userId
     );
-    if (existingItem){
-      console.log("Okay this is api/post with existing item");
-      throw new Boom('You have already linked an item at this institution.', {
-        statusCode: 409,
-      });
-    }
 
     // exchange the public token for a private access token and store with the item.
     const response = await plaid.itemPublicTokenExchange({
@@ -62,6 +56,7 @@ router.post(
       itemId,
       userId
     );
+
 
     // Make an initial call to fetch transactions and enable SYNC_UPDATES_AVAILABLE webhook sending
     // for this item.

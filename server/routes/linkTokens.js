@@ -26,7 +26,7 @@ router.post(
     try {
       const { userId, itemId } = req.body;
       let accessToken = null;
-      let products = ["auth", "transactions"]; // must include transactions in order to receive transactions webhooks
+      let products = ["auth", "transactions", "liabilities"]; // must include transactions in order to receive transactions webhooks
       if (itemId != null) {
         // for the link update mode, include access token and an empty products array
         const itemIdResponse = await retrieveItemById(itemId);
@@ -47,21 +47,8 @@ router.post(
         language: 'en',
         //webhook: httpsTunnel.public_url + '/services/webhook',
         access_token: accessToken,
-        link_customization_name: 'dolfin',
-        account_filters: {
-
-          depository: {
-      
-            account_subtypes: ['checking', 'savings']
-      
-          },
-      
-          credit: {
-      
-            account_subtypes: ['credit card']
-      
-          }
-        }
+        link_customization_name: 'dolfin'
+        
       };
       // If user has entered a redirect uri in the .env file
       if (redirect_uri.indexOf('http') === 0) {

@@ -90,7 +90,10 @@ const updateTransactions = async (plaidItemId) => {
   const {data: {accounts}} = await plaid.accountsGet(request);
   
   // Update the DB.
-  await createAccounts(plaidItemId, accounts);
+  console.log('Accounts being processed:', accounts);
+const createdAccounts = await createAccounts(plaidItemId, accounts);
+console.log('Accounts created/updated:', createdAccounts);
+
   await createOrUpdateTransactions(added.concat(modified));
   await deleteTransactions(removed);
   await updateItemTransactionsCursor(plaidItemId, cursor);

@@ -84,7 +84,7 @@ const createOrUpdateTransactions = async transactions => {
 
       await queryDatabase(query, params);
       // Identify and update recurring transactions
-      const recurringTransactions = identifyRecurringTransactions(transactions);
+     // const recurringTransactions = identifyRecurringTransactions(transactions);
       await updateRecurringTransactions(recurringTransactions);
     } catch (err) {
       console.error(err);
