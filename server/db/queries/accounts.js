@@ -80,12 +80,6 @@ const createAccounts = async (plaidItemId, accounts) => {
               VALUES (source.item_id, source.plaid_account_id, source.name, source.mask, source.official_name, source.current_balance, source.available_balance, source.iso_currency_code, source.unofficial_currency_code, source.type, source.subtype)
             OUTPUT inserted.*;
         END
-        ELSE
-        BEGIN
-            -- Output a message or take another action if the record already exists
-            SELECT 'Another One not added because @name already exists.' AS Message;
-        END
-
 
     `;
 
@@ -107,11 +101,16 @@ const createAccounts = async (plaidItemId, accounts) => {
 
     const { recordset } = await queryDatabase(query, params);
   
-    return recordset[0];
+    return recordset? recordset[0]: null;
   });
 
   try {
-    return await Promise.all(pendingQueries);
+    // Wait for all queries to complete and filter out null values
+    const results = await Promise.all(pendingQueries);
+    const filteredResults = results.filter(result => result !== null);
+    
+    // Return filtered results if not empty, else return null
+    return filteredResults.length > 0 ? filteredResults : null;
   } catch (error) {
     console.error('Error creating accounts:', error);
     throw error;

@@ -8,6 +8,7 @@ const {
   createAccounts,
   createOrUpdateTransactions,
   deleteTransactions,
+  deleteItem,
   updateItemTransactionsCursor,
   retrieveRecurringTransactionsByUserId,
 } = require('./db/queries');
@@ -73,8 +74,8 @@ const fetchTransactionUpdates = async (plaidItemId) => {
  * @param {string} plaidItemId the Plaid ID for the item.
  */
 const updateTransactions = async (plaidItemId) => {
-  // Fetch new transactions from plaid api.
-  const {
+   // Fetch new transactions from plaid api.
+   const {
     added,
     modified,
     removed,
@@ -92,16 +93,28 @@ const updateTransactions = async (plaidItemId) => {
   // Update the DB.
   console.log('Accounts being processed:', accounts);
 const createdAccounts = await createAccounts(plaidItemId, accounts);
-console.log('Accounts created/updated:', createdAccounts);
+// Initialize the flag
+let shouldSaveItemId = false;
+let newItem = null;
+
+if (createdAccounts) {
+  shouldSaveItemId = true;
+
 
   await createOrUpdateTransactions(added.concat(modified));
   await deleteTransactions(removed);
   await updateItemTransactionsCursor(plaidItemId, cursor);
+}
+
+
 
   return {
     addedCount: added.length,
     modifiedCount: modified.length,
     removedCount: removed.length,
+    itemAdded: shouldSaveItemId,
+    accounts: createdAccounts,
+    newItemId: newItem ? newItem.id : null
   };
 };
 
