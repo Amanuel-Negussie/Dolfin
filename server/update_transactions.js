@@ -8,6 +8,7 @@ const {
   createAccounts,
   createOrUpdateTransactions,
   deleteTransactions,
+  deleteItem,
   updateItemTransactionsCursor,
   retrieveRecurringTransactionsByUserId,
 } = require('./db/queries');
@@ -73,8 +74,8 @@ const fetchTransactionUpdates = async (plaidItemId) => {
  * @param {string} plaidItemId the Plaid ID for the item.
  */
 const updateTransactions = async (plaidItemId) => {
-  // Fetch new transactions from plaid api.
-  const {
+   // Fetch new transactions from plaid api.
+   const {
     added,
     modified,
     removed,
@@ -90,15 +91,41 @@ const updateTransactions = async (plaidItemId) => {
   const {data: {accounts}} = await plaid.accountsGet(request);
   
   // Update the DB.
-  await createAccounts(plaidItemId, accounts);
-  await createOrUpdateTransactions(added.concat(modified));
-  await deleteTransactions(removed);
-  await updateItemTransactionsCursor(plaidItemId, cursor);
+  console.log('Accounts being processed:', accounts);
+const createdAccounts = await createAccounts(plaidItemId, accounts);
+// Initialize the flag
+let shouldSaveItemId = false;
+let newItem = null;
+
+if (createdAccounts) {
+  shouldSaveItemId = true;
+
+  // Check if added or modified transactions are present before calling createOrUpdateTransactions
+  if (added.length > 0 || modified.length > 0) {
+    await createOrUpdateTransactions(added.concat(modified));
+  }
+
+  // Check if removed transactions are present before calling deleteTransactions
+  if (removed.length > 0) {
+    await deleteTransactions(removed);
+  }
+
+  // Update the cursor if transactions were added, modified, or removed
+  if (added.length > 0 || modified.length > 0 || removed.length > 0) {
+    await updateItemTransactionsCursor(plaidItemId, cursor);
+  }
+}
+
+
+
 
   return {
     addedCount: added.length,
     modifiedCount: modified.length,
     removedCount: removed.length,
+    itemAdded: shouldSaveItemId,
+    accounts: createdAccounts,
+    newItemId: newItem ? newItem.id : null
   };
 };
 

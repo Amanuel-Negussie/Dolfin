@@ -35,8 +35,14 @@ const createOrUpdateTransactions = async transactions => {
     // console.log('formatted: ', formattedAmount);
     //console.log('logo_url: ', transaction.logo_url);
     // Retrieve the account ID
-    const { id: accountId } = await retrieveAccountByPlaidAccountId(plaidAccountId);
+    const account = await retrieveAccountByPlaidAccountId(plaidAccountId);
+    
+    // Check if account was found
+    if (!account) {
+      throw new Error(`Account not found for plaidAccountId: ${plaidAccountId}`);
+    }
 
+    const { id: accountId } = account;
     try {
       console.log(category);
       // SQL query for MERGE
