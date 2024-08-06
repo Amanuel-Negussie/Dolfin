@@ -100,11 +100,22 @@ let newItem = null;
 if (createdAccounts) {
   shouldSaveItemId = true;
 
+  // Check if added or modified transactions are present before calling createOrUpdateTransactions
+  if (added.length > 0 || modified.length > 0) {
+    await createOrUpdateTransactions(added.concat(modified));
+  }
 
-  await createOrUpdateTransactions(added.concat(modified));
-  await deleteTransactions(removed);
-  await updateItemTransactionsCursor(plaidItemId, cursor);
+  // Check if removed transactions are present before calling deleteTransactions
+  if (removed.length > 0) {
+    await deleteTransactions(removed);
+  }
+
+  // Update the cursor if transactions were added, modified, or removed
+  if (added.length > 0 || modified.length > 0 || removed.length > 0) {
+    await updateItemTransactionsCursor(plaidItemId, cursor);
+  }
 }
+
 
 
 
