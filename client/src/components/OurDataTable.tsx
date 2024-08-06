@@ -5,6 +5,7 @@ import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
 
@@ -33,6 +34,7 @@ export function OurDataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     initialState: { pagination: { pageSize: 10 } }, // Set initial page size if desired
   })
 
@@ -42,18 +44,16 @@ export function OurDataTable<TData, TValue>({
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : <DataTableColumnHeader 
-                          column={header.column} 
-                          title={flexRender(header.column.columnDef.header, header.getContext())} 
-                        />}
-                  </TableHead>
-                )
-              })}
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : <DataTableColumnHeader 
+                        column={header.column} 
+                        title={flexRender(header.column.columnDef.header, header.getContext())} 
+                      />}
+                </TableHead>
+              ))}
             </TableRow>
           ))}
         </TableHeader>

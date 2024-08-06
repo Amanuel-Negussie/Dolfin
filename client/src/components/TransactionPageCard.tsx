@@ -4,24 +4,16 @@ import { Input } from "./ui/input";
 import { ColumnDef } from "@tanstack/react-table";
 import { Transaction } from "./types";
 import { format } from "date-fns";
-
-
-
-import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { OurDataTable } from "./OurDataTable";
-
-
 
 interface TransactionCardProps {
     transactions: Transaction[];
-};
+}
 
-const formatAmount = (amount: number): string => {
-    return amount >= 0 ? `$${amount.toFixed(2)}` : `-$${Math.abs(amount).toFixed(2)}`;
+const formatAmount = (amount: string): string => {
+    const num = parseFloat(amount);
+    return num >= 0 ? `$${num.toFixed(2)}` : `-$${Math.abs(num).toFixed(2)}`;
 };
 
 const getAvatarDetails = (name: string, logoUrl: string | null) => {
@@ -41,7 +33,7 @@ export const TransactionPageCard: React.FC<TransactionCardProps> = ({ transactio
     useEffect(() => {
         setFilteredTransactions(transactions.filter(transaction => {
             const matchesNameOrDate = transaction.name.toLowerCase().includes(nameFilter.toLowerCase()) ||
-                format(new Date(transaction.date as string | number | Date), 'yyyy-MM-dd').includes(nameFilter);
+                format(new Date(transaction.date), 'yyyy-MM-dd').includes(nameFilter);
             const matchesAmount = transaction.amount.toString().includes(amountFilter);
             return matchesNameOrDate && matchesAmount;
         }));
@@ -72,21 +64,22 @@ export const TransactionPageCard: React.FC<TransactionCardProps> = ({ transactio
         {
             header: 'Date',
             accessorKey: 'date',
-            cell: ({ row }) => format(new Date(row.getValue("date") as string | number | Date), 'yyyy-MM-dd'),
+            cell: ({ row }) => format(new Date(row.getValue("date")), 'yyyy-MM-dd'),
             enableSorting: true,
         },
         {
             header: 'Amount',
             accessorKey: 'amount',
             cell: ({ row }) => {
-                const amount = parseFloat(row.getValue("amount"));
-                const formatted = new Intl.NumberFormat("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                }).format(amount);
-                return formatted;
+                const amount = row.getValue("amount") as string;
+                return formatAmount(amount);
             },
             enableSorting: true,
+            sortingFn: (rowA, rowB) => {
+                const amountA = parseFloat(rowA.original.amount as unknown as string);
+                const amountB = parseFloat(rowB.original.amount as unknown as string);
+                return amountA - amountB;
+            },
         },
     ];
 
