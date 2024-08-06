@@ -125,6 +125,7 @@ const createAccounts = async (plaidItemId, accounts) => {
  * @returns {Object} a single account.
  */
 const retrieveAccountByPlaidAccountId = async plaidAccountId => {
+  console.log(plaidAccountId);
   const query = 'SELECT * FROM accounts WHERE plaid_account_id = @param1';
   const params = [{ name: 'param1', type: sql.NVarChar, value: plaidAccountId }];
   const { recordset } = await queryDatabase(query, params);
