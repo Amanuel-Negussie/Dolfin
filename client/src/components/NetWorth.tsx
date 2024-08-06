@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import DataTable from './DataTable';
+import DataTable from './dataTable';
 import { currencyFilter, pluralize } from '../util';
 import { AccountType, AssetType } from './types';
 import { useAssets } from '../services';
