@@ -148,7 +148,7 @@ app.post("/create_link_token", async function (request, response) {
       },
       client_name: 'Dolfin',
       products,
-      country_codes: ['US','CA'],
+      country_codes: ['CA'],
       language: 'en',
       //webhook: httpsTunnel.public_url + '/services/webhook',
       access_token: accessToken,

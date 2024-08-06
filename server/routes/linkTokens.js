@@ -47,7 +47,6 @@ router.post(
         language: 'en',
         //webhook: httpsTunnel.public_url + '/services/webhook',
         access_token: accessToken,
-        link_customization_name: 'dolfin',
         account_filters: {
 
           depository: {

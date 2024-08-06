@@ -97,9 +97,7 @@ const updateTransactions = async (plaidItemId) => {
   await updateItemTransactionsCursor(plaidItemId, cursor);
 
   // Identify and store recurring transactions
-  const recurringTransactions = identifyRecurringTransactions(added.concat(modified));
-  await updateRecurringTransactions(recurringTransactions);
-
+  
   return {
     addedCount: added.length,
     modifiedCount: modified.length,
