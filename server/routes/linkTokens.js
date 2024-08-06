@@ -47,8 +47,22 @@ router.post(
         language: 'en',
         //webhook: httpsTunnel.public_url + '/services/webhook',
         access_token: accessToken,
-        link_customization_name: 'dolfin'
+        link_customization_name: 'dolfin',
         
+        account_filters: {
+
+          depository: {
+      
+            account_subtypes: ['checking', 'savings']
+      
+          },
+      
+          credit: {
+      
+            account_subtypes: ['credit card']
+      
+          }
+        }
       };
       // If user has entered a redirect uri in the .env file
       if (redirect_uri.indexOf('http') === 0) {
