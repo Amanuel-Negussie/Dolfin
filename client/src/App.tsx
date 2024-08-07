@@ -19,6 +19,7 @@ import "react-toastify/dist/ReactToastify.css";
 import './styles.css';
 
 import { LoadingSpinner } from "./components/ui/loading-spinner";
+import { BudgetPage } from "./pages/BudgetPage.tsx";
 
 const LandingPage = React.lazy(() => import("./pages/LandingPage"));
 
@@ -29,6 +30,7 @@ const routes = [
   { path: "/networth/", element: <NetworthPage/>},
   { path: "/old", element: <HomePage /> },
   { path: "/recurring/*", element: <RecurringPage /> },
+  { path: "/budgets/*", element: <BudgetPage /> },
   //{ path: "/example", element: <ExamplePage />},
 ];
 

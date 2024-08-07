@@ -35,7 +35,13 @@ const {
     retrieveUserById,
     retrieveUserByUsername,
     retrieveTransactionAssetsByUserId,
-    retrieveTransactionLiabilitiesByUserId
+    retrieveTransactionLiabilitiesByUserId,
+    createIncomeBills,
+    retrieveIncomeBillsByUserId,
+    createBudgetCategory,
+    retrieveBudgetCategoriesByUserId,
+    updateIncomeBills,
+    updateBudgetCategory,
   } = require('./users');
   const { createLinkEvent } = require('./linkEvents');
   
@@ -78,6 +84,12 @@ const {
     retrieveUserById,
     retrieveUserByUsername,
     retrieveUsers,
+    createIncomeBills,
+    retrieveIncomeBillsByUserId,
+    createBudgetCategory,
+    retrieveBudgetCategoriesByUserId,
+    updateIncomeBills,
+    updateBudgetCategory,
     // assets
     createAsset,
     retrieveAssetsByUser,
