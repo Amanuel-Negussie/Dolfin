@@ -12,9 +12,12 @@ const {
   deleteUsers,
   retrieveItemsByAuth0Id,
   retrieveTransactionsByUserId,
+  retrieveTransactionAssetsByUserId,
+  retrieveTransactionLiabilitiesByUserId,
   retrieveTransactionsByAuth0Id,
   retrieveUserByAuth0Id,
   retrieveTransactionTrendsByAuth0Id,
+  retrieveRecurringTransactionsByUserId,
 } = require('../db/queries');
 const { asyncWrapper } = require('../middleware');
 const {
@@ -22,7 +25,10 @@ const {
   sanitizeItems,
   sanitizeUsers,
   sanitizeTransactions,
+  sanitizeTransactionAssets,
+  sanitizeTransactionLiabilities,
 } = require('../util');
+
 
 const router = express.Router();
 
@@ -139,6 +145,29 @@ router.get(
   })
 );
 
+
+// transaction assets
+router.get(
+  '/:userId/transaction-assets',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    const transactions = await retrieveTransactionAssetsByUserId(userId);
+    
+    res.json(sanitizeTransactionAssets(transactions));
+  })
+);
+
+// transaction liabilities
+router.get(
+  '/:userId/transaction-liabilities',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    const transactions = await retrieveTransactionLiabilitiesByUserId(userId);
+    res.json(sanitizeTransactionLiabilities(transactions));
+  })
+);
+
+
 /**
  * Retrieves all transactions associated with a single user.
  *
@@ -179,6 +208,22 @@ router.delete(
     // delete from the db
     await deleteUsers(userId);
     res.sendStatus(204);
+  })
+);
+
+/**
+ * Retrieves all recurring transactions associated with a single user.
+ *
+ * @param {string} userId the ID of the user.
+ * @returns {Object[]} an array of recurring transactions
+ */
+router.get(
+  '/:userId/recurring-transactions',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    console.log("Recurring Transactions Yo");
+    const recurringTransactions = await retrieveRecurringTransactionsByUserId(userId);
+    res.json(sanitizeTransactions(recurringTransactions));
   })
 );
 

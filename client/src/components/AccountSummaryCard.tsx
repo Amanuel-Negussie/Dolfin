@@ -82,7 +82,7 @@ export const AccountSummaryCard: React.FC<AccountSummaryCardProps> = ({ accounts
                     <CardTitle className="">Account Summary</CardTitle>
                     <Button onClick={navigateToTarget} className="ml-auto">Add Bank</Button>
                 </CardHeader>
-                <CardContent className="grid :grid-csmols-1 md:grid-cols-2 gap-4">
+                <CardContent className="grid md:grid-csmols-1 lg:grid-cols-2 gap-4">
                     <div>
                         <Card>
                             <CardHeader className="p-4">

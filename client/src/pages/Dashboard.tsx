@@ -2,6 +2,7 @@ import { AccountSummaryCard } from "@/components/AccountSummaryCard";
 import { TransactionTrendsCard } from "@/components/TransactionTrendsCard";
 import { TransactionsCard } from "@/components/TransactionsCard";
 import { AccountType, Transaction } from "@/components/types";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import useLogin from "@/hooks/useLogin";
 import { useAccounts, useTransactions } from "@/services";
 import { useEffect, useState } from "react";
@@ -42,8 +43,10 @@ export const Dashboard: React.FC = () => {
         }
     }, [transactionsByUser]);
 
-    if (isLoadingAccounts || isLoadingTransactions) {
-        return <div>Loading...</div>
+    if  (isLoadingAccounts || isLoadingTransactions) {
+        return <div>
+        <LoadingSpinner />
+      </div>
     }
 
     return (
@@ -53,10 +56,9 @@ export const Dashboard: React.FC = () => {
                 <div>
                     <AccountSummaryCard accounts={accounts} />
                 </div>
-                <div className="grid gap-4 md:grid-cols-1 xl:grid-cols-2">
-                    <TransactionTrendsCard />
-
-                    <TransactionsCard transactions={transactions} />
+                <div className="grid gap-4 lg:grid-cols-1 2xl:grid-cols-2">
+                        <TransactionTrendsCard />
+                        <TransactionsCard transactions={transactions} />
                 </div>
             </div>
         </div>

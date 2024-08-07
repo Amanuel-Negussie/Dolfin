@@ -27,6 +27,7 @@ const asyncWrapper = fn => (req, res, next) => {
  * @param {Function} next the Express next callback.
  */
 const errorHandler = (err, req, res, next) => {
+  console.log(err);
   let error = err;
 
   // handle errors from the Plaid api.

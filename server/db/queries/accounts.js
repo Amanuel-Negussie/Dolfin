@@ -9,10 +9,13 @@ const sql = require('mssql');
  * @returns {Object[]} an array of new accounts.
  */
 const createAccounts = async (plaidItemId, accounts) => {
-  const { id: itemId } = await retrieveItemByPlaidItemId(plaidItemId);
+  const { id: itemId, plaid_institution_id: plaidInstitutionId, user_id: userId } = await retrieveItemByPlaidItemId(plaidItemId);
+   // Log retrieved item details
+   console.log('Retrieved Item Details:', { itemId, plaidInstitutionId, userId });
+
   const pendingQueries = accounts.map(async account => {
     const {
-      account_id: aid,
+      account_id: plaidAccountId,
       name,
       mask,
       official_name: officialName,
@@ -25,37 +28,95 @@ const createAccounts = async (plaidItemId, accounts) => {
       subtype,
       type,
     } = account;
+    // Log account details
+    console.log('Processing Account:', {
+      plaidAccountId,
+      name,
+      mask,
+      officialName,
+      availableBalance,
+      currentBalance,
+      isoCurrencyCode,
+      unofficialCurrencyCode,
+      subtype,
+      type,
+    });
     const query = `
-      MERGE accounts_table AS target
-      USING (SELECT @param1 AS item_id, @param2 AS plaid_account_id, @param3 AS name, @param4 AS mask, @param5 AS official_name, @param6 AS current_balance, @param7 AS available_balance, @param8 AS iso_currency_code, @param9 AS unofficial_currency_code, @param10 AS type, @param11 AS subtype) AS source
-      ON (target.plaid_account_id = source.plaid_account_id)
-      WHEN MATCHED THEN
-        UPDATE SET
-          current_balance = source.current_balance,
-          available_balance = source.available_balance
-      WHEN NOT MATCHED THEN
-        INSERT (item_id, plaid_account_id, name, mask, official_name, current_balance, available_balance, iso_currency_code, unofficial_currency_code, type, subtype)
-        VALUES (source.item_id, source.plaid_account_id, source.name, source.mask, source.official_name, source.current_balance, source.available_balance, source.iso_currency_code, source.unofficial_currency_code, source.type, source.subtype)
-      OUTPUT inserted.*;
+     
+        IF NOT EXISTS (
+            SELECT 1 
+            FROM accounts_table 
+            WHERE name = @name 
+              AND item_id IN (
+                SELECT id 
+                FROM items_table 
+                WHERE plaid_institution_id = @plaidInstitutionId 
+                  AND user_id = @userId
+              )
+        )
+        BEGIN
+            -- Perform the MERGE operation if the record does not exist
+            MERGE accounts_table AS target
+            USING (SELECT 
+                      @itemId AS item_id, 
+                      @plaidAccountId AS plaid_account_id, 
+                      @name AS name, 
+                      @mask AS mask, 
+                      @officialName AS official_name, 
+                      @currentBalance AS current_balance, 
+                      @availableBalance AS available_balance, 
+                      @isoCurrencyCode AS iso_currency_code, 
+                      @unofficialCurrencyCode AS unofficial_currency_code, 
+                      @type AS type, 
+                      @subtype AS subtype
+                  ) AS source
+            ON (target.plaid_account_id = source.plaid_account_id)
+            WHEN MATCHED THEN
+              UPDATE SET
+                current_balance = source.current_balance,
+                available_balance = source.available_balance
+            WHEN NOT MATCHED THEN
+              INSERT (item_id, plaid_account_id, name, mask, official_name, current_balance, available_balance, iso_currency_code, unofficial_currency_code, type, subtype)
+              VALUES (source.item_id, source.plaid_account_id, source.name, source.mask, source.official_name, source.current_balance, source.available_balance, source.iso_currency_code, source.unofficial_currency_code, source.type, source.subtype)
+            OUTPUT inserted.*;
+        END
+
     `;
+
     const params = [
-      { name: 'param1', type: sql.Int, value: itemId },
-      { name: 'param2', type: sql.NVarChar, value: aid },
-      { name: 'param3', type: sql.NVarChar, value: name },
-      { name: 'param4', type: sql.NVarChar, value: mask },
-      { name: 'param5', type: sql.NVarChar, value: officialName },
-      { name: 'param6', type: sql.Float, value: currentBalance },
-      { name: 'param7', type: sql.Float, value: availableBalance },
-      { name: 'param8', type: sql.NVarChar, value: isoCurrencyCode },
-      { name: 'param9', type: sql.NVarChar, value: unofficialCurrencyCode },
-      { name: 'param10', type: sql.NVarChar, value: type },
-      { name: 'param11', type: sql.NVarChar, value: subtype },
+      { name: 'itemId', type: sql.Int, value: itemId },
+      { name: 'plaidAccountId', type: sql.NVarChar, value: plaidAccountId },
+      { name: 'name', type: sql.NVarChar, value: name },
+      { name: 'mask', type: sql.NVarChar, value: mask },
+      { name: 'officialName', type: sql.NVarChar, value: officialName },
+      { name: 'currentBalance', type: sql.Float, value: currentBalance },
+      { name: 'availableBalance', type: sql.Float, value: availableBalance },
+      { name: 'isoCurrencyCode', type: sql.NVarChar, value: isoCurrencyCode },
+      { name: 'unofficialCurrencyCode', type: sql.NVarChar, value: unofficialCurrencyCode },
+      { name: 'type', type: sql.NVarChar, value: type },
+      { name: 'subtype', type: sql.NVarChar, value: subtype },
+      { name: 'plaidInstitutionId', type: sql.NVarChar, value: plaidInstitutionId },
+      { name: 'userId', type: sql.Int, value: userId },
     ];
+
     const { recordset } = await queryDatabase(query, params);
-    return recordset[0];
+  
+    return recordset? recordset[0]: null;
   });
-  return await Promise.all(pendingQueries);
+
+  try {
+    // Wait for all queries to complete and filter out null values
+    const results = await Promise.all(pendingQueries);
+    const filteredResults = results.filter(result => result !== null);
+    
+    // Return filtered results if not empty, else return null
+    return filteredResults.length > 0 ? filteredResults : null;
+  } catch (error) {
+    console.error('Error creating accounts:', error);
+    throw error;
+  }
 };
+
 
 /**
  * Retrieves the account associated with a Plaid account ID.
@@ -64,6 +125,7 @@ const createAccounts = async (plaidItemId, accounts) => {
  * @returns {Object} a single account.
  */
 const retrieveAccountByPlaidAccountId = async plaidAccountId => {
+  console.log(plaidAccountId);
   const query = 'SELECT * FROM accounts WHERE plaid_account_id = @param1';
   const params = [{ name: 'param1', type: sql.NVarChar, value: plaidAccountId }];
   const { recordset } = await queryDatabase(query, params);

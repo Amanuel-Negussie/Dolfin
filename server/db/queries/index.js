@@ -28,6 +28,7 @@ const {
     retrieveTransactionsByAuth0Id,
     retrieveTransactionTrendsByAuth0Id,
     deleteTransactions,
+    retrieveRecurringTransactionsByUserId,
   } = require('./transactions');
   const {
     createUser,
@@ -35,6 +36,8 @@ const {
     retrieveUsers,
     retrieveUserByAuth0Id,
     retrieveUserByUsername,
+    retrieveTransactionAssetsByUserId,
+    retrieveTransactionLiabilitiesByUserId
   } = require('./users');
   const { createLinkEvent } = require('./linkEvents');
   
@@ -70,6 +73,9 @@ const {
     deleteTransactions,
     createOrUpdateTransactions,
     updateItemTransactionsCursor,
+    retrieveTransactionAssetsByUserId,
+    retrieveTransactionLiabilitiesByUserId,
+    retrieveRecurringTransactionsByUserId,
     // users
     createUser,
     deleteUsers,

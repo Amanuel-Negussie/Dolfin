@@ -20,9 +20,12 @@ export const setAccessToken = (token: string) => {
 }
 
 export default api;
+
 // currentUser
 export const getLoginUser = (auth0Id: string) =>
   api.post('/sessions', { auth0Id });
+
+
 
 // assets
 export const addAsset = (userId: number, description: string, value: number) =>
@@ -30,6 +33,16 @@ export const addAsset = (userId: number, description: string, value: number) =>
 export const getAssetsByUser = (userId: number) => api.get(`/assets/${userId}`);
 export const deleteAssetByAssetId = (assetId: number) =>
   api.delete(`/assets/${assetId}`);
+
+
+// transaction assets
+export const getTransactionAssetsByUser = (userId: number) =>
+  api.get(`/users/${userId}/transaction-assets`);
+
+// transaction liabilities
+export const getTransactionLiabilitiesByUser = (userId: number) =>
+  api.get(`/users/${userId}/transaction-liabilities`);
+
 
 // users
 export const getUsers = () => api.get('/users');
@@ -70,6 +83,8 @@ export const getTransactionsByItem = (itemId: number) =>
   api.get(`/items/${itemId}/transactions`);
 export const getTransactionsByUser = (userId: number) =>
   api.get(`/users/${userId}/transactions`);
+export const getRecurringTransactionsByUser = (userId: number) =>
+  api.get(`/users/${userId}/recurring-transactions`);
 export const getTransactionTrendsByUser = () =>
   api.get(`/users/transactions/trends`);
 
