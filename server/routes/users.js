@@ -16,6 +16,8 @@ const {
   retrieveTransactionLiabilitiesByUserId,
   retrieveUserById,
   retrieveRecurringTransactionsByUserId,
+  createIncomeBills,
+  retrieveIncomeBillsByUserId,
 } = require('../db/queries');
 const { asyncWrapper } = require('../middleware');
 const {
@@ -25,6 +27,7 @@ const {
   sanitizeTransactions,
   sanitizeTransactionAssets,
   sanitizeTransactionLiabilities,
+  sanitizeIncomeBills,
 } = require('../util');
 
 
@@ -207,6 +210,45 @@ router.get(
     console.log("Recurring Transactions Yo");
     const recurringTransactions = await retrieveRecurringTransactionsByUserId(userId);
     res.json(sanitizeTransactions(recurringTransactions));
+  })
+);
+
+// Create income and bills entry for a user
+router.post(
+  '/:userId/income-bills',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    const { income, bills } = req.body;
+
+    console.log('POST /users/:userId/income-bills', { userId, income, bills });
+
+    try {
+      const incomeBills = await createIncomeBills(userId, income, bills);
+      console.log('Income and bills entry created:', incomeBills);
+      res.json(sanitizeIncomeBills(incomeBills));
+    } catch (error) {
+      console.error('Error in POST /users/:userId/income-bills:', error);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  })
+);
+
+// Retrieve income and bills for a user
+router.get(
+  '/:userId/income-bills',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+
+    console.log('GET /users/:userId/income-bills', { userId });
+
+    try {
+      const incomeBills = await retrieveIncomeBillsByUserId(userId);
+      console.log('Income and bills entry retrieved:', incomeBills);
+      res.json(sanitizeIncomeBills(incomeBills));
+    } catch (error) {
+      console.error('Error in GET /users/:userId/income-bills:', error);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
   })
 );
 

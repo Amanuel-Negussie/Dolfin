@@ -85,6 +85,13 @@ export const getRecurringTransactionsByUser = (userId: number) =>
 export const getInstitutionById = (instId: string) =>
   api.get(`/institutions/${instId}`);
 
+// income and bills
+export const addIncomeBills = (userId: number, income: number, bills: number) =>
+  api.post(`/users/${userId}/income-bills`, { income, bills });
+
+export const getIncomeBillsByUser = (userId: number) =>
+  api.get(`/users/${userId}/income-bills`);
+
 // misc
 export const postLinkEvent = (event: any) => api.post(`/link-event`, event);
 

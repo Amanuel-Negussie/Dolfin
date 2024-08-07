@@ -112,6 +112,61 @@ const retrieveTransactionLiabilitiesByUserId = async (userId) => {
   return transactions;
 };
 
+
+/**
+ * Creates a new income and bills entry for a user.
+ *
+ * @param {number} userId the ID of the user.
+ * @param {number} income the income amount.
+ * @param {number} bills the bills amount.
+ * @returns {Object} the new income and bills entry.
+ */
+const createIncomeBills = async (userId, income, bills) => {
+  console.log('Creating income and bills entry:', { userId, income, bills });
+  const query = `
+    INSERT INTO income_bills_table (user_id, income, bills)
+    OUTPUT INSERTED.*
+    VALUES (@userId, @income, @bills);
+  `;
+  const params = [
+    { name: "userId", type: sql.Int, value: userId },
+    { name: "income", type: sql.Decimal(10, 2), value: income },
+    { name: "bills", type: sql.Decimal(10, 2), value: bills },
+  ];
+
+  try {
+    const { recordset } = await queryDatabase(query, params);
+    console.log('Income and bills entry created:', recordset[0]);
+    return recordset[0];
+  } catch (error) {
+    console.error('Error creating income and bills entry:', error);
+    throw error;
+  }
+};
+
+/**
+ * Retrieves income and bills for a user.
+ *
+ * @param {number} userId the ID of the user.
+ * @returns {Object} the income and bills entry.
+ */
+const retrieveIncomeBillsByUserId = async (userId) => {
+  console.log('Retrieving income and bills for user:', { userId });
+  const query = `
+    SELECT * FROM income_bills_table WHERE user_id = @userId;
+  `;
+  const params = [{ name: "userId", type: sql.Int, value: userId }];
+
+  try {
+    const { recordset } = await queryDatabase(query, params);
+    console.log('Income and bills retrieved:', recordset[0]);
+    return recordset[0];
+  } catch (error) {
+    console.error('Error retrieving income and bills:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   createUser,
   deleteUsers,
@@ -120,4 +175,6 @@ module.exports = {
   retrieveUsers,
   retrieveTransactionAssetsByUserId,
   retrieveTransactionLiabilitiesByUserId,
+  createIncomeBills,
+  retrieveIncomeBillsByUserId,
 };
