@@ -11,6 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import useAccounts from "../services/accounts";
 import useBudgetCategories from "../services/budget";
 
@@ -228,9 +235,19 @@ const BudgetSection: React.FC<{ userId: number; onOpenDialogs: () => void }> = (
           </Button>
         </>
       ) : (
-        <Button variant="outline" onClick={onOpenDialogs} className="w-full mx-2">
-          Start
-        </Button>
+        <Card className="max-w-md mx-auto mt-4">
+          <CardHeader>
+            <CardTitle>Setting up your budget is quick and easy.</CardTitle>
+            <CardDescription>
+              Your budget is the foundation for planning your spending and reaching your goals. Don't worry, we'll guide you through it!
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" onClick={onOpenDialogs} className="w-full mx-2">
+              Start
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
       <Dialog open={openAddCategoryDialog} onOpenChange={setOpenAddCategoryDialog}>
