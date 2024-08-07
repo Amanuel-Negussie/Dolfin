@@ -43,10 +43,10 @@ export const Dashboard: React.FC = () => {
         }
     }, [transactionsByUser]);
 
-    if  (isLoadingAccounts || isLoadingTransactions) {
+    if (isLoadingAccounts || isLoadingTransactions) {
         return <div>
-        <LoadingSpinner />
-      </div>
+            <LoadingSpinner />
+        </div>
     }
 
     return (
@@ -57,8 +57,8 @@ export const Dashboard: React.FC = () => {
                     <AccountSummaryCard accounts={accounts} />
                 </div>
                 <div className="grid gap-4 lg:grid-cols-1 2xl:grid-cols-2">
-                        <TransactionTrendsCard />
-                        <TransactionsCard transactions={transactions} />
+                    <TransactionTrendsCard />
+                    <TransactionsCard transactions={transactions} />
                 </div>
             </div>
         </div>

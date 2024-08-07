@@ -209,14 +209,14 @@ const retrieveTransactionTrendsByAuth0Id = async auth0Id => {
   const query = `
     SELECT 
       CAST(date AS DATE) AS date,
-      SUM(amount) AS amount
+      SUM(amount) * -1 AS amount
     FROM 
       transactions
     WHERE 
       user_id = (SELECT id FROM users_table WHERE auth0_id = @param1)
       AND date >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
       AND date < DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0)
-      AND amount >= 0
+      AND amount <= 0
     GROUP BY 
       CAST(date AS DATE)
     ORDER BY 

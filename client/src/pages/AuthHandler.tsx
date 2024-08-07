@@ -6,7 +6,6 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { setAccessToken } from "@/services/api";
 
-
 export const AuthHandler: React.FC = () => {
     const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
     const { login, setNewUser, userState } = useCurrentUser();
@@ -37,8 +36,10 @@ export const AuthHandler: React.FC = () => {
         else if (!userState.newUser && !userState.currentUser) {
             if (user?.nickname && user?.sub) {
                 addNewUser({ username: user?.nickname, auth0Id: user?.sub });
-                setNewUser(user?.sub);
-                navigate('/home');
+                setNewUser(user?.nickname);
+                setTimeout(() => {
+                    navigate('/home');
+                }, 500); // Delay of 0.5 seconds
             }
         }
     }, [userState.newUser]);

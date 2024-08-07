@@ -59,7 +59,7 @@ import {
             toast.success(`Successful login.  Welcome back ${(Object.values(payload) as UserType[])[0].username}!`);
             dispatch({ type: 'SUCCESSFUL_GET', payload: payload[0] });
           } else {
-            toast.error(`Username is invalid. Try again.`);
+            //toast.error(`Username is invalid. Try again.`);
             dispatch({ type: 'FAILED_GET' });
           }
         } catch (err) {

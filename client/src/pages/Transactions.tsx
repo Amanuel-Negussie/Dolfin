@@ -1,5 +1,6 @@
 import { TransactionPageCard } from "@/components/TransactionPageCard";
 import { Transaction } from "@/components/types";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import useLogin from "@/hooks/useLogin";
 import { useTransactions } from "@/services";
 import { useEffect, useState } from "react";
@@ -26,7 +27,7 @@ export const Transactions: React.FC = () => {
     }, [transactionsByUser]);
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return <div><LoadingSpinner /></div>
     }
 
     return (

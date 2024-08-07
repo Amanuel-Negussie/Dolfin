@@ -34,7 +34,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ element }) => {
   }, []);
 
   if (!isFetched) {
-    return <div>Fetching access token...</div>;
+    return <div><LoadingSpinner /></div>;
   }
 
   return (
