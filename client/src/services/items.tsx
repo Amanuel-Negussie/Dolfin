@@ -36,7 +36,7 @@ import {
   interface ItemsContextShape extends ItemsState {
     dispatch: Dispatch<ItemsAction>;
     deleteItemById: (id: number, userId: number) => void;
-    getItemsByUser: (userId: number, refresh: boolean) => void;
+    getItemsByUser: (userId: number) => void;
     getItemById: (id: number, refresh: boolean) => void;
     itemsById: { [itemId: number]: ItemType[] };
     itemsByUser: { [userId: number]: ItemType[] };

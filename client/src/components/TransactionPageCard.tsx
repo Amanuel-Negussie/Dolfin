@@ -31,7 +31,7 @@ export const TransactionPageCard: React.FC<TransactionCardProps> = ({ transactio
     const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>(transactions);
 
     useEffect(() => {
-        setFilteredTransactions(transactions.filter(transaction => {
+        setFilteredTransactions(transactions.flat().length == 0 ? [] : transactions.filter(transaction => {
             const matchesNameOrDate = transaction.name.toLowerCase().includes(nameFilter.toLowerCase()) ||
                 format(new Date(transaction.date), 'yyyy-MM-dd').includes(nameFilter);
             const matchesAmount = transaction.amount.toString().includes(amountFilter);
@@ -39,7 +39,7 @@ export const TransactionPageCard: React.FC<TransactionCardProps> = ({ transactio
         }));
     }, [nameFilter, amountFilter, transactions]);
 
-    const columns: ColumnDef<Transaction>[] = [
+    const columns: ColumnDef<Transaction>[] = transactions.flat().length == 0 ? [] : [
         {
             header: 'Avatar',
             accessorKey: 'logo_url',
@@ -86,14 +86,14 @@ export const TransactionPageCard: React.FC<TransactionCardProps> = ({ transactio
     return (
         <>
             <div className="mb-4 flex space-x-4">
-                <Input 
+                <Input
                     type="text"
                     placeholder="Filter by name or date"
                     value={nameFilter}
                     onChange={(e) => setNameFilter(e.target.value)}
                     className="p-2 border border-gray-300 rounded"
                 />
-                <Input 
+                <Input
                     type="text"
                     placeholder="Filter by amount"
                     value={amountFilter}
@@ -106,7 +106,7 @@ export const TransactionPageCard: React.FC<TransactionCardProps> = ({ transactio
                     <CardTitle>Recent Transactions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <OurDataTable 
+                    <OurDataTable
                         columns={columns}
                         data={filteredTransactions}
                     />

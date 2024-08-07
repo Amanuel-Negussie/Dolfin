@@ -15,6 +15,10 @@ const api = axios.create({
   },
 });
 
+export const setAccessToken = (token: string) => {
+  api.defaults.headers.common.Authorization = `Bearer ${token}`;
+}
+
 export default api;
 
 // currentUser
@@ -66,6 +70,7 @@ export const getAccountsByItem = (itemId: number) =>
   api.get(`/items/${itemId}/accounts`);
 export const getAccountsByUser = (userId: number) =>
   api.get(`/users/${userId}/accounts`);
+export const deleteAccountById = (id: number) => api.delete(`/accounts/${id}`);
 
 // transactions
 export const getTransactionsByAccount = (accountId: number) =>
@@ -76,6 +81,8 @@ export const getTransactionsByUser = (userId: number) =>
   api.get(`/users/${userId}/transactions`);
 export const getRecurringTransactionsByUser = (userId: number) =>
   api.get(`/users/${userId}/recurring-transactions`);
+export const getTransactionTrendsByUser = () =>
+  api.get(`/users/transactions/trends`);
 
 // institutions
 export const getInstitutionById = (instId: string) =>

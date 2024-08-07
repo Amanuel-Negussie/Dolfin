@@ -12,6 +12,7 @@ import groupBy from 'lodash/groupBy';
 import keyBy from 'lodash/keyBy';
 import omitBy from 'lodash/omitBy';
 import { AccountType } from '../components/types';
+
 import {
   getAccountsByItem as apiGetAccountsByItem,
   getAccountsByUser as apiGetAccountsByUser,
@@ -24,17 +25,30 @@ interface AccountsState {
   [accountId: number]: AccountType;
 }
 
-const initialState: AccountsState = {};
+interface FetchingState {
+  isComplete: boolean;
+}
+
+interface IncomeBillsState {
+  incomeBills: { income: number; bills: number } | null;
+}
+
+type State = AccountsState & FetchingState & IncomeBillsState;
+
+const initialState: State = {
+  isComplete: false,
+  incomeBills: null,
+};
+
 type AccountsAction =
-  | {
-      type: 'SUCCESSFUL_GET';
-      payload: AccountType[];
-    }
+  | { type: 'SUCCESSFUL_GET'; payload: AccountType[] }
+  | { type: 'FETCH_START' }
+  | { type: 'FETCH_COMPLETE' }
   | { type: 'DELETE_BY_ITEM'; payload: number }
   | { type: 'DELETE_BY_USER'; payload: number }
   | { type: 'SUCCESSFUL_GET_INCOME_BILLS'; payload: { income: number; bills: number } };
 
-interface AccountsContextShape extends AccountsState {
+interface AccountsContextShape extends State {
   dispatch: Dispatch<AccountsAction>;
   accountsByItem: { [itemId: number]: AccountType[] };
   deleteAccountsByItemId: (itemId: number) => void;
@@ -46,22 +60,27 @@ interface AccountsContextShape extends AccountsState {
   updateIncomeBills: (userId: number, income: number, bills: number) => void;
   incomeBills: { income: number; bills: number } | null;
 }
+
 const AccountsContext = createContext<AccountsContextShape>(
   initialState as AccountsContextShape
 );
 
 export const AccountsProvider: React.FC<{ children: ReactNode }> = (props: any) => {
-  const [accountsById, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const [incomeBills, setIncomeBills] = useState<{ income: number; bills: number } | null>(null);
 
   const getAccountsByItem = useCallback(async (itemId: number) => {
+    dispatch({ type: 'FETCH_START' });
     const { data: payload } = await apiGetAccountsByItem(itemId);
-    dispatch({ type: 'SUCCESSFUL_GET', payload: payload });
+    dispatch({ type: 'SUCCESSFUL_GET', payload });
+    dispatch({ type: 'FETCH_COMPLETE' });
   }, []);
 
   const getAccountsByUser = useCallback(async (userId: number) => {
+    dispatch({ type: 'FETCH_START' });
     const { data: payload } = await apiGetAccountsByUser(userId);
-    dispatch({ type: 'SUCCESSFUL_GET', payload: payload });
+    dispatch({ type: 'SUCCESSFUL_GET', payload });
+    dispatch({ type: 'FETCH_COMPLETE' });
   }, []);
 
   const deleteAccountsByItemId = useCallback((itemId: number) => {
@@ -88,11 +107,13 @@ export const AccountsProvider: React.FC<{ children: ReactNode }> = (props: any) 
   }, []);
 
   const value = useMemo(() => {
-    const allAccounts = Object.values(accountsById);
+    const allAccounts = Object.values(state).filter(account => typeof account === 'object');
 
     return {
+      dispatch,
       allAccounts,
-      accountsById,
+      accountsById: state,
+      isComplete: state.isComplete,
       accountsByItem: groupBy(allAccounts, 'item_id'),
       accountsByUser: groupBy(allAccounts, 'user_id'),
       getAccountsByItem,
@@ -105,7 +126,7 @@ export const AccountsProvider: React.FC<{ children: ReactNode }> = (props: any) 
       incomeBills,
     };
   }, [
-    accountsById,
+    state,
     getAccountsByItem,
     getAccountsByUser,
     deleteAccountsByItemId,
@@ -119,20 +140,36 @@ export const AccountsProvider: React.FC<{ children: ReactNode }> = (props: any) 
   return <AccountsContext.Provider value={value} {...props} />;
 };
 
-function reducer(state: AccountsState, action: AccountsAction) {
+function reducer(state: State, action: AccountsAction): State {
   switch (action.type) {
     case 'SUCCESSFUL_GET':
-      if (!action.payload.length) {
-        return state;
-      }
       return {
         ...state,
         ...keyBy(action.payload, 'id'),
+        isComplete: false,
+      };
+    case 'FETCH_START':
+      return {
+        ...state,
+        isComplete: false,
+      };
+    case 'FETCH_COMPLETE':
+      return {
+        ...state,
+        isComplete: true,
       };
     case 'DELETE_BY_ITEM':
-      return omitBy(state, transaction => transaction.item_id === action.payload);
+      return {
+        ...omitBy(state, account => account.item_id === action.payload),
+        incomeBills: state.incomeBills,
+        isComplete: state.isComplete,
+      };
     case 'DELETE_BY_USER':
-      return omitBy(state, transaction => transaction.user_id === action.payload);
+      return {
+        ...omitBy(state, account => account.user_id === action.payload),
+        incomeBills: state.incomeBills,
+        isComplete: state.isComplete,
+      };
     case 'SUCCESSFUL_GET_INCOME_BILLS':
       return {
         ...state,

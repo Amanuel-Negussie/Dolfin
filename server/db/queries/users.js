@@ -38,14 +38,14 @@ const deleteUsers = async (userId) => {
 /**
  * Retrieves a single user.
  *
- * @param {number} userId the ID of the user.
+ * @param {string} auth0Id the Auth0 ID of the user.
  * @returns {Object} a user.
  */
-const retrieveUserById = async (userId) => {
+const retrieveUserByAuth0Id = async auth0Id => {
   const query = `
-    SELECT * FROM users_table WHERE id = @param1;
+    SELECT * FROM users_table WHERE auth0_id = @param1;
   `;
-  const params = [{ name: "param1", type: sql.Int, value: userId }];
+  const params = [{ name: 'param1', type: sql.NVarChar, value: auth0Id }];
   const { recordset } = await queryDatabase(query, params);
   return recordset[0];
 };
@@ -98,9 +98,9 @@ const retrieveTransactionAssetsByUserId = async (userId) => {
 const retrieveTransactionLiabilitiesByUserId = async (userId) => {
   const query = `
     SELECT t.id, t.account_id, t.category, t.amount, t.created_at, a.type
-    FROM [DolfinDB].[dbo].[transactions_table] t
-    JOIN [DolfinDB].[accounts_table] a ON t.account_id = a.id
-    JOIN [DolfinDB].[items_table] i ON a.item_id = i.id
+    FROM transactions_table t
+    JOIN accounts_table a ON t.account_id = a.id
+    JOIN items_table i ON a.item_id = i.id
     WHERE i.user_id = @param1
       AND a.type IN ('loan', 'credit')
     ORDER BY created_at DESC;
@@ -288,7 +288,7 @@ const retrieveBudgetCategoriesByUserId = async (userId) => {
 module.exports = {
   createUser,
   deleteUsers,
-  retrieveUserById,
+  retrieveUserByAuth0Id,
   retrieveUserByUsername,
   retrieveUsers,
   retrieveTransactionAssetsByUserId,

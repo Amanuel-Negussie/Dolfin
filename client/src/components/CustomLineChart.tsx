@@ -1,12 +1,13 @@
-import { Line, LineChart, ResponsiveContainer, Tooltip } from "recharts"
+import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis } from "recharts"
 
 interface CustomLineChartProps {
   data: any[]
+  timePeriod: string
 }
 
-export const CustomLineChart: React.FC<CustomLineChartProps> = ({ data }) => {
+export const CustomLineChart: React.FC<CustomLineChartProps> = ({ data, timePeriod }) => {
   return (
-    <div className="h-[200px]">
+    <div className="h-[350px]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={data}
@@ -25,7 +26,7 @@ export const CustomLineChart: React.FC<CustomLineChartProps> = ({ data }) => {
                     <div className="grid grid-cols-2 gap-2">
                       <div className="flex flex-col">
                         <span className="text-[0.70rem] uppercase text-muted-foreground">
-                          Last Week
+                          Last {timePeriod}
                         </span>
                         <span className="font-bold text-muted-foreground">
                           {payload[0].value}
@@ -33,7 +34,7 @@ export const CustomLineChart: React.FC<CustomLineChartProps> = ({ data }) => {
                       </div>
                       {payload[1] && <div className="flex flex-col">
                         <span className="text-[0.70rem] uppercase text-muted-foreground">
-                          This Week
+                          This {timePeriod}
                         </span>
                         <span className="font-bold">
                           {payload[1].value}
@@ -47,10 +48,14 @@ export const CustomLineChart: React.FC<CustomLineChartProps> = ({ data }) => {
               return null
             }}
           />
+          <YAxis domain={[-1, 'auto']} />
           <Line
             type="monotone"
             strokeWidth={2}
-            dataKey="lastweek"
+            dataKey={"last" + timePeriod}
+            dot={{
+              r: 2.5,
+            }}
             activeDot={{
               r: 6,
               style: { fill: "#8884d8", opacity: 0.25 },
@@ -64,8 +69,11 @@ export const CustomLineChart: React.FC<CustomLineChartProps> = ({ data }) => {
           />
           <Line
             type="monotone"
-            dataKey="thisweek"
+            dataKey={"this" + timePeriod}
             strokeWidth={2}
+            dot={{
+              r: 2.5,
+            }}
             activeDot={{
               r: 8,
               style: { fill: "#82ca9d" },

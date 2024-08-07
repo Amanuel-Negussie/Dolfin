@@ -7,14 +7,16 @@ const Boom = require('@hapi/boom');
 const {
   retrieveUsers,
   retrieveUserByUsername,
-  retrieveAccountsByUserId,
+  retrieveAccountsByAuth0Id,
   createUser,
   deleteUsers,
-  retrieveItemsByUser,
+  retrieveItemsByAuth0Id,
   retrieveTransactionsByUserId,
   retrieveTransactionAssetsByUserId,
   retrieveTransactionLiabilitiesByUserId,
-  retrieveUserById,
+  retrieveTransactionsByAuth0Id,
+  retrieveUserByAuth0Id,
+  retrieveTransactionTrendsByAuth0Id,
   retrieveRecurringTransactionsByUserId,
   createIncomeBills,
   retrieveIncomeBillsByUserId,
@@ -70,7 +72,6 @@ router.get(
 router.post(
   '/',
   asyncWrapper(async (req, res) => {
-    console.log('hello');
     const { username, auth0Id } = req.body;
     
     try {
@@ -100,8 +101,8 @@ router.post(
 router.get(
   '/:userId',
   asyncWrapper(async (req, res) => {
-    const { userId } = req.params;
-    const user = await retrieveUserById(userId);
+    const { sub: auth0Id } = req.auth.payload;
+    const user = await retrieveUserByAuth0Id(auth0Id);
     res.json(sanitizeUsers(user));
   })
 );
@@ -116,7 +117,8 @@ router.get(
   '/:userId/items',
   asyncWrapper(async (req, res) => {
     const { userId } = req.params;
-    const items = await retrieveItemsByUser(userId);
+    const { sub: auth0Id } = req.auth.payload;
+    const items = await retrieveItemsByAuth0Id(auth0Id);
     res.json(sanitizeItems(items));
   })
 );
@@ -130,8 +132,8 @@ router.get(
 router.get(
   '/:userId/accounts',
   asyncWrapper(async (req, res) => {
-    const { userId } = req.params;
-    const accounts = await retrieveAccountsByUserId(userId);
+    const { sub: auth0Id } = req.auth.payload;
+    const accounts = await retrieveAccountsByAuth0Id(auth0Id);
     res.json(sanitizeAccounts(accounts));
   })
 );
@@ -145,8 +147,8 @@ router.get(
 router.get(
   '/:userId/transactions',
   asyncWrapper(async (req, res) => {
-    const { userId } = req.params;
-    const transactions = await retrieveTransactionsByUserId(userId);
+    const { sub: auth0Id } = req.auth.payload;
+    const transactions = await retrieveTransactionsByAuth0Id(auth0Id);
     res.json(sanitizeTransactions(transactions));
   })
 );
@@ -174,6 +176,21 @@ router.get(
 );
 
 
+
+/**
+ * Retrieves all transactions associated with a single user.
+ *
+ * @param {number} userId the ID of the user.
+ * @returns {Object[]} an array of transactions
+ */
+router.get(
+  '/transactions/trends',
+  asyncWrapper(async (req, res) => {
+    const { sub: auth0Id } = req.auth.payload;
+    const transactions = await retrieveTransactionTrendsByAuth0Id(auth0Id);
+    res.json(transactions);
+  })
+);
 
 /**
  * Deletes a user and its related items

@@ -6,6 +6,7 @@ const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const { connectToDatabase, queryDatabase } = require("./db/db");
+const { validateAccessToken } = require("./auth0.middleware");
 
 const {
   Configuration,
@@ -24,7 +25,12 @@ const configuration = new Configuration({
 });
 
 const plaidClient = new PlaidApi(configuration);
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+}));
+app.use(validateAccessToken);
 app.use(bodyParser.json());
 /**
  * @file The application root. Defines the Express server configuration.
@@ -202,7 +208,6 @@ app.post("/transactions/sync", async function (request, response) {
     // Save transactions to the database
     for (const transaction of transactions) {
       const category = transaction.personal_finance_category
-      console.log(category);
       const name = capitalizeAndRemoveUnderscores(transaction.name);
       const merchantName = capitalizeAndRemoveUnderscores(transaction.merchant_name || transaction.name);
 

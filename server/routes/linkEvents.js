@@ -22,7 +22,7 @@ const router = express.Router();
 router.post(
   '/',
   asyncWrapper(async (req, res) => {
-    await createLinkEvent(req.body);
+    await createLinkEvent(req.body, req.auth.payload.sub);
     res.sendStatus(200);
   })
 );

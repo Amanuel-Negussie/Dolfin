@@ -7,14 +7,14 @@ const sql = require('mssql');
  * @param {string} plaidInstitutionId the Plaid institution ID of the item.
  * @param {string} plaidAccessToken the Plaid access token of the item.
  * @param {string} plaidItemId the Plaid ID of the item.
- * @param {number} userId the ID of the user.
+ * @param {string} auth0Id the ID of the user.
  * @returns {Object} the new item.
  */
 const createItem = async (
   plaidInstitutionId,
   plaidAccessToken,
   plaidItemId,
-  userId
+  auth0Id
 ) => {
   // this method only gets called on successfully linking an item.
   // We know the status is good.
@@ -24,10 +24,10 @@ const createItem = async (
         (user_id, plaid_access_token, plaid_item_id, plaid_institution_id, status)
       OUTPUT INSERTED.*
       VALUES
-        (@param1, @param2, @param3, @param4, @param5);
+        ((SELECT id FROM users_table WHERE auth0_id = @param1), @param2, @param3, @param4, @param5);
     `;
   const params = [
-    { name: 'param1', type: sql.Int, value: userId },
+    { name: 'param1', type: sql.NVarChar, value: auth0Id },
     { name: 'param2', type: sql.NVarChar, value: plaidAccessToken },
     { name: 'param3', type: sql.NVarChar, value: plaidItemId },
     { name: 'param4', type: sql.NVarChar, value: plaidInstitutionId },
@@ -67,14 +67,14 @@ const retrieveItemByPlaidAccessToken = async accessToken => {
  * Retrieves a single item.
  *
  * @param {string} plaidInstitutionId the Plaid institution ID of the item.
- * @param {number} userId the ID of the user.
+ * @param {string} auth0Id the ID of the user.
  * @returns {Object} an item.
  */
-const retrieveItemByPlaidInstitutionId = async (plaidInstitutionId, userId) => {
-  const query = 'SELECT * FROM items_table WHERE plaid_institution_id = @param1 AND user_id = @param2';
+const retrieveItemByPlaidInstitutionId = async (plaidInstitutionId, auth0Id) => {
+  const query = 'SELECT * FROM items_table WHERE plaid_institution_id = @param1 AND user_id = (SELECT id FROM users_table WHERE auth0_id = @param2)';
   const params = [
     { name: 'param1', type: sql.NVarChar, value: plaidInstitutionId },
-    { name: 'param2', type: sql.Int, value: userId },
+    { name: 'param2', type: sql.NVarChar, value: auth0Id },
   ];
   const { recordset: existingItems } = await queryDatabase(query, params);
   return existingItems[0];
@@ -96,12 +96,12 @@ const retrieveItemByPlaidItemId = async plaidItemId => {
 /**
  * Retrieves all items for a single user.
  *
- * @param {number} userId the ID of the user.
+ * @param {number} auth0Id the Auth0 ID of the user.
  * @returns {Object[]} an array of items.
  */
-const retrieveItemsByUser = async userId => {
-  const query = 'SELECT * FROM items_table WHERE user_id = @param1';
-  const params = [{ name: 'param1', type: sql.Int, value: userId }];
+const retrieveItemsByAuth0Id = async auth0Id => {
+  const query = 'SELECT * FROM items_table WHERE user_id = (SELECT id FROM users_table WHERE auth0_id = @param1)';
+  const params = [{ name: 'param1', type: sql.NVarChar, value: auth0Id }];
   const { recordset: items } = await queryDatabase(query, params);
   return items;
 };
@@ -116,6 +116,21 @@ const updateItemStatus = async (itemId, status) => {
   const query = 'UPDATE items_table SET status = @param1 WHERE id = @param2';
   const params = [
     { name: 'param1', type: sql.NVarChar, value: status },
+    { name: 'param2', type: sql.Int, value: itemId },
+  ];
+  await queryDatabase(query, params);
+};
+
+/**
+ * Updates the access token for a single item.
+ *
+ * @param {string} itemId the Plaid item ID of the item.
+ * @param {string} accessToken the status of the item.
+ */
+const updateItemAccessToken = async (itemId, accessToken) => {
+  const query = 'UPDATE items_table SET plaid_access_token = @param1 WHERE id = @param2';
+  const params = [
+    { name: 'param1', type: sql.NVarChar, value: accessToken },
     { name: 'param2', type: sql.Int, value: itemId },
   ];
   await queryDatabase(query, params);
@@ -154,7 +169,8 @@ module.exports = {
   retrieveItemByPlaidAccessToken,
   retrieveItemByPlaidInstitutionId,
   retrieveItemByPlaidItemId,
-  retrieveItemsByUser,
+  retrieveItemsByAuth0Id,
   updateItemStatus,
+  updateItemAccessToken,
   updateItemTransactionsCursor,
 };

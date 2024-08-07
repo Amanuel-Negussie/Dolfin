@@ -53,15 +53,13 @@ import {
      */
     const login = useCallback(
       async (auth0Id: string) => {
-        console.log(auth0Id);
         try {
           const { data: payload } = await apiGetLoginUser(auth0Id);
           if (payload != null) {
-            toast.success(`Successful login.  Welcome back ${auth0Id}`);
+            toast.success(`Successful login.  Welcome back ${(Object.values(payload) as UserType[])[0].username}!`);
             dispatch({ type: 'SUCCESSFUL_GET', payload: payload[0] });
           } else {
-            console.log(`Username ${auth0Id} is invalid.  Try again. `);
-            toast.error(`Username ${auth0Id} is invalid.  Try again. `);
+            //toast.error(`Username is invalid. Try again.`);
             dispatch({ type: 'FAILED_GET' });
           }
         } catch (err) {

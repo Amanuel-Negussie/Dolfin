@@ -1,6 +1,7 @@
 import {
     Card,
     CardContent,
+    CardDescription,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
@@ -15,7 +16,7 @@ import { Transaction } from "./types";
 import { format } from "date-fns";
 
 interface TransactionCardProps {
-    transactions: Transaction[];
+    transactions: Transaction[] | null;
 };
 
 const getAvatarDetails = (name: string, logoUrl: string | null) => {
@@ -31,9 +32,9 @@ const formatAmount = (amount: number): string => {
     return amount >= 0 ? `$${amount.toFixed(2)}` : `-$${Math.abs(amount).toFixed(2)}`;
 };
 
-export const TransactionsCard: React.FC<TransactionCardProps> = ({ transactions }) => {
+export const TransactionsCard: React.FC<TransactionCardProps> = ({ transactions = null }) => {
     // Get the most recent 10 transactions
-    const recentTransactions = transactions.slice(-10);
+    const recentTransactions = transactions?.flat().slice(0, 10);
 
     return (
         <>
@@ -41,8 +42,8 @@ export const TransactionsCard: React.FC<TransactionCardProps> = ({ transactions 
                 <CardHeader>
                     <CardTitle>Recent Transactions</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    {recentTransactions.map((transaction) => {
+                <CardContent className="min-h-[350px]">
+                    {recentTransactions && recentTransactions?.length > 0 && recentTransactions.map((transaction) => {
                         const { name, logo_url: logoUrl } = transaction;
                         const { src, fallback } = getAvatarDetails(name, logoUrl);
 
@@ -59,6 +60,10 @@ export const TransactionsCard: React.FC<TransactionCardProps> = ({ transactions 
                             </div>
                         );
                     })}
+                    {!recentTransactions?.length &&
+                        <div className="min-h-[350px] flex items-center justify-center">
+                            <CardDescription className="text-center">You have no transactions to display.</CardDescription>
+                        </div>}
                 </CardContent>
             </Card>
         </>

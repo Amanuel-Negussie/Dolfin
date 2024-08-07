@@ -1,8 +1,8 @@
 import React, { ReactElement, useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { setAccessToken } from '../hooks/axiosConfigs';
 import { MainNav } from "@/components/MainNav";
 import { AccountMenu } from "@/components/AccountMenu";
+import { setAccessToken } from "@/services/api";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface PageLayoutProps {
@@ -34,7 +34,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ element }) => {
   }, []);
 
   if (!isFetched) {
-    return <div>Fetching access token...</div>;
+    return <div><LoadingSpinner /></div>;
   }
 
   return (
@@ -43,9 +43,9 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ element }) => {
         Mobile
       </div>
 
-      <div className="hidden md:flex flex-col">
-        <div className="border-b">
-          <div className="flex h-16 items-center px-4">
+      <div className="hidden md:flex flex-col items-center">
+        <div className="border-b w-full">
+          <div className="flex h-16 items-center px-4 max-w-[1920px] w-full mx-auto">
             <MainNav className="mx-6" />
             <div className="ml-auto flex items-center space-x-4">
               <AccountMenu name={user?.nickname} email={user?.email} picture={user?.picture} logout={logout} />
@@ -53,11 +53,16 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ element }) => {
           </div>
         </div>
 
-        <div className="flex-grow">
-          {element}
+        <div className="flex-grow flex justify-center w-full">
+          <div className="max-w-[1920px] w-full px-4">
+            {element}
+          </div>
         </div>
 
-        <div className="border-t mt-auto">
+        <div className="border-t mt-auto w-full">
+          <div className="max-w-[1920px] w-full mx-auto">
+            {/* Footer content here */}
+          </div>
         </div>
       </div>
     </div>
