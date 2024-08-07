@@ -26,6 +26,7 @@ import React, {
   }
   
   const initialState: BudgetCategoriesState = {};
+  
   type BudgetCategoriesAction = {
     type: "SET_BUDGET_CATEGORIES";
     payload: BudgetCategory[];
@@ -43,13 +44,9 @@ import React, {
     ) => void;
   }
   
-  const BudgetCategoriesContext = createContext<BudgetCategoriesContextShape>(
-    initialState as BudgetCategoriesContextShape
-  );
+  const BudgetCategoriesContext = createContext<BudgetCategoriesContextShape | undefined>(undefined);
   
-  export const BudgetCategoriesProvider: React.FC<{ children: ReactNode }> = (
-    props: any
-  ) => {
+  export const BudgetCategoriesProvider: React.FC<{ children: ReactNode }> = (props: any) => {
     const [state, dispatch] = useReducer(reducer, initialState);
   
     const getBudgetCategoriesByUser = useCallback(async (userId: number) => {
