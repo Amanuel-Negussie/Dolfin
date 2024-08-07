@@ -36,10 +36,10 @@ export const AccountSummaryCard: React.FC<AccountSummaryCardProps> = ({ accounts
     const toggleCheckingInfo = () => setShowCheckingInfo(!showCheckingInfo);
     const toggleCreditInfo = () => setShowCreditInfo(!showCreditInfo);
 
-    const checkingAccounts = accounts?.filter((account) => account.subtype === 'checking');
+    const checkingAccounts = (accounts ?? []).filter((account) => account && account.subtype === 'checking');
     const totalCheckingBalance = checkingAccounts?.reduce((acc, account) => acc + account.current_balance, 0);
 
-    const creditAccounts = accounts?.filter((account) => account.subtype === 'credit card');
+    const creditAccounts = (accounts ?? []).filter((account) => account && account.subtype === 'credit card');
     const totalCreditBalance = creditAccounts?.reduce((acc, account) => acc + account.current_balance, 0);
 
     useEffect(() => {

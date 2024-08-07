@@ -25,15 +25,12 @@ export default api;
 export const getLoginUser = (auth0Id: string) =>
   api.post('/sessions', { auth0Id });
 
-
-
 // assets
 export const addAsset = (userId: number, description: string, value: number) =>
   api.post('/assets', { userId, description, value });
 export const getAssetsByUser = (userId: number) => api.get(`/assets/${userId}`);
 export const deleteAssetByAssetId = (assetId: number) =>
   api.delete(`/assets/${assetId}`);
-
 
 // transaction assets
 export const getTransactionAssetsByUser = (userId: number) =>
@@ -42,7 +39,6 @@ export const getTransactionAssetsByUser = (userId: number) =>
 // transaction liabilities
 export const getTransactionLiabilitiesByUser = (userId: number) =>
   api.get(`/users/${userId}/transaction-liabilities`);
-
 
 // users
 export const getUsers = () => api.get('/users');
@@ -120,3 +116,40 @@ export const exchangeToken = async (
     }
   }
 };
+
+// Income Bills API
+export const getIncomeBillsByUser = (userId: number) =>
+  api.get(`/users/${userId}/income-bills`);
+
+export const addIncomeBills = (userId: number, income: number, bills: number) =>
+  api.post(`/users/${userId}/income-bills`, { income, bills });
+
+export const updateIncomeBills = (userId: number, income: number, bills: number) =>
+  api.put(`/users/${userId}/income-bills`, { income, bills });
+
+// Budget Categories API
+export const getBudgetCategoriesByUser = (userId: number) =>
+  api.get(`/users/${userId}/budget-categories`);
+
+export const addBudgetCategory = (
+  userId: number,
+  category: string,
+  budgetedValue: number,
+  actualValue: number
+) =>
+  api.post(`/users/${userId}/budget-categories`, {
+    category,
+    budgetedValue,
+    actualValue,
+  });
+
+export const updateBudgetCategory = (
+  userId: number,
+  category: string,
+  budgetedValue: number,
+  actualValue: number
+) =>
+  api.put(`/users/${userId}/budget-categories/${category}`, {
+    budgetedValue,
+    actualValue,
+  });

@@ -3,9 +3,9 @@ CREATE DATABASE DolfinDB;
 GO
 
 -- Switch to the newly created database
-USE DolfinDB;
+USE [DolfinDB]
 GO
-/****** Object:  Table [dbo].[transactions_table]    Script Date: 2024-08-05 3:19:38 PM ******/
+/****** Object:  Table [dbo].[transactions_table]    Script Date: 2024-08-07 11:48:51 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -40,7 +40,7 @@ CREATE TABLE [dbo].[transactions_table](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[accounts_table]    Script Date: 2024-08-05 3:19:38 PM ******/
+/****** Object:  Table [dbo].[accounts_table]    Script Date: 2024-08-07 11:48:51 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -71,7 +71,7 @@ CREATE TABLE [dbo].[accounts_table](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[items_table]    Script Date: 2024-08-05 3:19:38 PM ******/
+/****** Object:  Table [dbo].[items_table]    Script Date: 2024-08-07 11:48:51 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -100,7 +100,7 @@ UNIQUE NONCLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[accounts]    Script Date: 2024-08-05 3:19:38 PM ******/
+/****** Object:  View [dbo].[accounts]    Script Date: 2024-08-07 11:48:51 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -128,7 +128,7 @@ AS
     accounts_table a
     LEFT JOIN items_table i ON i.id = a.item_id;
 GO
-/****** Object:  View [dbo].[transactions]    Script Date: 2024-08-05 3:19:38 PM ******/
+/****** Object:  View [dbo].[transactions]    Script Date: 2024-08-07 11:48:51 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -163,7 +163,7 @@ FROM
     transactions_table t
     LEFT JOIN accounts a ON t.account_id = a.id;
 GO
-/****** Object:  Table [dbo].[assets_table]    Script Date: 2024-08-05 3:19:38 PM ******/
+/****** Object:  Table [dbo].[assets_table]    Script Date: 2024-08-07 11:48:51 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -181,7 +181,45 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[link_events_table]    Script Date: 2024-08-05 3:19:38 PM ******/
+/****** Object:  Table [dbo].[budget_table]    Script Date: 2024-08-07 11:48:51 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[budget_table](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[user_id] [int] NOT NULL,
+	[category] [nvarchar](255) NOT NULL,
+	[budgeted_value] [decimal](10, 2) NOT NULL,
+	[actual_value] [decimal](10, 2) NOT NULL,
+	[remaining_value]  AS ([budgeted_value]-[actual_value]) PERSISTED,
+	[created_at] [datetime2](7) NULL,
+	[updated_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[income_bills_table]    Script Date: 2024-08-07 11:48:51 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[income_bills_table](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[user_id] [int] NOT NULL,
+	[income] [decimal](10, 2) NOT NULL,
+	[bills] [decimal](10, 2) NOT NULL,
+	[created_at] [datetime2](7) NULL,
+	[updated_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[link_events_table]    Script Date: 2024-08-07 11:48:51 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -200,9 +238,13 @@ PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+UNIQUE NONCLUSTERED 
+(
+	[request_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[plaid_api_events_table]    Script Date: 2024-08-05 3:19:38 PM ******/
+/****** Object:  Table [dbo].[plaid_api_events_table]    Script Date: 2024-08-07 11:48:51 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -227,7 +269,7 @@ UNIQUE NONCLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[users_table]    Script Date: 2024-08-05 3:19:38 PM ******/
+/****** Object:  Table [dbo].[users_table]    Script Date: 2024-08-07 11:48:51 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -256,6 +298,14 @@ ALTER TABLE [dbo].[assets_table] ADD  DEFAULT (getdate()) FOR [created_at]
 GO
 ALTER TABLE [dbo].[assets_table] ADD  DEFAULT (getdate()) FOR [updated_at]
 GO
+ALTER TABLE [dbo].[budget_table] ADD  DEFAULT (getdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[budget_table] ADD  DEFAULT (getdate()) FOR [updated_at]
+GO
+ALTER TABLE [dbo].[income_bills_table] ADD  DEFAULT (getdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[income_bills_table] ADD  DEFAULT (getdate()) FOR [updated_at]
+GO
 ALTER TABLE [dbo].[items_table] ADD  DEFAULT (getdate()) FOR [created_at]
 GO
 ALTER TABLE [dbo].[items_table] ADD  DEFAULT (getdate()) FOR [updated_at]
@@ -281,6 +331,12 @@ GO
 ALTER TABLE [dbo].[assets_table]  WITH CHECK ADD FOREIGN KEY([user_id])
 REFERENCES [dbo].[users_table] ([id])
 ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[budget_table]  WITH CHECK ADD FOREIGN KEY([user_id])
+REFERENCES [dbo].[users_table] ([id])
+GO
+ALTER TABLE [dbo].[income_bills_table]  WITH CHECK ADD FOREIGN KEY([user_id])
+REFERENCES [dbo].[users_table] ([id])
 GO
 ALTER TABLE [dbo].[items_table]  WITH CHECK ADD FOREIGN KEY([user_id])
 REFERENCES [dbo].[users_table] ([id])

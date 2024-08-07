@@ -18,6 +18,12 @@ const {
   retrieveUserByAuth0Id,
   retrieveTransactionTrendsByAuth0Id,
   retrieveRecurringTransactionsByUserId,
+  createIncomeBills,
+  retrieveIncomeBillsByUserId,
+  createBudgetCategory,
+  retrieveBudgetCategoriesByUserId,
+  updateIncomeBills,
+  updateBudgetCategory,
 } = require('../db/queries');
 const { asyncWrapper } = require('../middleware');
 const {
@@ -27,6 +33,8 @@ const {
   sanitizeTransactions,
   sanitizeTransactionAssets,
   sanitizeTransactionLiabilities,
+  sanitizeIncomeBills,
+  sanitizeBudgetCategories,
 } = require('../util');
 
 
@@ -168,6 +176,7 @@ router.get(
 );
 
 
+
 /**
  * Retrieves all transactions associated with a single user.
  *
@@ -226,5 +235,122 @@ router.get(
     res.json(sanitizeTransactions(recurringTransactions));
   })
 );
+
+// Create income and bills entry for a user
+router.post(
+  '/:userId/income-bills',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    const { income, bills } = req.body;
+
+    console.log('POST /users/:userId/income-bills', { userId, income, bills });
+
+    try {
+      const incomeBills = await createIncomeBills(userId, income, bills);
+      console.log('Income and bills entry created:', incomeBills);
+      res.json(sanitizeIncomeBills(incomeBills));
+    } catch (error) {
+      console.error('Error in POST /users/:userId/income-bills:', error);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  })
+);
+
+// Retrieve income and bills for a user
+router.get(
+  '/:userId/income-bills',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+
+    console.log('GET /users/:userId/income-bills', { userId });
+
+    try {
+      const incomeBills = await retrieveIncomeBillsByUserId(userId);
+      console.log('Income and bills entry retrieved:', incomeBills);
+      res.json(sanitizeIncomeBills(incomeBills));
+    } catch (error) {
+      console.error('Error in GET /users/:userId/income-bills:', error);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  })
+);
+
+// Create budget category entry for a user
+router.post(
+  '/:userId/budget-categories',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    const { category, budgetedValue, actualValue } = req.body;
+    
+    console.log(`Creating budget category for user ${userId} with category: ${category}, budgetedValue: ${budgetedValue}, actualValue: ${actualValue}`);
+
+    try {
+      const budgetCategory = await createBudgetCategory(userId, category, budgetedValue, actualValue);
+      res.json(sanitizeBudgetCategories(budgetCategory));
+    } catch (error) {
+      console.error(`Error creating budget category for user ${userId}:`, error);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  })
+);
+
+// Retrieve budget categories for a user
+router.get(
+  '/:userId/budget-categories',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    
+    console.log(`Retrieving budget categories for user ${userId}`);
+
+    try {
+      const budgetCategories = await retrieveBudgetCategoriesByUserId(userId);
+      res.json(sanitizeBudgetCategories(budgetCategories));
+    } catch (error) {
+      console.error(`Error retrieving budget categories for user ${userId}:`, error);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  })
+);
+
+// Update income and bills entry for a user
+router.put(
+  '/:userId/income-bills',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    const { income, bills } = req.body;
+
+    console.log('PUT /users/:userId/income-bills', { userId, income, bills });
+
+    try {
+      const updatedIncomeBills = await updateIncomeBills(userId, income, bills);
+      console.log('Income and bills entry updated:', updatedIncomeBills);
+      res.json(sanitizeIncomeBills(updatedIncomeBills));
+    } catch (error) {
+      console.error('Error in PUT /users/:userId/income-bills:', error);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  })
+);
+
+// Update budget category entry for a user
+router.put(
+  '/:userId/budget-categories/:category',
+  asyncWrapper(async (req, res) => {
+    const { userId, category } = req.params;
+    const { budgetedValue, actualValue } = req.body;
+    
+    console.log(`Updating budget category ${category} for user ${userId} with budgetedValue: ${budgetedValue}, actualValue: ${actualValue}`);
+
+    try {
+      const updatedBudgetCategory = await updateBudgetCategory(userId, category, budgetedValue, actualValue);
+      res.json(sanitizeBudgetCategories(updatedBudgetCategory));
+    } catch (error) {
+      console.error(`Error updating budget category ${category} for user ${userId}:`, error);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  })
+);
+
+
 
 module.exports = router;

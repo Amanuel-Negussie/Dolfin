@@ -99,23 +99,22 @@ const NetWorth: React.FC<Props> = (props) => {
   ], []);
 
   return (
-    <div className="netWorthContainer">
-      <h2 className="netWorthHeading">Net Worth</h2>
-      <h4 className="tableSubHeading">
+    <div className="">
+      <h4 className="text-lg mb-4">
         A summary of your assets and liabilities
       </h4>
       {!props.assetsOnly && (
         <>
-          <div className="netWorthText">{`Your total across ${
+          <p className="text-base mb-2">{`Your total across ${
             props.numOfItems
-          } bank ${pluralize('account', props.numOfItems)}`}</div>
-          <h2 className="netWorthDollars">
+          } bank ${pluralize('account', props.numOfItems)}`}</p>
+          <h2 className="text-xl mb-2">
             Networth: {currencyFilter(assets - liabilities)}
           </h2>
-          <h2>Assets: {currencyFilter(assets)}</h2>
-          <h2>Liabilities: {currencyFilter(liabilities)}</h2>
-          <div className="holdingsContainer">
-            <div className="userDataBox">
+          <h2 className="text-lg mb-2">Assets: {currencyFilter(assets)}</h2>
+          <h2 className="text-lg mb-6">Liabilities: {currencyFilter(liabilities)}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
               <DataTable
                 title="Assets"
                 columns={columns}
@@ -131,7 +130,7 @@ const NetWorth: React.FC<Props> = (props) => {
                 onClose={handleCloseForm}  // Pass the close handler
               />
             </div>
-            <div className="userDataBox">
+            <div>
               <DataTable
                 title="Liabilities"
                 columns={columns}
@@ -144,11 +143,11 @@ const NetWorth: React.FC<Props> = (props) => {
       )}
       {props.assetsOnly && (
         <>
-          <h2 className="netWorthDollars">
+          <h2 className="text-xl mb-6">
             {currencyFilter(assets - liabilities)}
           </h2>
-          <div className="holdingsContainer">
-            <div className="userDataBox">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
               <DataTable
                 title="Assets"
                 columns={columns}

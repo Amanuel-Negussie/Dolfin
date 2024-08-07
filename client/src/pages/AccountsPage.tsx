@@ -57,7 +57,7 @@ export const AccountPage: React.FC = () => {
     useEffect(() => {
         if (Object.keys(accountsByUser).length > 0) {
             const groupedAccounts: GroupedAccounts = accountTypes.reduce((acc: GroupedAccounts, type) => {
-                acc[type] = Object.values(accountsByUser)[0].filter((account: AccountType) => account.subtype === type.toLowerCase());
+                acc[type] = Object.values(accountsByUser)[0].filter((account: AccountType | null) => account && account.subtype === type.toLowerCase());
                 return acc;
             }, {} as GroupedAccounts);
 

@@ -30,8 +30,9 @@ export const StyledLineChart: React.FC<StyledLineChartProps> = ({ data, title })
   return (
     <Card className="shadow-lg rounded-lg border border-gray-200 bg-white">
       <CardContent>
+        <div className = "mb-4"></div>
         <CardTitle className="text-xl font-semibold text-gray-800">{title}</CardTitle>
-        <div ref={yAxisRef} className="h-[300px]">
+        <div className="mt-4 h-[300px]" ref={yAxisRef}> {/* Added top margin */}
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={data}
