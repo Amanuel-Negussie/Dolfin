@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import {
   Table,
   TableBody,
@@ -48,6 +48,10 @@ const BudgetSection: React.FC<{ userId: number; onOpenDialogs: () => void }> = (
   const [editedCategories, setEditedCategories] = useState<{ [key: string]: { budgetedValue: string } }>({});
   const [openAddCategoryDialog, setOpenAddCategoryDialog] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const incomeInputRef = useRef<HTMLInputElement>(null);
+  const billsInputRef = useRef<HTMLInputElement>(null);
+  const categoryInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   useEffect(() => {
     if (userId && !isNaN(userId)) {
@@ -107,9 +111,10 @@ const BudgetSection: React.FC<{ userId: number; onOpenDialogs: () => void }> = (
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, saveFunction: () => void) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, saveFunction: () => void, ref: React.RefObject<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       saveFunction();
+      ref.current?.blur();
     }
   };
 
@@ -139,11 +144,11 @@ const BudgetSection: React.FC<{ userId: number; onOpenDialogs: () => void }> = (
   }, [incomeBills, spendingBudget]);
 
   return (
-    <div className="max-w-md mx-auto mt-4">
+    <div className="max-w-3xl mx-auto mt-4">
       {incomeBills && incomeBills.income && incomeBills.bills ? (
         <>
           <h3 className="text-xl font-bold">Budget Basics</h3>
-          <Table>
+          <Table className="w-full">
             <TableHeader>
               <TableRow>
                 <TableHead>Income</TableHead>
@@ -154,18 +159,20 @@ const BudgetSection: React.FC<{ userId: number; onOpenDialogs: () => void }> = (
               <TableRow>
                 <TableCell>
                   <Input
+                    ref={incomeInputRef}
                     value={income}
                     onChange={handleIncomeChange}
                     onBlur={handleSaveIncomeBills}
-                    onKeyDown={(e) => handleKeyDown(e, handleSaveIncomeBills)}
+                    onKeyDown={(e) => handleKeyDown(e, handleSaveIncomeBills, incomeInputRef)}
                   />
                 </TableCell>
                 <TableCell>
                   <Input
+                    ref={billsInputRef}
                     value={bills}
                     onChange={handleBillsChange}
                     onBlur={handleSaveIncomeBills}
-                    onKeyDown={(e) => handleKeyDown(e, handleSaveIncomeBills)}
+                    onKeyDown={(e) => handleKeyDown(e, handleSaveIncomeBills, billsInputRef)}
                   />
                 </TableCell>
               </TableRow>
@@ -173,7 +180,7 @@ const BudgetSection: React.FC<{ userId: number; onOpenDialogs: () => void }> = (
           </Table>
           <h3 className="text-xl font-bold">Budget Categories</h3>
           {budgetCategories && Object.keys(budgetCategories).length > 0 ? (
-            <Table>
+            <Table className="w-full">
               <TableHeader>
                 <TableRow>
                   <TableHead>Category</TableHead>
@@ -188,10 +195,11 @@ const BudgetSection: React.FC<{ userId: number; onOpenDialogs: () => void }> = (
                     <TableCell>{category.category}</TableCell>
                     <TableCell>
                       <Input
+                        ref={(el) => (categoryInputRefs.current[category.category] = el)}
                         value={editedCategories[category.category]?.budgetedValue || ""}
                         onChange={handleCategoryChange(category.category, "budgetedValue")}
                         onBlur={() => handleSaveCategory(category.category)}
-                        onKeyDown={(e) => handleKeyDown(e, () => handleSaveCategory(category.category))}
+                        onKeyDown={(e) => handleKeyDown(e, () => handleSaveCategory(category.category), { current: categoryInputRefs.current[category.category] })}
                       />
                     </TableCell>
                     <TableCell>{category.actualValue}</TableCell>
