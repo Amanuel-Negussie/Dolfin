@@ -23,6 +23,7 @@ const {
   validItemStatuses,
 } = require('../util');
 const updateTransactions = require('../update_transactions');
+const { updateItemAccessToken } = require('../db/queries/items');
 
 const router = express.Router();
 
@@ -37,37 +38,35 @@ const router = express.Router();
 router.post(
   '/',
   asyncWrapper(async (req, res) => {
-    const { publicToken, institutionId, userId } = req.body;
+    const { publicToken, institutionId } = req.body;
+    const { sub: auth0Id } = req.auth.payload;
     // prevent duplicate items for the same institution per user.
     const existingItem = await retrieveItemByPlaidInstitutionId(
       institutionId,
-      userId
+      auth0Id
     );
-    if (existingItem){
-      console.log("Okay this is api/post with existing item");
-      throw new Boom('You have already linked an item at this institution.', {
-        statusCode: 409,
-      });
-    }
 
     // exchange the public token for a private access token and store with the item.
     const response = await plaid.itemPublicTokenExchange({
       public_token: publicToken,
     });
     const accessToken = response.data.access_token;
-    const itemId = response.data.item_id;
-    const newItem = await createItem(
+    const itemId = existingItem ? null: response.data.item_id;
+    const newItem = existingItem ? null: await createItem(
       institutionId,
       accessToken,
       itemId,
-      userId
+      auth0Id
     );
 
+    updateItemAccessToken(existingItem ? existingItem.id: newItem.id, accessToken);
     // Make an initial call to fetch transactions and enable SYNC_UPDATES_AVAILABLE webhook sending
     // for this item.
-    updateTransactions(itemId).then(() => {
+    updateTransactions(existingItem ? existingItem.plaid_item_id: itemId).then(() => {
       // Notify frontend to reflect any transactions changes.
-      req.io.emit('NEW_TRANSACTIONS_DATA', { itemId: newItem.id });
+      if(!existingItem){
+        req.io.emit('NEW_TRANSACTIONS_DATA', { itemId: newItem.id });
+      }
     });
 
     res.json(sanitizeItems(newItem));

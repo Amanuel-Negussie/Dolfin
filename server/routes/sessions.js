@@ -3,7 +3,7 @@
  */
 
 const express = require('express');
-const { retrieveUserByUsername } = require('../db/queries');
+const { retrieveUserByAuth0Id } = require('../db/queries');
 const { asyncWrapper } = require('../middleware');
 const { sanitizeUsers } = require('../util');
 
@@ -18,10 +18,9 @@ const router = express.Router();
 router.post(
   '/',
   asyncWrapper(async (req, res) => {
-    const { auth0Id } = req.body;
-    const user = await retrieveUserByUsername(auth0Id);
+    const { sub: auth0Id } = req.auth.payload;
+    const user = await retrieveUserByAuth0Id(auth0Id);
     if (user != null) {
-      console.log(`User ${user.username}`)
       res.json(sanitizeUsers(user));
     } else {
       console.log('User not found')

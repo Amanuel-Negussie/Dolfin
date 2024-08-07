@@ -19,10 +19,10 @@ import { format } from "date-fns";
 
 
 interface TransactionCardProps {
-    transactions: Transaction[];
+    transactions: Transaction[] | null;
 };
 
-export const TransactionsCard: React.FC<TransactionCardProps> = ({transactions}) => {
+export const TransactionsCard: React.FC<TransactionCardProps> = ({transactions = null}) => {
     return (
         <>
             <Card>
@@ -30,7 +30,7 @@ export const TransactionsCard: React.FC<TransactionCardProps> = ({transactions})
                     <CardTitle>Recent Transactions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {transactions.map((transaction) => (
+                    {transactions && transactions.map((transaction) => (
                         <div key={transaction.id} className="flex items-center" >
                             <Avatar className="h-9 w-9">
                                 <AvatarImage src="/avatars/05.png" alt="Avatar" />
@@ -43,6 +43,7 @@ export const TransactionsCard: React.FC<TransactionCardProps> = ({transactions})
                             <div className="ml-auto font-medium">{transaction.amount}</div>
                         </div>
                     ))}
+                    {!transactions && <p>You have no transactions to display.</p>}
                 </CardContent>
             </Card>
         </>

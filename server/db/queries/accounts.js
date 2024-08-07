@@ -86,20 +86,32 @@ const retrieveAccountsByItemId = async itemId => {
 /**
  * Retrieves all accounts for a single user.
  *
- * @param {number} userId the ID of the user.
+ * @param {string} auth0Id the Auth0 ID of the user.
  *
  * @returns {Object[]} an array of accounts.
  */
-const retrieveAccountsByUserId = async userId => {
-  const query = 'SELECT * FROM accounts WHERE user_id = @param1 ORDER BY id';
-  const params = [{ name: 'param1', type: sql.Int, value: userId }];
+const retrieveAccountsByAuth0Id = async auth0Id => {
+  const query = 'SELECT * FROM accounts WHERE user_id = (SELECT id FROM users_table WHERE auth0_id = @param1) ORDER BY id';
+  const params = [{ name: 'param1', type: sql.NVarChar, value: auth0Id }];
   const { recordset: accounts } = await queryDatabase(query, params);
   return accounts;
+};
+
+/**
+ * Removes a single account. The database will also remove related transactions.
+ *
+ * @param {string} accountId the id of the item.
+ */
+const deleteAccount = async accountId => {
+  const query = 'DELETE FROM accounts_table WHERE id = @param1';
+  const params = [{ name: 'param1', type: sql.Int, value: accountId }];
+  await queryDatabase(query, params);
 };
 
 module.exports = {
   createAccounts,
   retrieveAccountByPlaidAccountId,
   retrieveAccountsByItemId,
-  retrieveAccountsByUserId,
+  retrieveAccountsByAuth0Id,
+  deleteAccount,
 };

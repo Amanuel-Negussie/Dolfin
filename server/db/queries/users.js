@@ -38,14 +38,14 @@ const deleteUsers = async userId => {
 /**
  * Retrieves a single user.
  *
- * @param {number} userId the ID of the user.
+ * @param {string} auth0Id the Auth0 ID of the user.
  * @returns {Object} a user.
  */
-const retrieveUserById = async userId => {
+const retrieveUserByAuth0Id = async auth0Id => {
   const query = `
-    SELECT * FROM users_table WHERE id = @param1;
+    SELECT * FROM users_table WHERE auth0_id = @param1;
   `;
-  const params = [{ name: 'param1', type: sql.Int, value: userId }];
+  const params = [{ name: 'param1', type: sql.NVarChar, value: auth0Id }];
   const { recordset } = await queryDatabase(query, params);
   return recordset[0];
 };
@@ -81,7 +81,7 @@ const retrieveUsers = async () => {
 module.exports = {
   createUser,
   deleteUsers,
-  retrieveUserById,
+  retrieveUserByAuth0Id,
   retrieveUserByUsername,
   retrieveUsers,
 };

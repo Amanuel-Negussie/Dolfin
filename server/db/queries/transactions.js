@@ -31,7 +31,6 @@ const createOrUpdateTransactions = async transactions => {
     const { id: accountId } = await retrieveAccountByPlaidAccountId(plaidAccountId);
 
     try {
-      console.log(category);
       // SQL query for MERGE
       const query = `
         MERGE transactions_table AS target
@@ -122,6 +121,47 @@ const retrieveTransactionsByUserId = async userId => {
 };
 
 /**
+ * Retrieves all transactions for a single user.
+ *
+ * @param {string} auth0Id the Auth0 ID of the user.
+ * @returns {Object[]} an array of transactions.
+ */
+const retrieveTransactionsByAuth0Id = async auth0Id => {
+  const query = 'SELECT * FROM transactions WHERE user_id = (SELECT id FROM users_table WHERE auth0_id = @param1) ORDER BY date DESC';
+  const params = [{ name: 'param1', type: sql.NVarChar, value: auth0Id }];
+  const { recordset: transactions } = await queryDatabase(query, params);
+  return transactions;
+};
+
+/**
+ * Retrieves all transactions for a single user.
+ *
+ * @param {string} auth0Id the Auth0 ID of the user.
+ * @returns {Object[]} an array of transactions.
+ */
+const retrieveTransactionTrendsByAuth0Id = async auth0Id => {
+  const query = `
+    SELECT 
+      CAST(date AS DATE) AS date,
+      SUM(amount) AS amount
+    FROM 
+      transactions
+    WHERE 
+      user_id = (SELECT id FROM users_table WHERE auth0_id = @param1)
+      AND date >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+      AND date < DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0)
+      AND amount >= 0
+    GROUP BY 
+      CAST(date AS DATE)
+    ORDER BY 
+      date;
+  `;
+  const params = [{ name: 'param1', type: sql.NVarChar, value: auth0Id }];
+  const { recordset: transactions } = await queryDatabase(query, params);
+  return transactions;
+};
+
+/**
  * Removes one or more transactions.
  *
  * @param {string[]} plaidTransactionIds the Plaid IDs of the transactions.
@@ -140,5 +180,7 @@ module.exports = {
   retrieveTransactionsByAccountId,
   retrieveTransactionsByItemId,
   retrieveTransactionsByUserId,
+  retrieveTransactionsByAuth0Id,
+  retrieveTransactionTrendsByAuth0Id,
   deleteTransactions,
 };

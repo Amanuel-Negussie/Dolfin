@@ -21,7 +21,8 @@ const createLinkEvent = async ({
   error_type: errorType,
   error_code: errorCode,
   status,
-}) => {
+}, auth0Id
+) => {
   const query = `
       INSERT INTO link_events_table
         (
@@ -33,11 +34,11 @@ const createLinkEvent = async ({
           error_code,
           status
         )
-      VALUES (@param1, @param2, @param3, @param4, @param5, @param6, @param7);
+      VALUES (@param1, (SELECT id FROM users_table WHERE auth0_id = @param2), @param3, @param4, @param5, @param6, @param7);
     `;
   const params = [
     { name: 'param1', type: sql.NVarChar, value: type },
-    { name: 'param2', type: sql.Int, value: userId },
+    { name: 'param2', type: sql.NVarChar, value: auth0Id },
     { name: 'param3', type: sql.NVarChar, value: linkSessionId },
     { name: 'param4', type: sql.NVarChar, value: requestId },
     { name: 'param5', type: sql.NVarChar, value: errorType },

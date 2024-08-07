@@ -21,16 +21,24 @@ import React, {
     [accountId: number]: AccountType;
   }
   
-  const initialState: AccountsState = {};
+  interface FetchingState {
+    isComplete: boolean;
+  }
+  
+  type State = AccountsState & FetchingState;
+  
+  const initialState: State = {
+    isComplete: false
+  };
+  
   type AccountsAction =
-    | {
-        type: 'SUCCESSFUL_GET';
-        payload: AccountType[];
-      }
+    | { type: 'SUCCESSFUL_GET'; payload: AccountType[] }
+    | { type: 'FETCH_START' }
+    | { type: 'FETCH_COMPLETE' }
     | { type: 'DELETE_BY_ITEM'; payload: number }
     | { type: 'DELETE_BY_USER'; payload: number };
   
-  interface AccountsContextShape extends AccountsState {
+  interface AccountsContextShape extends State {
     dispatch: Dispatch<AccountsAction>;
     accountsByItem: { [itemId: number]: AccountType[] };
     deleteAccountsByItemId: (itemId: number) => void;
@@ -38,58 +46,44 @@ import React, {
     accountsByUser: { [user_id: number]: AccountType[] };
     deleteAccountsByUserId: (userId: number) => void;
   }
+  
   const AccountsContext = createContext<AccountsContextShape>(
     initialState as AccountsContextShape
   );
   
-  /**
-   * @desc Maintains the Accounts context state and provides functions to update that state.
-   */
   export const AccountsProvider: React.FC<{ children: ReactNode }> = (props: any) => {
-    const [accountsById, dispatch] = useReducer(reducer, initialState);
+    const [state, dispatch] = useReducer(reducer, initialState);
   
-    /**
-     * @desc Requests all Accounts that belong to an individual Item.
-     */
     const getAccountsByItem = useCallback(async (itemId: number) => {
+      dispatch({ type: 'FETCH_START' });
       const { data: payload } = await apiGetAccountsByItem(itemId);
-      dispatch({ type: 'SUCCESSFUL_GET', payload: payload });
+      dispatch({ type: 'SUCCESSFUL_GET', payload });
+      dispatch({ type: 'FETCH_COMPLETE' });
     }, []);
   
-    /**
-     * @desc Requests all Accounts that belong to an individual User.
-     */
     const getAccountsByUser = useCallback(async (userId: number) => {
+      dispatch({ type: 'FETCH_START' });
       const { data: payload } = await apiGetAccountsByUser(userId);
-      dispatch({ type: 'SUCCESSFUL_GET', payload: payload });
+      dispatch({ type: 'SUCCESSFUL_GET', payload });
+      dispatch({ type: 'FETCH_COMPLETE' });
     }, []);
   
-    /**
-     * @desc Will delete all accounts that belong to an individual Item.
-     * There is no api request as apiDeleteItemById in items delete all related transactions
-     */
     const deleteAccountsByItemId = useCallback((itemId: number) => {
       dispatch({ type: 'DELETE_BY_ITEM', payload: itemId });
     }, []);
   
-    /**
-     * @desc Will delete all accounts that belong to an individual User.
-     * There is no api request as apiDeleteItemById in items delete all related transactions
-     */
     const deleteAccountsByUserId = useCallback((userId: number) => {
       dispatch({ type: 'DELETE_BY_USER', payload: userId });
     }, []);
   
-    /**
-     * @desc Builds a more accessible state shape from the Accounts data. useMemo will prevent
-     * these from being rebuilt on every render unless accountsById is updated in the reducer.
-     */
     const value = useMemo(() => {
-      const allAccounts = Object.values(accountsById);
+      const allAccounts = Object.values(state).filter(account => typeof account === 'object');
   
       return {
+        dispatch,
         allAccounts,
-        accountsById,
+        accountsById: state,
+        isComplete: state.isComplete,
         accountsByItem: groupBy(allAccounts, 'item_id'),
         accountsByUser: groupBy(allAccounts, 'user_id'),
         getAccountsByItem,
@@ -98,7 +92,7 @@ import React, {
         deleteAccountsByUserId,
       };
     }, [
-      accountsById,
+      state,
       getAccountsByItem,
       getAccountsByUser,
       deleteAccountsByItemId,
@@ -108,38 +102,40 @@ import React, {
     return <AccountsContext.Provider value={value} {...props} />;
   };
   
-  /**
-   * @desc Handles updates to the Accounts state as dictated by dispatched actions.
-   */
-  function reducer(state: AccountsState, action: AccountsAction) {
+  function reducer(state: State, action: AccountsAction): State {
     switch (action.type) {
       case 'SUCCESSFUL_GET':
-        if (!action.payload.length) {
-          return state;
-        }
         return {
           ...state,
           ...keyBy(action.payload, 'id'),
+          isComplete: false,
+        };
+      case 'FETCH_START':
+        return {
+          ...state,
+          isComplete: false,
+        };
+      case 'FETCH_COMPLETE':
+        return {
+          ...state,
+          isComplete: true,
         };
       case 'DELETE_BY_ITEM':
-        return omitBy(
-          state,
-          transaction => transaction.item_id === action.payload
-        );
+        return {
+          ...omitBy(state, account => account.item_id === action.payload),
+          isComplete: state.isComplete,
+        };
       case 'DELETE_BY_USER':
-        return omitBy(
-          state,
-          transaction => transaction.user_id === action.payload
-        );
+        return {
+          ...omitBy(state, account => account.user_id === action.payload),
+          isComplete: state.isComplete,
+        };
       default:
         console.warn('unknown action');
         return state;
     }
   }
   
-  /**
-   * @desc A convenience hook to provide access to the Accounts context state in components.
-   */
   export default function useAccounts() {
     const context = useContext(AccountsContext);
   
@@ -149,4 +145,3 @@ import React, {
   
     return context;
   }
-  

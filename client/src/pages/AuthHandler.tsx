@@ -2,31 +2,35 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useCurrentUser } from "@/services";
 import { useUsers } from "@/services";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { setAccessToken } from "@/services/api";
 
 
 export const AuthHandler: React.FC = () => {
-    const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
-    const { login, setNewUser, setCurrentUser, userState } = useCurrentUser();
-    const { addNewUser, dispatch } = useUsers();
-    const [isLoginDone, setIsLoginDone] = useState(false);
+    const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
+    const { login, setNewUser, userState } = useCurrentUser();
+    const { addNewUser } = useUsers();
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Login to backend if Auth0 is authenticated
-        if (isAuthenticated && user?.sub) {
-            login(user?.sub);
+        async function fetchAccessToken() {
+            const token = await getAccessTokenSilently();
+            setAccessToken(token);
+            // Login to backend if Auth0 is authenticated
+            if (isAuthenticated && user?.nickname) {
+                login(user.nickname);
+            }
+            else {
+                console.log("No User Logged In");
+            }
         }
-        else {
-            console.log("No User Logged In");
-        }
+        fetchAccessToken();
     }, [login]);
 
     // Login set NewUser to null
     useEffect(() => {
         if (!userState.newUser && userState.currentUser) {
-            console.log('Current user is: ', userState.currentUser);
             navigate('/home');
         }
         // If logged in through Auth0, but not in the backend, create a new user

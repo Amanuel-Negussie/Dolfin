@@ -7,7 +7,7 @@ const { asyncWrapper } = require('../middleware');
 const express = require('express');
 const plaid = require('../plaid');
 const fetch = require('node-fetch');
-const { retrieveItemById } = require('../db/queries');
+const { retrieveItemById, retrieveUserByAuth0Id } = require('../db/queries');
 const {
   PLAID_SANDBOX_REDIRECT_URI,
   PLAID_PRODUCTION_REDIRECT_URI,
@@ -24,9 +24,11 @@ router.post(
   '/',
   asyncWrapper(async (req, res) => {
     try {
-      const { userId, itemId } = req.body;
+      const { itemId } = req.body;
+      const { sub: auth0Id } = req.auth.payload;
+      const { id: userId } = await retrieveUserByAuth0Id(auth0Id);
       let accessToken = null;
-      let products = ["auth", "transactions"]; // must include transactions in order to receive transactions webhooks
+      let products = ["auth", "transactions", "liabilities"]; // must include transactions in order to receive transactions webhooks
       if (itemId != null) {
         // for the link update mode, include access token and an empty products array
         const itemIdResponse = await retrieveItemById(itemId);

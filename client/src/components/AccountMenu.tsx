@@ -8,7 +8,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Link } from "react-router-dom"
 
 export interface AccountProps {
     name: string | undefined
@@ -45,8 +44,3 @@ export function AccountMenu({ name, email, picture, logout }: AccountProps) {
         </DropdownMenu>
     )
 }
-
-/*
-
-        
-*/
