@@ -42,7 +42,7 @@ export const TransactionsCard: React.FC<TransactionCardProps> = ({ transactions 
                 <CardHeader>
                     <CardTitle>Recent Transactions</CardTitle>
                 </CardHeader>
-                <CardContent className="flex items-center justify-center min-h-[350px]">
+                <CardContent className="min-h-[350px]">
                     {recentTransactions && recentTransactions?.length > 0 && recentTransactions.map((transaction) => {
                         const { name, logo_url: logoUrl } = transaction;
                         const { src, fallback } = getAvatarDetails(name, logoUrl);
@@ -60,7 +60,10 @@ export const TransactionsCard: React.FC<TransactionCardProps> = ({ transactions 
                             </div>
                         );
                     })}
-                    {!recentTransactions?.length && <CardDescription className="text-center">You have no transactions to display.</CardDescription>}
+                    {!recentTransactions?.length &&
+                        <div className="min-h-[350px] flex items-center justify-center">
+                            <CardDescription className="text-center">You have no transactions to display.</CardDescription>
+                        </div>}
                 </CardContent>
             </Card>
         </>
