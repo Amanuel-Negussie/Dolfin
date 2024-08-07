@@ -14,9 +14,15 @@ export const BudgetPage: React.FC = () => {
 
   return (
     <>
-      <h2 className="text-3xl font-bold tracking-tight">Budgeting</h2>
-      <BudgetSection userId={userId} onOpenDialogs={handleOpenDialogs} />
-      {showDialogs && <BudgetDialogs userId={userId} />}
+      <div className="flex flex-col min-h-screen h-screen">
+        <div className="flex-1 flex flex-col space-y-4 p-20 pt-6">
+          <h2 className="text-3xl font-bold tracking-tight">
+            Budget
+          </h2>
+          <BudgetSection userId={userId} onOpenDialogs={handleOpenDialogs} />
+          {showDialogs && <BudgetDialogs userId={userId} />}
+        </div>
+      </div>
     </>
   );
 };

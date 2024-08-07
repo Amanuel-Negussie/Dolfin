@@ -17,6 +17,7 @@ import {
   getAccountsByUser as apiGetAccountsByUser,
   addIncomeBills as apiAddIncomeBills,
   getIncomeBillsByUser as apiGetIncomeBillsByUser,
+  updateIncomeBills as apiUpdateIncomeBills,
 } from './api';
 
 interface AccountsState {
@@ -42,6 +43,7 @@ interface AccountsContextShape extends AccountsState {
   deleteAccountsByUserId: (userId: number) => void;
   addIncomeBills: (userId: number, income: number, bills: number) => void;
   getIncomeBillsByUser: (userId: number) => void;
+  updateIncomeBills: (userId: number, income: number, bills: number) => void;
   incomeBills: { income: number; bills: number } | null;
 }
 const AccountsContext = createContext<AccountsContextShape>(
@@ -80,6 +82,11 @@ export const AccountsProvider: React.FC<{ children: ReactNode }> = (props: any) 
     setIncomeBills(payload);
   }, []);
 
+  const updateIncomeBills = useCallback(async (userId: number, income: number, bills: number) => {
+    const { data: payload } = await apiUpdateIncomeBills(userId, income, bills);
+    setIncomeBills(payload);
+  }, []);
+
   const value = useMemo(() => {
     const allAccounts = Object.values(accountsById);
 
@@ -94,6 +101,7 @@ export const AccountsProvider: React.FC<{ children: ReactNode }> = (props: any) 
       deleteAccountsByUserId,
       addIncomeBills,
       getIncomeBillsByUser,
+      updateIncomeBills,
       incomeBills,
     };
   }, [
@@ -104,6 +112,7 @@ export const AccountsProvider: React.FC<{ children: ReactNode }> = (props: any) 
     deleteAccountsByUserId,
     addIncomeBills,
     getIncomeBillsByUser,
+    updateIncomeBills,
     incomeBills,
   ]);
 

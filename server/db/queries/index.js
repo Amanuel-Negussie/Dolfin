@@ -39,7 +39,9 @@ const {
     createIncomeBills,
     retrieveIncomeBillsByUserId,
     createBudgetCategory,
-    retrieveBudgetCategoriesByUserId
+    retrieveBudgetCategoriesByUserId,
+    updateIncomeBills,
+    updateBudgetCategory,
   } = require('./users');
   const { createLinkEvent } = require('./linkEvents');
   
@@ -86,6 +88,8 @@ const {
     retrieveIncomeBillsByUserId,
     createBudgetCategory,
     retrieveBudgetCategoriesByUserId,
+    updateIncomeBills,
+    updateBudgetCategory,
     // assets
     createAsset,
     retrieveAssetsByUser,
