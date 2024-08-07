@@ -37,7 +37,9 @@ const {
     retrieveTransactionAssetsByUserId,
     retrieveTransactionLiabilitiesByUserId,
     createIncomeBills,
-    retrieveIncomeBillsByUserId
+    retrieveIncomeBillsByUserId,
+    createBudgetCategory,
+    retrieveBudgetCategoriesByUserId
   } = require('./users');
   const { createLinkEvent } = require('./linkEvents');
   
@@ -82,6 +84,8 @@ const {
     retrieveUsers,
     createIncomeBills,
     retrieveIncomeBillsByUserId,
+    createBudgetCategory,
+    retrieveBudgetCategoriesByUserId,
     // assets
     createAsset,
     retrieveAssetsByUser,

@@ -128,6 +128,24 @@ const sanitizeIncomeBills = (incomeBills) => ({
   updatedAt: incomeBills.updated_at,
 });
 
+const sanitizeBudgetCategories = (budgetCategories) => {
+  if (Array.isArray(budgetCategories)) {
+    return budgetCategories.map(sanitizeBudgetCategory);
+  }
+  return sanitizeBudgetCategory(budgetCategories);
+};
+
+const sanitizeBudgetCategory = (category) => ({
+  id: category.id,
+  userId: category.user_id,
+  category: category.category,
+  budgetedValue: category.budgeted_value,
+  actualValue: category.actual_value,
+  remainingValue: category.remaining_value,
+  createdAt: category.created_at,
+  updatedAt: category.updated_at,
+});
+
 const validItemStatuses = new Set(["good", "bad"]);
 const isValidItemStatus = (status) => validItemStatuses.has(status);
 
@@ -142,4 +160,5 @@ module.exports = {
   sanitizeIncomeBills,
   validItemStatuses,
   isValidItemStatus,
+  sanitizeBudgetCategories,
 };

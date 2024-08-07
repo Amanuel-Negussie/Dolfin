@@ -18,6 +18,8 @@ const {
   retrieveRecurringTransactionsByUserId,
   createIncomeBills,
   retrieveIncomeBillsByUserId,
+  createBudgetCategory,
+  retrieveBudgetCategoriesByUserId,
 } = require('../db/queries');
 const { asyncWrapper } = require('../middleware');
 const {
@@ -28,6 +30,7 @@ const {
   sanitizeTransactionAssets,
   sanitizeTransactionLiabilities,
   sanitizeIncomeBills,
+  sanitizeBudgetCategories,
 } = require('../util');
 
 
@@ -169,6 +172,7 @@ router.get(
 );
 
 
+
 /**
  * Deletes a user and its related items
  *
@@ -251,5 +255,43 @@ router.get(
     }
   })
 );
+
+// Create budget category entry for a user
+router.post(
+  '/:userId/budget-categories',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    const { category, budgetedValue, actualValue } = req.body;
+    
+    console.log(`Creating budget category for user ${userId} with category: ${category}, budgetedValue: ${budgetedValue}, actualValue: ${actualValue}`);
+
+    try {
+      const budgetCategory = await createBudgetCategory(userId, category, budgetedValue, actualValue);
+      res.json(sanitizeBudgetCategories(budgetCategory));
+    } catch (error) {
+      console.error(`Error creating budget category for user ${userId}:`, error);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  })
+);
+
+// Retrieve budget categories for a user
+router.get(
+  '/:userId/budget-categories',
+  asyncWrapper(async (req, res) => {
+    const { userId } = req.params;
+    
+    console.log(`Retrieving budget categories for user ${userId}`);
+
+    try {
+      const budgetCategories = await retrieveBudgetCategoriesByUserId(userId);
+      res.json(sanitizeBudgetCategories(budgetCategories));
+    } catch (error) {
+      console.error(`Error retrieving budget categories for user ${userId}:`, error);
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  })
+);
+
 
 module.exports = router;
