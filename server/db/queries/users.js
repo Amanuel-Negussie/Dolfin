@@ -170,17 +170,15 @@ const retrieveIncomeBillsByUserId = async (userId) => {
 // Create a new budget category entry for a user
 const createBudgetCategory = async (userId, category, budgetedValue, actualValue) => {
   const query = `
-    INSERT INTO budget_table (user_id, category, budgeted_value, actual_value, remaining_value)
+    INSERT INTO budget_table (user_id, category, budgeted_value, actual_value)
     OUTPUT INSERTED.*
-    VALUES (@userId, @category, @budgetedValue, @actualValue, @remainingValue);
+    VALUES (@userId, @category, @budgetedValue, @actualValue);
   `;
-  const remainingValue = budgetedValue - actualValue;
   const params = [
     { name: "userId", type: sql.Int, value: userId },
     { name: "category", type: sql.NVarChar, value: category },
     { name: "budgetedValue", type: sql.Decimal(10, 2), value: budgetedValue },
     { name: "actualValue", type: sql.Decimal(10, 2), value: actualValue },
-    { name: "remainingValue", type: sql.Decimal(10, 2), value: remainingValue },
   ];
 
   console.log(`Executing query to create budget category for user ${userId}`);
@@ -193,6 +191,7 @@ const createBudgetCategory = async (userId, category, budgetedValue, actualValue
     throw error;
   }
 };
+
 
 // Retrieve budget categories for a user
 const retrieveBudgetCategoriesByUserId = async (userId) => {
