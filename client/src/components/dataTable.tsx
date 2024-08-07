@@ -1,7 +1,9 @@
 import React from 'react';
-import { Button, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Paper } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableRow } from '@/components/ui/table';
+import { Trash } from 'lucide-react'; // Using lucide-react for icons
 
 interface DataTableProps {
   title: string;
@@ -32,73 +34,77 @@ const DataTable: React.FC<DataTableProps> = ({
   setValue,
   onClose
 }) => (
-  <Paper style={{ padding: 16, position: 'relative' }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-      <h3>{title}</h3>
-      {onClose && <IconButton onClick={onClose} style={{ position: 'absolute', top: 8, right: 8 }}><CloseIcon /></IconButton>}
-    </div>
-    <TableContainer>
-      <Table>
-        <TableHead>
-          <TableRow>
-            {columns.map(column => (
-              <TableCell key={column.accessor}>{column.Header}</TableCell>
-            ))}
-            {onDelete && <TableCell>Actions</TableCell>}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {data.map(row => (
-            <TableRow key={row.id}>
-              {columns.map(column => (
-                <TableCell key={column.accessor}>{row[column.accessor]}</TableCell>
-              ))}
-              {onDelete && row.canDelete && (
-                <TableCell>
-                  <IconButton color="error" onClick={() => onDelete(row.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
-          {showAddForm && (
+  <Card className="p-4 relative">
+    <CardHeader>
+      <CardTitle className="flex justify-between items-center">
+        {title}
+        {onClose && <button onClick={onClose} className="absolute top-2 right-2"></button>}
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="overflow-x-auto">
+        <Table className="w-full table-fixed">
+          <TableHead>
             <TableRow>
-              <TableCell colSpan={columns.length + (onDelete ? 1 : 0)}>
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
-                  <TextField
-                    label="Description"
-                    value={description}
-                    onChange={(e) => setDescription && setDescription(e.target.value)}
-                    required
-                    style={{ marginBottom: 8 }}
-                  />
-                  <TextField
-                    label="Value"
-                    value={value}
-                    onChange={(e) => setValue && setValue(e.target.value)}
-                    required
-                    type="number"
-                    inputProps={{ step: "0.01" }}
-                    style={{ marginBottom: 8 }}
-                  />
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-                    <Button type="submit" variant="contained" color="primary" style={{ marginRight: 8 }}>Add</Button>
-                    <Button type="button" onClick={() => onClose && onClose()} variant="outlined">Cancel</Button>
-                  </div>
-                </form>
-              </TableCell>
+              {columns.map(column => (
+                <TableCell key={column.accessor} className="font-semibold w-1/3">{column.Header}</TableCell>
+              ))}
+              {onDelete && <TableCell className="font-semibold text-right w-1/3">Actions</TableCell>}
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
-    {!showAddForm && onAdd && (
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-        <Button variant="contained" color="primary" onClick={onAdd}>Add</Button>
+          </TableHead>
+          <TableBody>
+            {data.map(row => (
+              <TableRow key={row.id}>
+                {columns.map(column => (
+                  <TableCell key={column.accessor} className="truncate w-1/3">{row[column.accessor]}</TableCell>
+                ))}
+                {onDelete && row.canDelete && (
+                  <TableCell className="text-right w-1/3">
+                    <button onClick={() => onDelete(row.id)} className="text-red-600">
+                      <Trash className="w-4 h-4" />
+                    </button>
+                  </TableCell>
+                )}
+              </TableRow>
+            ))}
+            {showAddForm && (
+              <TableRow>
+                <TableCell colSpan={columns.length + (onDelete ? 1 : 0)}>
+                  <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
+                    <Input
+                      placeholder="Description"
+                      value={description}
+                      onChange={(e) => setDescription && setDescription(e.target.value)}
+                      required
+                      className="mb-2"
+                    />
+                    <Input
+                      placeholder="Value"
+                      value={value}
+                      onChange={(e) => setValue && setValue(e.target.value)}
+                      required
+                      type="number"
+                      step="0.01"
+                      className="mb-2"
+                    />
+                    <div className="flex justify-end mt-2 space-x-2">
+                      <Button type="submit">Add</Button>
+                      <Button type="button" variant="outline" onClick={() => onClose && onClose()}>Cancel</Button>
+                    </div>
+                  </form>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
-    )}
-  </Paper>
+      {!showAddForm && onAdd && (
+        <div className="flex justify-end mt-4">
+          <Button onClick={onAdd}>Add</Button>
+        </div>
+      )}
+    </CardContent>
+  </Card>
 );
 
 export default DataTable;
