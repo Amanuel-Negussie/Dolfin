@@ -38,7 +38,7 @@ router.post(
   "/",
   asyncWrapper(async (req, res) => {
     const { publicToken, institutionId, userId } = req.body;
-   
+    const { sub: auth0Id } = req.auth.payload;
      // exchange the public token for a private access token and store with the item.
   const response = await plaid.itemPublicTokenExchange({
     public_token: publicToken,
@@ -51,7 +51,7 @@ router.post(
       institutionId,
       accessToken,
       itemId,
-      userId
+      auth0Id
     );
   
  

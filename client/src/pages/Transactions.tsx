@@ -1,11 +1,12 @@
 import { TransactionPageCard } from "@/components/TransactionPageCard";
 import { Transaction } from "@/components/types";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import useLogin from "@/hooks/useLogin";
 import { useTransactions } from "@/services";
 import { useEffect, useState } from "react";
 
 export const Transactions: React.FC = () => {
-    const { getTransactionsByUser, transactionsByUser } = useTransactions();
+    const { getTransactionsByUser, transactionsByUser, isComplete } = useTransactions();
     const [isLoading, setIsLoading] = useState(true);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const userId = Number(useLogin());
@@ -17,14 +18,16 @@ export const Transactions: React.FC = () => {
     }, [userId]);
 
     useEffect(() => {
-        if (Object.keys(transactionsByUser).length > 0) {
-            setTransactions(Object.values(transactionsByUser)[0]);
-            setIsLoading(false);
+        if (isComplete) {
+            if (Object.keys(transactionsByUser).length > 0) {
+                setTransactions(Object.values(transactionsByUser)[0]);
+                setIsLoading(false);
+            }
         }
     }, [transactionsByUser]);
 
     if (isLoading) {
-        return <div>Loading...</div>
+        return <div><LoadingSpinner /></div>
     }
 
     return (

@@ -83,13 +83,11 @@ const updateTransactions = async (plaidItemId) => {
     accessToken
   } = await fetchTransactionUpdates(plaidItemId);
 
-  
   const request = {
     access_token: accessToken,
   };
 
   const {data: {accounts}} = await plaid.accountsGet(request);
-  
   // Update the DB.
   console.log('Accounts being processed:', accounts);
 const createdAccounts = await createAccounts(plaidItemId, accounts);

@@ -53,11 +53,11 @@ export default function LaunchLink(props: Props) {
         metadata.accounts,
         props.userId
       );
-      getItemsByUser(props.userId, true);
+      getItemsByUser(props.userId);
     }
     resetError();
     deleteLinkToken(props.userId, null);
-    //navigate(`/user/${props.userId}`);
+    window.location.href = '/accounts';
   };
 
   const onExit = async (

@@ -15,13 +15,15 @@ const api = axios.create({
   },
 });
 
+export const setAccessToken = (token: string) => {
+  api.defaults.headers.common.Authorization = `Bearer ${token}`;
+}
+
 export default api;
 
 // currentUser
 export const getLoginUser = (auth0Id: string) =>
   api.post('/sessions', { auth0Id });
-
-
 
 // assets
 export const addAsset = (userId: number, description: string, value: number) =>
@@ -30,7 +32,6 @@ export const getAssetsByUser = (userId: number) => api.get(`/assets/${userId}`);
 export const deleteAssetByAssetId = (assetId: number) =>
   api.delete(`/assets/${assetId}`);
 
-
 // transaction assets
 export const getTransactionAssetsByUser = (userId: number) =>
   api.get(`/users/${userId}/transaction-assets`);
@@ -38,7 +39,6 @@ export const getTransactionAssetsByUser = (userId: number) =>
 // transaction liabilities
 export const getTransactionLiabilitiesByUser = (userId: number) =>
   api.get(`/users/${userId}/transaction-liabilities`);
-
 
 // users
 export const getUsers = () => api.get('/users');
@@ -70,6 +70,7 @@ export const getAccountsByItem = (itemId: number) =>
   api.get(`/items/${itemId}/accounts`);
 export const getAccountsByUser = (userId: number) =>
   api.get(`/users/${userId}/accounts`);
+export const deleteAccountById = (id: number) => api.delete(`/accounts/${id}`);
 
 // transactions
 export const getTransactionsByAccount = (accountId: number) =>
@@ -80,6 +81,8 @@ export const getTransactionsByUser = (userId: number) =>
   api.get(`/users/${userId}/transactions`);
 export const getRecurringTransactionsByUser = (userId: number) =>
   api.get(`/users/${userId}/recurring-transactions`);
+export const getTransactionTrendsByUser = () =>
+  api.get(`/users/transactions/trends`);
 
 // institutions
 export const getInstitutionById = (instId: string) =>
@@ -113,3 +116,40 @@ export const exchangeToken = async (
     }
   }
 };
+
+// Income Bills API
+export const getIncomeBillsByUser = (userId: number) =>
+  api.get(`/users/${userId}/income-bills`);
+
+export const addIncomeBills = (userId: number, income: number, bills: number) =>
+  api.post(`/users/${userId}/income-bills`, { income, bills });
+
+export const updateIncomeBills = (userId: number, income: number, bills: number) =>
+  api.put(`/users/${userId}/income-bills`, { income, bills });
+
+// Budget Categories API
+export const getBudgetCategoriesByUser = (userId: number) =>
+  api.get(`/users/${userId}/budget-categories`);
+
+export const addBudgetCategory = (
+  userId: number,
+  category: string,
+  budgetedValue: number,
+  actualValue: number
+) =>
+  api.post(`/users/${userId}/budget-categories`, {
+    category,
+    budgetedValue,
+    actualValue,
+  });
+
+export const updateBudgetCategory = (
+  userId: number,
+  category: string,
+  budgetedValue: number,
+  actualValue: number
+) =>
+  api.put(`/users/${userId}/budget-categories/${category}`, {
+    budgetedValue,
+    actualValue,
+  });

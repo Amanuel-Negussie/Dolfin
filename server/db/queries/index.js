@@ -6,7 +6,7 @@ const {
     createAccounts,
     retrieveAccountByPlaidAccountId,
     retrieveAccountsByItemId,
-    retrieveAccountsByUserId,
+    retrieveAccountsByAuth0Id,
   } = require('./accounts');
   const {
     createItem,
@@ -15,7 +15,7 @@ const {
     retrieveItemByPlaidAccessToken,
     retrieveItemByPlaidInstitutionId,
     retrieveItemByPlaidItemId,
-    retrieveItemsByUser,
+    retrieveItemsByAuth0Id,
     updateItemStatus,
     updateItemTransactionsCursor,
   } = require('./items');
@@ -25,6 +25,8 @@ const {
     retrieveTransactionsByAccountId,
     retrieveTransactionsByItemId,
     retrieveTransactionsByUserId,
+    retrieveTransactionsByAuth0Id,
+    retrieveTransactionTrendsByAuth0Id,
     deleteTransactions,
     retrieveRecurringTransactionsByUserId,
   } = require('./transactions');
@@ -32,10 +34,16 @@ const {
     createUser,
     deleteUsers,
     retrieveUsers,
-    retrieveUserById,
+    retrieveUserByAuth0Id,
     retrieveUserByUsername,
     retrieveTransactionAssetsByUserId,
-    retrieveTransactionLiabilitiesByUserId
+    retrieveTransactionLiabilitiesByUserId,
+    createIncomeBills,
+    retrieveIncomeBillsByUserId,
+    createBudgetCategory,
+    retrieveBudgetCategoriesByUserId,
+    updateIncomeBills,
+    updateBudgetCategory,
   } = require('./users');
   const { createLinkEvent } = require('./linkEvents');
   
@@ -50,7 +58,7 @@ const {
     createAccounts,
     retrieveAccountByPlaidAccountId,
     retrieveAccountsByItemId,
-    retrieveAccountsByUserId,
+    retrieveAccountsByAuth0Id,
     // items
     createItem,
     deleteItem,
@@ -58,7 +66,7 @@ const {
     retrieveItemByPlaidAccessToken,
     retrieveItemByPlaidInstitutionId,
     retrieveItemByPlaidItemId,
-    retrieveItemsByUser,
+    retrieveItemsByAuth0Id,
     updateItemStatus,
     // plaid api events
     createPlaidApiEvent,
@@ -66,6 +74,8 @@ const {
     retrieveTransactionsByAccountId,
     retrieveTransactionsByItemId,
     retrieveTransactionsByUserId,
+    retrieveTransactionsByAuth0Id,
+    retrieveTransactionTrendsByAuth0Id,
     deleteTransactions,
     createOrUpdateTransactions,
     updateItemTransactionsCursor,
@@ -75,9 +85,15 @@ const {
     // users
     createUser,
     deleteUsers,
-    retrieveUserById,
+    retrieveUserByAuth0Id,
     retrieveUserByUsername,
     retrieveUsers,
+    createIncomeBills,
+    retrieveIncomeBillsByUserId,
+    createBudgetCategory,
+    retrieveBudgetCategoriesByUserId,
+    updateIncomeBills,
+    updateBudgetCategory,
     // assets
     createAsset,
     retrieveAssetsByUser,

@@ -13,9 +13,9 @@ const TransactionTrendsOverview: React.FC<TransactionTrendsOverviewProps> = ({
   transactionAssets,
   transactionLiabilities,
 }) => {
-  console.log('Daily Assets Transaction Trends OVerview: ', transactionAssets); 
+  console.log('Daily Assets Transaction Trends Overview: ', transactionAssets); 
   const dailyAssets = preprocessDailyData(transactionAssets);
-  console.log('Preprocess Assets Transaction Trends OVerview: ', dailyAssets); 
+  console.log('Preprocess Assets Transaction Trends Overview: ', dailyAssets); 
   const weeklyAssets = preprocessWeeklyData(transactionAssets);
   const monthlyAssets = preprocessMonthlyData(transactionAssets);
 
@@ -35,19 +35,19 @@ const TransactionTrendsOverview: React.FC<TransactionTrendsOverviewProps> = ({
         </CardHeader>
         <CardContent>
           <TabsContent value="daily">
-            <div>
+            <div className="space-y-4"> {/* Adds vertical space between elements */}
               <StyledLineChart data={dailyAssets} title='Daily Asset Trends' />
               <StyledLineChart data={dailyLiabilities} title='Daily Liability Trends' />
             </div>
           </TabsContent>
           <TabsContent value="weekly">
-            <div>
+            <div className="space-y-4"> {/* Adds vertical space between elements */}
               <StyledLineChart data={weeklyAssets} title='Weekly Asset Trends' />
               <StyledLineChart data={weeklyLiabilities} title='Weekly Liability Trends' />
             </div>
           </TabsContent>
           <TabsContent value="monthly">
-            <div>
+            <div className="space-y-4"> {/* Adds vertical space between elements */}
               <StyledLineChart data={monthlyAssets} title='Monthly Asset Trends' />
               <StyledLineChart data={monthlyLiabilities} title='Monthly Liability Trends' />
             </div>

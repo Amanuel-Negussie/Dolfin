@@ -1,59 +1,64 @@
 import { AccountSummaryCard } from "@/components/AccountSummaryCard";
 import { TransactionTrendsCard } from "@/components/TransactionTrendsCard";
 import { TransactionsCard } from "@/components/TransactionsCard";
-import { Transaction } from "@/components/types";
+import { AccountType, Transaction } from "@/components/types";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import useLogin from "@/hooks/useLogin";
 import { useAccounts, useTransactions } from "@/services";
 import { useEffect, useState } from "react";
 
 export const Dashboard: React.FC = () => {
-    const { getTransactionsByUser, transactionsByUser } = useTransactions();
-    const { getAccountsByUser, accountsByUser } = useAccounts();
-    const [isLoading, setIsLoading] = useState(true);
+    const { getAccountsByUser, accountsByUser, isComplete: isCompleteFetchingAccount } = useAccounts();
+    const { getTransactionsByUser, transactionsByUser, isComplete: isFetchingTransactions } = useTransactions();
+    const [isLoadingAccounts, setIsLoadingAccounts] = useState(true);
+    const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
+    const [accounts, setAccounts] = useState<AccountType[]>([]);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const userId = Number(useLogin());
 
     useEffect(() => {
         if (!isNaN(userId)) {
-            getTransactionsByUser(userId);
-            getAccountsByUser(userId);
+            getTransactionsByUser(0);
+            getAccountsByUser(0);
+            setIsLoadingAccounts(true);
+            setIsLoadingTransactions(true);
         }
     }, [userId]);
 
     useEffect(() => {
-        if (Object.keys(transactionsByUser).length > 0) {
-            setTransactions(Object.values(transactionsByUser)[0]);
-            setIsLoading(false);
-        }
-    }, [transactionsByUser]);
-
-    useEffect(() => {
-        if (Object.keys(accountsByUser).length > 0) {
-            //console.log(accountsByUser);
+        if (isCompleteFetchingAccount) {
+            if (Object.keys(accountsByUser).length > 0) {
+                setAccounts(Object.values(accountsByUser)[0]);
+            }
+            setIsLoadingAccounts(false);
         }
     }, [accountsByUser]);
 
-    if (isLoading) {
+    useEffect(() => {
+        if (isFetchingTransactions) {
+            if (Object.keys(transactionsByUser).length > 0) {
+                setTransactions(Object.values(transactionsByUser)[0]);
+            }
+            setIsLoadingTransactions(false);
+        }
+    }, [transactionsByUser]);
+
+    if (isLoadingAccounts || isLoadingTransactions) {
         return <div>
-        <LoadingSpinner />
-      </div>
+            <LoadingSpinner />
+        </div>
     }
 
     return (
-        <div className="hidden flex-col md:flex">
+        <div className="hidden flex-col md:flex flex-1">
             <div className="flex-1 space-y-4 p-20 pt-6">
                 <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
                 <div>
-                    <AccountSummaryCard />
+                    <AccountSummaryCard accounts={accounts} />
                 </div>
-                <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
-                    <div className="flex-1">
-                        <TransactionTrendsCard />
-                    </div>
-                    <div className="flex-1">
-                        <TransactionsCard transactions={transactions} />
-                    </div>
+                <div className="grid gap-4 lg:grid-cols-1 2xl:grid-cols-2">
+                    <TransactionTrendsCard />
+                    <TransactionsCard transactions={transactions} />
                 </div>
             </div>
         </div>
